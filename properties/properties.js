@@ -9,6 +9,6 @@ fs.readdirSync(__dirname).forEach(function(file) {
     }
 })
 
-for (properties_file in properties) {
+for (const properties_file in properties) {
     exports[properties_file] = properties[properties_file];
 }

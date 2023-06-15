@@ -38,6 +38,63 @@ var arr = window.location.href.split('/');
 var urlSockets = arr[0] + "//" + arr[2];
 var socket;
 
+
+/** base64url helper functions **/
+/**
+* Convert from a Base64URL-encoded string to an Array Buffer. Best used when converting a
+* credential ID from a JSON string to an ArrayBuffer, like in allowCredentials or
+* excludeCredentials
+*
+* Helper method to compliment `bufferToBase64URLString`
+*/
+function base64URLStringToBuffer(base64URLString) {
+    // Convert from Base64URL to Base64
+    const base64 = base64URLString.replace(/-/g, '+').replace(/_/g, '/');
+    /**
+     * Pad with '=' until it's a multiple of four
+     * (4 - (85 % 4 = 1) = 3) % 4 = 3 padding
+     * (4 - (86 % 4 = 2) = 2) % 4 = 2 padding
+     * (4 - (87 % 4 = 3) = 1) % 4 = 1 padding
+     * (4 - (88 % 4 = 0) = 4) % 4 = 0 padding
+     */
+    const padLength = (4 - (base64.length % 4)) % 4;
+    const padded = base64.padEnd(base64.length + padLength, '=');
+
+    // Convert to a binary string
+    const binary = atob(padded);
+
+    // Convert binary string to buffer
+    const buffer = new ArrayBuffer(binary.length);
+    const bytes = new Uint8Array(buffer);
+
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+
+    return buffer;
+}
+
+/**
+* Convert the given array buffer into a Base64URL-encoded string. Ideal for converting various
+* credential response ArrayBuffers to string for sending back to the server as JSON.
+* 
+* Helper method to compliment `base64URLStringToBuffer`
+* 
+* source: https://github.com/MasterKale/SimpleWebAuthn/blob/master/packages/browser/src/helpers/bufferToBase64URLString.ts
+*/
+function bufferToBase64URLString(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let str = '';
+
+    for (const charCode of bytes) {
+        str += String.fromCharCode(charCode);
+    }
+
+    const base64String = btoa(str);
+
+    return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
 /** Vue.JS **/
 
 /** User **/
@@ -61,8 +118,8 @@ var PushMethod = Vue.extend({
         socket.on('userPushActivateManager', function (data) {
             self.activatePush();
         });
-  	
-	socket.on('userPushDeactivate', function () {
+
+    socket.on('userPushDeactivate', function () {
             self.deActivatePush();
         });
     },
@@ -70,8 +127,8 @@ var PushMethod = Vue.extend({
         activatePush: function () {
             this.get_user(this.user.uid);
         },
-	deActivatePush: function () {
-            this.get_user(this.user.uid);		
+    deActivatePush: function () {
+            this.get_user(this.user.uid);
         }
     },
     template: '#push-method'
@@ -125,6 +182,450 @@ const TotpMethod = Vue.extend({
     template: '#totp-method'
 });
 
+const webAuthnAuthenticatorNameRegex = /^[a-zA-Z0-9_^¨éêèà ]+$/;
+
+const WebAuthnSingleFactor = Vue.extend({
+    props: {
+        messages: Object,
+
+        // authenticator props
+        name: String,
+        credentialID: String,
+
+        // index of this factor in the
+        // array of all factors.
+        id: Number,
+    },
+
+    data: function() {
+        return {
+            hovering_edit: false,
+
+            // contains the name as it is being typed ;
+            // reflects the value of the input field
+            nameBeingTyped: "",
+
+            // @TODO(Guilian): get this value from esup.json
+            maxCharsAllowed: 35,
+
+            // When cancelling, set this as the "new name" (go back to before edit)
+            nameMemory: null,
+        };
+    },
+    computed: {
+        editing: function() {
+            const is = this.name === null;
+            if(is) {
+                // Vue.nextTick does not seem to work
+                // => wait for next turn of event loop
+                setTimeout(() => {
+                    document.querySelector("#new-name-input")?.focus();
+                }, 0);
+            }
+            return is;
+        },
+        characterCountIndicator() {
+            return `${this.nameBeingTyped.length}/${this.maxCharsAllowed}`;
+        },
+    },
+    methods: {
+
+        startEditing: function() {
+            // prevents icon from being stuck in edit-hover mode (because the mouseleave event of the icon is never fired)
+            this.hovering_edit = false;
+
+            this.nameMemory = this.name.slice(0);
+            this.$emit('newfactorname', null,  this.nameMemory, this.credentialID);
+            // Vue.nextTick does not seem to work
+            // => wait for next turn of event loop
+            setTimeout(() => {
+                this.nameBeingTyped = this.nameMemory;
+                document.querySelector("#new-name-input").value = this.nameMemory;
+            }, 0);
+        },
+
+        /**
+         * This function is called after onBeforeNameBeingTyped,
+         * if the event in that function was not cancelled.
+         * It just updates the internal representation of the typed text.
+         * @param {InputEvent} e the input event
+         */
+        onNameTyped: function(e) {
+            this.nameBeingTyped = e.target.value;
+        },
+
+        /**
+         * When trying to enter some text in the field,
+         * this function checks if entering such text is valid (too long, wrong characters, etc.)
+         * @param {InputEvent} event the before input event
+         */
+        onBeforeNameBeingTyped: function(event) {
+            const ignore = [
+                "deleteContentBackward",
+                "deleteWordBackward"
+            ];
+
+            if(ignore.includes(event.inputType)) {
+                return true;
+            }
+
+            const proposition = (this.nameBeingTyped + event.data);
+
+            if(proposition.length > this.maxCharsAllowed) {
+                event.preventDefault();
+                return false;
+            }
+
+            if(webAuthnAuthenticatorNameRegex.test(proposition) === false) {
+                event.preventDefault();
+                return false;
+            }
+
+            return true;
+        },
+
+        cancelChoosingName: function(){
+            this.$emit('newfactorname', this.nameMemory,  this.nameMemory, this.credentialID);
+        },
+
+        resolveChoosingName: function() {
+            if(!this.editing) {
+                Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
+                return;
+            }
+
+            const textValue = document.querySelector("#new-name-input").value;
+
+
+            if(typeof textValue !== 'string') {
+                Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
+                return;
+            }
+
+            if(textValue.length < 1 || textValue.length > this.maxCharsAllowed) {
+                Materialize.toast(this.messages.error.webauthn.input_hint_length, 3000, 'red darken-1');
+                return;
+            }
+
+
+            if(webAuthnAuthenticatorNameRegex.test(textValue) === false) {
+                Materialize.toast(this.messages.error.webauthn.input_hint_type, 3000, 'red darken-1');
+                return;
+            }
+
+            this.nameBeingTyped = "";
+            this.$emit('newfactorname', textValue, this.nameMemory, this.credentialID);
+            return;
+        },
+    },
+
+    template: '#webauthn-singlefactor',
+});
+
+
+const WebAuthnMethod = Vue.extend({
+    props: {
+        'user': Object,
+        'generate_webauthn': Function,
+        'activate': Function,
+        'deactivate': Function,
+        'messages': Object,
+        'method': Object,
+    },
+    components: {
+        WebAuthnSingleFactor
+    },
+    data: function() {
+        return {
+            // = waiting for server response
+            waiting_for_fetch: true,
+
+            // = waiting for user interaction with the MFA factor
+            waiting_for_user_input: false,
+
+            // data about user fetched from api call
+            realData: null,
+        };
+    },
+    computed: {
+        showAddButton() {
+            if(this.data.auths.length === 0) {
+                return true;
+            }
+            // if a name is null, we're naming a new factor
+            return this.data.auths.every(auth => auth.name !== null);
+        },
+
+        data() {
+            return this.realData ?? {};
+        },
+
+        gotData() {
+            return this.realData !== null;
+        },
+
+        descriptionMessage() {
+            if(this.data.auths.every(auth => auth.name !== null) === false) {
+                return this.messages.api.action.webauthn.give_name_to_factor.replace('%CANCEL_KEY%', `<kbd>${this.messages.api.key.escape}</kbd>`);
+            }
+
+            if(this.data.auths.length == 0) {
+                return this.messages.api.methods.webauthn.no_authentificators;
+            }
+            else if(this.data.auths.length == 1) {
+                return this.messages.api.methods.webauthn.single_auth;
+            }
+            else {
+                return this.messages.api.methods.webauthn.nb_of_auths.replace('%NB%', this.data.auths.length);
+            }
+        },
+    },
+    methods: {
+        findAuthenticatorIndex: function(fromID) {
+            return this.realData.auths.findIndex(auth => auth.credentialID === fromID);
+        },
+
+        updateFactorName: async function(name, prevName, id) {
+            // name is null => editing
+            if(name !== null) {
+                await this.renameAuthenticator(id, name, prevName);
+            }
+            else {
+                const matchingAuthIndex = this.findAuthenticatorIndex(id);
+
+                if(matchingAuthIndex === -1) {
+                    return;
+                }
+                this.realData.auths[matchingAuthIndex].name = null;
+            }
+        },
+
+        fetchAuthnData: async function() {
+            let fetchedData;
+            try {
+                this.waiting_for_fetch = true;
+                const res = await fetch("/api/generate/webauthn", {method: "POST"});
+
+                if(res.headers.get('content-type').split(';').includes("application/json") === false) {
+                    //console.error("Incorrect api response type : " + res.headers.get('content-type'));
+                    throw new Error("Incorrect api response type : " + res.headers.get('content-type'));
+                }
+
+                fetchedData = await res.json();
+            }
+            catch(e) {
+                // @TODO(Guilian): improve error handling
+                fetchedData = null;
+                console.error(e);
+            }
+            finally {
+                this.waiting_for_fetch = false;
+
+            }
+            return fetchedData;
+        },
+        deleteAuthenticatorConfirm: async function(authCredID) {
+            if(window.confirm(this.messages.api.action.webauthn.confirm_delete)) {
+                this.deleteAuthenticator(authCredID);
+            }
+        },
+
+        renameAuthenticator: async function(authCredID, newName, previousName) {
+            const matchingAuthIndex = this.findAuthenticatorIndex(authCredID);
+
+            // optimistic UI (show change before server accepts)
+            this.realData.auths[matchingAuthIndex].name = newName;
+
+            // previousName is provided because editing the name of a factor
+            // sets it's name attribute to null.
+            if(previousName === newName) {
+                // don't send data to server
+                return;
+            }
+
+            try {
+                this.waiting_for_fetch = true;
+
+                const res = await fetch("/api/webauthn/auth/" + authCredID, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            name: newName
+                        })
+                    },
+                );
+
+                if(200 <= res.status && res.status < 300) {
+                    // update data
+                    this.realData = await this.fetchAuthnData();
+                    Materialize.toast(this.messages.success.webauthn.renamed, 3000, 'green darken-1');
+                }
+                else {
+                    Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
+                }
+            }
+            catch(e) {
+                Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
+            }
+            finally {
+                this.waiting_for_fetch = false;
+            }
+        },
+
+        deleteAuthenticator: async function(authCredID) {
+            try {
+                this.waiting_for_fetch = true;
+
+                const res = await fetch("/api/webauthn/auth/" + authCredID, {method: "DELETE"});
+
+                if(200 <= res.status && res.status < 300) {
+                    // @TODO(Guilian): can filter directly instead of refetching
+                    this.realData = await this.fetchAuthnData();
+                    Materialize.toast(this.messages.success.webauthn.deleted, 3000, 'green darken-1');
+                }
+                else {
+                    Materialize.toast(this.messages.error.webauthn.delete_failed, 3000, 'red darken-1');
+                }
+            }
+            catch(e) {
+                Materialize.toast(this.messages.error.webauthn.delete_failed, 3000, 'red darken-1');
+            }
+            finally {
+                this.waiting_for_fetch = false;
+            }
+        },
+        generateWebauthn: async function(onError) {
+            try {
+                const data = await this.fetchAuthnData();
+
+                // arguments for the webauthn registration
+                const publicKeyCredentialCreationOptions = {
+                    challenge: base64URLStringToBuffer(data.nonce),
+                    rp: data.rp,
+                    rpId: data.rp.id,
+                    user: {
+                        id: Uint8Array.from(data.user_id),
+                        name: `${this.user.uid}@${data.rp.id}`,
+                        displayName: `${this.user.uid}`
+                    },
+                    // Spec recommends at least supporting these
+                    pubKeyCredParams: data.pubKeyTypes,
+                    // user has 3 * 60 seconds to register
+                    timeout: 3 * 60000,
+                    // leaks data about the user if in direct mode.
+                    attestation: "none",
+                    extensions: {
+                        credProps: true,
+                    },
+                    authenticatorSelection: {
+                        residentKey:"preferred",
+                        requireResidentKey:false,
+                        userVerification:"preferred"
+                    },
+                    // Don't register the same credentials twice
+                    excludeCredentials: data.auths.map(a => ({id: base64URLStringToBuffer(a.credentialID), type: "public-key"})),
+                };
+
+                this.waiting_for_user_input = true;
+                // register
+                const credentials = await navigator.credentials.create({publicKey: publicKeyCredentialCreationOptions});
+
+                this.waiting_for_user_input = false;
+
+                // PublicKeyCredential can not be serialized
+                // because it contains some ArrayBuffers, which
+                // can not be serialized.
+                // This just translates the buffer to its' 'safe'
+                // version.
+                // This is only for the REGISTRATION part
+                // It is slightly different from what is
+                // used for authentication
+                const SerializePKC = PKC => {
+                    return {
+                        id: PKC.id,
+                        type: PKC.type,
+                        rawId: bufferToBase64URLString(PKC.rawId),
+                        response: {
+                            attestationObject: bufferToBase64URLString(PKC.response.attestationObject),
+                            clientDataJSON: bufferToBase64URLString(PKC.response.clientDataJSON),
+                        }
+                    };
+                }
+
+
+                this.waiting_for_fetch = true;
+
+                const verifyRes = await fetch("/api/webauthn/confirm_activate", {
+                    method: "POST",
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cred: SerializePKC(credentials),
+                        cred_name: "Authenticator " + credentials.id.slice(-5),
+                    }),
+                });
+                this.waiting_for_fetch = false;
+
+                if(200 <= verifyRes.status && verifyRes.status < 300) {
+                    const { registered } = await verifyRes.json();
+
+                    if(registered) {
+                        // name chooser dialog
+                        this.realData = await this.fetchAuthnData();
+                    }
+                    else {
+                        Materialize.toast(this.messages.error.webauthn.registration_failed, 3000, 'red darken-1');
+                    }
+                }
+                else {
+                    // timed out
+                    if(verifyRes.status === 422) {
+                        Materialize.toast(this.messages.error.webauthn.timeout, 3000, 'red darken-1');
+                    }
+                    else {
+                        Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
+                    }
+                }
+            }
+            catch(e) {
+                if (typeof (onError) === "function") {
+                    onError();
+                }
+                this.user.methods.webauthn.waiting = false;
+
+                // Already registered
+                if(e.name === "InvalidStateError") {
+                    Materialize.toast(this.messages.error.webauthn.already_registered, 3000, 'red darken-1');
+                }
+                // user said no / something like that
+                else if(e.name === "NotAllowedError") {
+                    Materialize.toast(this.messages.error.webauthn.user_declined, 3000, 'red darken-1');
+                }
+                else {
+                    Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
+                    console.error("/api/webauthn/confirm_activate", status, e.toString());
+                }
+            }
+        },
+    },
+    async mounted() {
+        this.realData = await this.fetchAuthnData();
+
+        if(this.realData.auths.length === 0) {
+            this.generateWebauthn();
+        }
+    },
+    beforeUnmount() {
+        if(this.data.auths.length === 0) {
+            fetch("/api/webauthn/activate", {method: "PUT"})
+        }
+    },
+    template: '#webauthn-method',
+});
+
 const RandomCodeMethod = Vue.extend({
     props: {
         'user': Object,
@@ -150,7 +651,7 @@ const RandomCodeMethod = Vue.extend({
                             Materialize.toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
                         }else {
                             const expected = data.otp;
-                            
+
                             const verifyCodeMessages = this.messages.api.methods.random_code.verify_code;
 
                             Swal.fire({ // https://sweetalert2.github.io/#configuration
@@ -248,9 +749,10 @@ var UserDashboard = Vue.extend({
         "push": PushMethod,
         "totp": TotpMethod,
         "bypass": BypassMethod,
+        "webauthn": WebAuthnMethod,
         "random_code": RandomCodeMethod,
         "random_code_mail": RandomCodeMailMethod,
-	"esupnfc":Esupnfc
+    "esupnfc":Esupnfc
     },
     template: "#user-dashboard",
     created: function () {
@@ -266,31 +768,33 @@ var UserDashboard = Vue.extend({
                     break;
                 case 'bypass':
                     this.standardActivate(method);
-		    this.generateBypass(function () {
-                            this.user.methods.bypass.active = false;                           
+            this.generateBypass(function () {
+                            this.user.methods.bypass.active = false;
                         });
                     break;
                 case 'random_code':
                     this.standardActivate(method);
                     break;
-		case 'random_code_mail':
+        case 'random_code_mail':
                     this.standardActivate(method);
                     break;
                 case 'totp':
                     this.generateTotp();
                     break;
+                case 'webauthn':
+                    this.standardActivate(method);
+                    break;
                 case 'esupnfc':
                     this.standardActivate(method);
                     break;
                 default:
-                    /** **/                    
                     this.user.methods[method].active = true;
                     break;
             }
         },
         askPushActivation: function (method) {
             this.user.methods.push.askActivation = true;
-	    this.user.methods.push.active = true;
+        this.user.methods.push.active = true;
             //ajax
             $.ajax({
                 method: "PUT",
@@ -308,7 +812,7 @@ var UserDashboard = Vue.extend({
                     console.error("/api/push/activate", status, err.toString());
                 }.bind(this)
             });
-        },       
+        },
         standardActivate: function (method) {
             $.ajax({
                 method: "PUT",
@@ -317,7 +821,7 @@ var UserDashboard = Vue.extend({
                 cache: false,
                 success: function (data) {
                     if (data.code != "Ok") {
-			this.user.methods[method].active = false;
+            this.user.methods[method].active = false;
                         Materialize.toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
                     } else this.user.methods[method].active = true;
                 }.bind(this),
@@ -325,35 +829,40 @@ var UserDashboard = Vue.extend({
                     console.error("/api/"+method+"/activate", status, err.toString());
                 }.bind(this)
             });
-        },     
+        },
         deactivate: function (method) {
-	  if (window.confirm(this.messages.api.action.confirm_deactivate)){
-           if(this.user.methods[method].askActivation) this.user.methods[method].askActivation=false;	
-            $.ajax({
-                method: "PUT",
-                url: "/api/" + method + "/deactivate",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code != "Ok") {
-                        Materialize.toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
+            if (window.confirm(this.messages.api.action.confirm_deactivate)) {
+                if (this.user.methods[method].askActivation)
+                    this.user.methods[method].askActivation = false;
+                $.ajax({
+                    method: "PUT",
+                    url: "/api/" + method + "/deactivate",
+                    dataType: 'json',
+                    cache: false,
+                    success: function (data) {
+                        if (data.code != "Ok") {
+                            Materialize.toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
+                        } else
+                            this.user.methods[method].active = false;
                     }
-                    else this.user.methods[method].active = false;
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    Materialize.toast(err, 3000, 'red darken-1');
-                    console.error("/api/" + method + "/deactivate", status, err.toString());
-                }.bind(this)
-            });
-	   }
+                    .bind(this),
+                    error: function (xhr, status, err) {
+                        Materialize.toast(err, 3000, 'red darken-1');
+                        console.error("/api/" + method + "/deactivate", status, err.toString());
+                    }
+                    .bind(this)
+                });
+            }
         },
-	generateBypassConfirm : function(){
-	    if (window.confirm(this.messages.api.action.confirm_generate)) this.generateBypass();
+        generateBypassConfirm : function(){
+            if (window.confirm(this.messages.api.action.confirm_generate))
+                this.generateBypass();
         },
-	generateTotpConfirm : function(){
-	    if (window.confirm(this.messages.api.action.confirm_generate)) this.generateTotp();
+        generateTotpConfirm : function(){
+            if (window.confirm(this.messages.api.action.confirm_generate))
+                this.generateTotp();
         },
-        generateBypass: function (onError) {   
+        generateBypass: function (onError) {
             $.ajax({
                 method: "POST",
                 url: "/api/generate/bypass",
@@ -406,9 +915,10 @@ var UserView = Vue.extend({
         "push": PushMethod,
         "totp": TotpMethod,
         "bypass": BypassMethod,
+        "webauthn": WebAuthnMethod,
         "random_code": RandomCodeMethod,
         "random_code_mail": RandomCodeMailMethod,
-	"esupnfc":Esupnfc
+    "esupnfc":Esupnfc
     },
     data: function () {
         return {
@@ -427,14 +937,17 @@ var UserView = Vue.extend({
                     break;
                 case 'bypass':
                     this.standardActivate(method);
-		    this.generateBypass(function () {
-                            this.user.methods.bypass.active = false;
-                        })
+                    this.generateBypass(function () {
+                        this.user.methods.bypass.active = false;
+                    });
+                    break;
+                case 'webauthn':
+                    this.standardActivate(method);
                     break;
                 case 'random_code':
                     this.standardActivate(method);
                     break;
-		case 'random_code_mail':
+                case 'random_code_mail':
                     this.standardActivate(method);
                     break;
                 case 'totp':
@@ -451,7 +964,7 @@ var UserView = Vue.extend({
         },
         askPushActivation: function () {
             this.user.methods.push.askActivation = true;
-	    this.user.methods.push.active = true;   
+            this.user.methods.push.active = true;
             //ajax
             $.ajax({
                 method: "PUT",
@@ -470,7 +983,7 @@ var UserView = Vue.extend({
                     console.error("/api/admin/" + this.user.uid + "/push/activate", status, err.toString());
                 }.bind(this)
             });
-        },        
+        },
         standardActivate: function (method) {
             $.ajax({
                 method: "PUT",
@@ -489,37 +1002,41 @@ var UserView = Vue.extend({
                     console.error("/api/admin/" + this.user.uid + "/"+method+"/activate", status, err.toString());
                 }.bind(this)
             });
-        },            
+        },
         deactivate: function (method) {
-         if (window.confirm(this.messages.api.action.confirm_deactivate)){
-            if(this.user.methods[method].askActivation) this.user.methods[method].askActivation=false;	
-            $.ajax({
-                method: "PUT",
-                url: "/api/admin/" + this.user.uid + "/" + method + "/deactivate",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code == "Ok") this.user.methods[method].active = false;
-                    else {
-                        Materialize.toast('Erreur interne, veuillez réessayer plus tard', 3000, 'red darken-1');
-                        this.user.methods[method].active = true;
+            if (window.confirm(this.messages.api.action.confirm_deactivate)) {
+                if (this.user.methods[method].askActivation)
+                    this.user.methods[method].askActivation = false;
+                $.ajax({
+                    method: "PUT",
+                    url: "/api/admin/" + this.user.uid + "/" + method + "/deactivate",
+                    dataType: 'json',
+                    cache: false,
+                    success: function (data) {
+                        if (data.code == "Ok")
+                            this.user.methods[method].active = false;
+                        else {
+                            Materialize.toast('Erreur interne, veuillez réessayer plus tard', 3000, 'red darken-1');
+                            this.user.methods[method].active = true;
+                        }
                     }
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    this.user.methods[method].active = true;
-                    Materialize.toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/" + this.user.uid + "/" + method + "/activate", status, err.toString());
-                }.bind(this)
-            });
-	  }
+                    .bind(this),
+                    error: function (xhr, status, err) {
+                        this.user.methods[method].active = true;
+                        Materialize.toast(err, 3000, 'red darken-1');
+                        console.error("/api/admin/" + this.user.uid + "/" + method + "/activate", status, err.toString());
+                    }
+                    .bind(this)
+                });
+            }
         },
-	generateBypassConfirm : function(){
-	    if (window.confirm(this.messages.api.action.confirm_generate)) this.generateBypass();
+        generateBypassConfirm : function(){
+            if (window.confirm(this.messages.api.action.confirm_generate)) this.generateBypass();
         },
-	generateTotpConfirm : function(){
-	    if (window.confirm(this.messages.api.action.confirm_generate)) this.generateTotp();
+        generateTotpConfirm : function(){
+            if (window.confirm(this.messages.api.action.confirm_generate)) this.generateTotp();
         },
-        generateBypass: function (onError) {       
+        generateBypass: function (onError) {
             $.ajax({
                 method: "POST",
                 url: "/api/admin/generate/bypass/" + this.user.uid,
@@ -596,9 +1113,9 @@ var ManagerDashboard = Vue.extend({
         suggest: function (event) {
             this.suggestions = [];
             if (event.target.value !== "") {
-                for (uid in this.uids) {
+                for (const uid in this.uids) {
                     this.isHidden= true;
-                    
+
                     if (this.uids[uid].includes(event.target.value)) {
                         this.suggestions.push(this.uids[uid]);
                     }
@@ -822,7 +1339,7 @@ var app = new Vue({
     },
     methods: {
         cleanMethods: function () {
-            for (method in this.methods) {
+            for (const method in this.methods) {
                 if (method[0] == '_') delete this.methods[method];
                 else {
                     this.methods[method].name = method;
@@ -910,7 +1427,7 @@ var app = new Vue({
             var query = '';
             if(language)query="/"+language;
             $.ajax({
-                url: "/api/messages"+query,
+                url: "/api/messages" + query,
                 dataType: 'json',
                 cache: false,
                 success: function (data) {
@@ -926,33 +1443,37 @@ var app = new Vue({
             this.messages = data;
             this.cleanMethods();
         },
-	checkAcl: function(method,acl){
-	 var result=false;
-	 var not="";	
-	 if(acl=="deny"){
-		result=true;
-		not="not ";		
-	  }
-	  if(this.users_methods[method][acl] && this.users_methods.user.attributes)
-	    for(attr in this.users_methods[method][acl]) {
-              //console.debug("this.users_methods["+method+"]["+acl+"]: "+JSON.stringify(this.users_methods[method][acl]));
-	      //console.debug("User: "+JSON.stringify(this.users_methods.user));   
-	      if(this.users_methods.user.attributes[attr])
-		for(valueAttr of this.users_methods[method][acl][attr])
-  		    if(this.users_methods.user.attributes[attr].includes(valueAttr)){
-                	//console.debug("{"+method+"} method is "+not+"displayed because user attribute {"+attr+"} contains {"+valueAttr+"}"); 		
-			return !result;
-		    }	        	      
-             }         	    
-	  return result;  
-	},
-	is_authorized: function(method){
-	 var result=true; //par défaut, la méthode est autorisée
-	 if(this.users_methods && this.users_methods[method])
-	    for(acl in this.users_methods[method])//pour une méthode, la priorité porte sur le dernier acl [allow|deny].
-		result=this.checkAcl(method,acl); 
-	    
-	 return result;
-	} 
+    checkAcl: function (method, acl) {
+        var result = false;
+        var not = "";
+        if (acl == "deny") {
+            result = true;
+            not = "not ";
+        }
+        if (this.users_methods[method][acl] && this.users_methods.user.attributes) {
+            for (const attr in this.users_methods[method][acl]) {
+                //console.debug("this.users_methods["+method+"]["+acl+"]: "+JSON.stringify(this.users_methods[method][acl]));
+                //console.debug("User: "+JSON.stringify(this.users_methods.user));
+                if (this.users_methods.user.attributes[attr]) {
+                    for (const valueAttr of this.users_methods[method][acl][attr]) {
+                        if (this.users_methods.user.attributes[attr].includes(valueAttr)) {
+                            //console.debug("{"+method+"} method is "+not+"displayed because user attribute {"+attr+"} contains {"+valueAttr+"}");
+                            return !result;
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    },
+    is_authorized: function (method) {
+        var result = true; //par défaut, la méthode est autorisée
+        if (this.users_methods && this.users_methods[method]) {
+            for (const acl in this.users_methods[method]) { //pour une méthode, la priorité porte sur le dernier acl [allow|deny].
+                result = this.checkAcl(method, acl);
+            }
+        }
+        return result;
+    }
   }
 })

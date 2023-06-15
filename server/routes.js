@@ -6,14 +6,24 @@ const { request } = require('undici');
 
 var passport;
 
-/** @param {{ relUrl: string; bearerAuth?: true, method?: 'POST'|'PUT'|'DELETE' }} opts_ */
+
+/** @param {{ relUrl: string; bearerAuth?: true, method?: 'GET'|'POST'|'PUT'|'DELETE' }} opts_ */
 async function request_otp_api(req, res, opts_) {
     console.log("requesting api");
     const clientIP = req.ip;
     const userAgent = req.headers['user-agent'];
+    /**
+     * @typedef {import('undici').Dispatcher.RequestOptions} RequestOptions
+     * @type {Omit<RequestOptions, 'origin' | 'path'>}
+     */
     let opts = {
-        method: opts_.method,
+        method: opts_.method || 'GET',
     }
+
+    if (req.body) {
+        opts.body = JSON.stringify(req.body);
+    }
+    
     const url = properties.esup.api_url + opts_.relUrl;
 
     opts.headers = {
@@ -32,14 +42,22 @@ async function request_otp_api(req, res, opts_) {
     try {
         response = await request(url, opts);
     } catch (error) {
+        res.status(503);
         return res.send({
             "code": "Error",
-            "message": error.message
+            "message": error.message || "Api did not give a response"
         });
     }
-    /**
-     * @type {Object}
-     */
+    
+    
+    // forward the status code, because if the request failed
+    // it should not be responding with 200 ("everything is fine !")
+    //
+    // this helps to have clearer error messages, because getting
+    // "error, code 200" with a message containing just "Error" is
+    // kind of frustrating.
+    res.status(response.statusCode);
+    /** @type {Object} */
     const infos = await response.body.json();
     if (req.session.passport.user.uid) infos.uid = req.session.passport.user.uid;
     infos.api_url = properties.esup.api_url;
@@ -146,21 +164,21 @@ function routing() {
             relUrl: 'users/' + req.session.passport.user.uid + '/' + getHash(req),
         });
     });
-
+    
     router.get('/api/messages', function(req, res) {
         var lang = req.acceptsLanguages('fr', 'en');
         if(lang) {
-            res.json(require("../properties/messages_" + lang + ".json")); 
+            res.json(properties["messages_" + lang]); 
         } else {
-            res.json(require("../properties/messages.json"));
+            res.json(properties.messages);
         }
     });
-
+    
     router.get('/api/messages/:language', isUser, function(req, res) {
             switch (req.params.language){
-                case "français": res.json(require("../properties/messages_fr.json"));break;
-                case "english": res.json(require("../properties/messages_en.json")); break;
-                default : res.json(require("../properties/messages.json")); break;
+                case "français": res.json(properties.messages_fr); break;
+                case "english": res.json(properties.messages_en); break;
+                default : res.json(properties.messages); break;
             }
     });
 
@@ -195,6 +213,27 @@ function routing() {
         request_otp_api(req, res, {
             method: 'POST',
             relUrl: 'protected/users/' + req.params.uid + '/methods/' + req.params.method + '/activate/' + req.params.activation_code, bearerAuth: true
+        });
+    });
+
+    router.post('/api/:method/confirm_activate', isUser, function(req, res) {
+        request_otp_api(req, res, {
+            method: 'POST',
+            relUrl: 'protected/users/' + req.session.passport.user.uid + '/methods/' + req.params.method + '/confirm_activate/', bearerAuth: true,
+        });
+    });
+
+    router.post('/api/:method/auth/:authenticator_id', isUser, function(req, res) {
+        request_otp_api(req, res, {
+            method: 'POST',
+            relUrl: `protected/users/${req.session.passport.user.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}/`, bearerAuth: true,
+        });
+    });
+
+    router.delete('/api/:method/auth/:authenticator_id', isUser, function(req, res) {
+        request_otp_api(req, res, {
+            method: 'DELETE',
+            relUrl: `protected/users/${req.session.passport.user.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}/`, bearerAuth: true,
         });
     });
 
