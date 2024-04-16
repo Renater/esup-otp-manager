@@ -69,10 +69,17 @@
                 "description": "Method for connecting via NFC swipe"
             }
         },
-        "app": {
-            "home": "ESUP-OTP permits you to add a second level of protection to your account. You can, for example, set a single-use code sent to you by SMS in addition to your username and password. Thus, a third can not access your account with the same password."
+        "home":{
+            "description": "ESUP-OTP permits you to add a second level of protection to your account. You can, for example, set a single-use code sent to you by SMS in addition to your username and password. Thus, a third can not access your account with the same password.",
+            "push":"Notification to Esup Auth (Android, iOS).",
+            "totp":"TOTP code into an application (Esup Auth, Authenticator...).",
+            "bypass":"Display random Codes (Backup codes).",
+            "esupnfc":"Connection with student card or business card",
+            "random_code":"Send random code by SMS.",
+            "random_code_mail":"Send random code by mail.",
+            "webauthn":"WebAuthn hardware authentication factor (USB/NFC Yubikey, Smartphone, Windows Hello, TouchID, ...).",
+            "note":"Set up at least 2 methods among:"
         },
-        "home": "ESUP-OTP permez you to add a second level of protection to your account. You can, for example, set a single-use code sent to you by SMS in addition to your username and password. Thus, a third can not access your account with the same password.",
         "index": "Single use passwords management interface",
         "action":{
             "connection" : "Login",
