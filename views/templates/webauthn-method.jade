@@ -1,32 +1,27 @@
 script#webauthn-method(type='text/x-template').
     <div>
-      <div style="height: 0.5em;">
-        <div v-show="waiting_for_fetch">
-          <div class="progress">
-            <div class="indeterminate"></div>
+      <div class="col s12">
+        <div class="row" style="margin-bottom:0;">
+          <div class="col s6">
+            <p v-html="descriptionMessage"></p>
+          </div>
+          <div class="col s6 right-align">
+            <button class="waves-effect waves-light btn green darken-1" @click="generateWebauthn()">{{messages.api.action.add}}<i class="material-icons right">add</i></button>
           </div>
         </div>
-      </div>
-      
-      <template v-if="gotData">
-        <div>
-          <p v-html="descriptionMessage" />
-          <ul id="list-of-authenticators" style="">
-            <li v-for="(authenticator, index) in data.auths">
-              <WebAuthnSingleFactor @deletefactor="deleteAuthenticatorConfirm" @newfactorname="updateFactorName" v-bind:messages='messages' :name="authenticator.name" :id="index" :credentialID="authenticator.credentialID" :is_real="authenticator.real"/>
-            </li>
-
-            <li>
-              <button id="add-authenticator" class="authenticator-tag btn-large waves-effect teal btn" :title="messages.api.action.add" v-if="showAddButton" @click=generateWebauthn>
-                <i class="material-icons" style="font-size: 1.5em;">add</i>
-                <span>{{messages.api.action.add}}</span>
-              </button>
+        <div class="row">
+          <ul id="list-of-authenticators" class="collection">
+            <li class="collection-item" v-for="auth in realData.auths" :key="auth.credentialID">
+              <div class="row valign-wrapper" style="margin-bottom:0;"> <!-- TODO : use secondary-content instead https://archives.materializecss.com/0.100.2/collections.html#secondary --> 
+                <div class="col s6">{{ auth.name }}</div>
+                <div class="col s6 right-align">
+                  <button class="waves-effect waves-light btn" @click="renameAuthenticator(auth.credentialID)">{{messages.api.action.rename}}<i class="material-icons right">mode_edit</i></button>
+                  <div style="margin-top: 5px;" class="hide-on-med-and-up"></div>
+                  <button class="waves-effect waves-light btn red darken-1" @click="deleteAuthenticator(auth.credentialID)">{{messages.api.action.remove}}<i class="material-icons right">delete_forever</i></button>
+                </div>
+              </div>
             </li>
           </ul>
         </div>
-      </template>
-
-      
-        
-
+      </div>
     </div>

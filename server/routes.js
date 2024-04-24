@@ -219,21 +219,42 @@ function routing() {
     router.post('/api/:method/confirm_activate', isUser, function(req, res) {
         request_otp_api(req, res, {
             method: 'POST',
-            relUrl: 'protected/users/' + req.session.passport.user.uid + '/methods/' + req.params.method + '/confirm_activate/', bearerAuth: true,
+            relUrl: 'users/' + req.session.passport.user.uid + '/methods/' + req.params.method + '/confirm_activate/' + getHash(req),
         });
     });
 
     router.post('/api/:method/auth/:authenticator_id', isUser, function(req, res) {
         request_otp_api(req, res, {
             method: 'POST',
-            relUrl: `protected/users/${req.session.passport.user.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}/`, bearerAuth: true,
+            relUrl: `users/${req.session.passport.user.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}/${getHash(req)}`,
         });
     });
 
     router.delete('/api/:method/auth/:authenticator_id', isUser, function(req, res) {
         request_otp_api(req, res, {
             method: 'DELETE',
-            relUrl: `protected/users/${req.session.passport.user.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}/`, bearerAuth: true,
+            relUrl: `users/${req.session.passport.user.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}/${getHash(req)}`,
+        });
+    });
+    
+    router.post('/api/admin/:method/confirm_activate/:uid', isManager, function(req, res) {
+        request_otp_api(req, res, {
+            method: 'POST',
+            relUrl: 'protected/users/' + req.params.uid + '/methods/' + req.params.method + '/confirm_activate/', bearerAuth: true,
+        });
+    });
+
+    router.post('/api/admin/:method/auth/:authenticator_id/:uid', isManager, function(req, res) {
+        request_otp_api(req, res, {
+            method: 'POST',
+            relUrl: `protected/users/${req.params.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}/`, bearerAuth: true,
+        });
+    });
+
+    router.delete('/api/admin/:method/auth/:authenticator_id/:uid', isManager, function(req, res) {
+        request_otp_api(req, res, {
+            method: 'DELETE',
+            relUrl: `protected/users/${req.params.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}/`, bearerAuth: true,
         });
     });
 

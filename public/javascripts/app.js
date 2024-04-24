@@ -182,323 +182,156 @@ const TotpMethod = Vue.extend({
     template: '#totp-method'
 });
 
-const webAuthnAuthenticatorNameRegex = /^[a-zA-Z0-9_^¨éêèà ]+$/;
-
-const WebAuthnSingleFactor = Vue.extend({
-    props: {
-        messages: Object,
-
-        // authenticator props
-        name: String,
-        credentialID: String,
-
-        // index of this factor in the
-        // array of all factors.
-        id: Number,
-    },
-
-    data: function() {
-        return {
-            hovering_edit: false,
-
-            // contains the name as it is being typed ;
-            // reflects the value of the input field
-            nameBeingTyped: "",
-
-            // @TODO(Guilian): get this value from esup.json
-            maxCharsAllowed: 35,
-
-            // When cancelling, set this as the "new name" (go back to before edit)
-            nameMemory: null,
-        };
-    },
-    computed: {
-        editing: function() {
-            const is = this.name === null;
-            if(is) {
-                // Vue.nextTick does not seem to work
-                // => wait for next turn of event loop
-                setTimeout(() => {
-                    document.querySelector("#new-name-input")?.focus();
-                }, 0);
-            }
-            return is;
-        },
-        characterCountIndicator() {
-            return `${this.nameBeingTyped.length}/${this.maxCharsAllowed}`;
-        },
-    },
-    methods: {
-
-        startEditing: function() {
-            // prevents icon from being stuck in edit-hover mode (because the mouseleave event of the icon is never fired)
-            this.hovering_edit = false;
-
-            this.nameMemory = this.name.slice(0);
-            this.$emit('newfactorname', null,  this.nameMemory, this.credentialID);
-            // Vue.nextTick does not seem to work
-            // => wait for next turn of event loop
-            setTimeout(() => {
-                this.nameBeingTyped = this.nameMemory;
-                document.querySelector("#new-name-input").value = this.nameMemory;
-            }, 0);
-        },
-
-        /**
-         * This function is called after onBeforeNameBeingTyped,
-         * if the event in that function was not cancelled.
-         * It just updates the internal representation of the typed text.
-         * @param {InputEvent} e the input event
-         */
-        onNameTyped: function(e) {
-            this.nameBeingTyped = e.target.value;
-        },
-
-        /**
-         * When trying to enter some text in the field,
-         * this function checks if entering such text is valid (too long, wrong characters, etc.)
-         * @param {InputEvent} event the before input event
-         */
-        onBeforeNameBeingTyped: function(event) {
-            const ignore = [
-                "deleteContentBackward",
-                "deleteWordBackward"
-            ];
-
-            if(ignore.includes(event.inputType)) {
-                return true;
-            }
-
-            const proposition = (this.nameBeingTyped + event.data);
-
-            if(proposition.length > this.maxCharsAllowed) {
-                event.preventDefault();
-                return false;
-            }
-
-            if(webAuthnAuthenticatorNameRegex.test(proposition) === false) {
-                event.preventDefault();
-                return false;
-            }
-
-            return true;
-        },
-
-        cancelChoosingName: function(){
-            this.$emit('newfactorname', this.nameMemory,  this.nameMemory, this.credentialID);
-        },
-
-        resolveChoosingName: function() {
-            if(!this.editing) {
-                Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
-                return;
-            }
-
-            const textValue = document.querySelector("#new-name-input").value;
-
-
-            if(typeof textValue !== 'string') {
-                Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
-                return;
-            }
-
-            if(textValue.length < 1 || textValue.length > this.maxCharsAllowed) {
-                Materialize.toast(this.messages.error.webauthn.input_hint_length, 3000, 'red darken-1');
-                return;
-            }
-
-
-            if(webAuthnAuthenticatorNameRegex.test(textValue) === false) {
-                Materialize.toast(this.messages.error.webauthn.input_hint_type, 3000, 'red darken-1');
-                return;
-            }
-
-            this.nameBeingTyped = "";
-            this.$emit('newfactorname', textValue, this.nameMemory, this.credentialID);
-            return;
-        },
-    },
-
-    template: '#webauthn-singlefactor',
-});
-
-
 const WebAuthnMethod = Vue.extend({
     props: {
         'user': Object,
-        'generate_webauthn': Function,
         'activate': Function,
         'deactivate': Function,
         'messages': Object,
-        'method': Object,
+        'formatApiUrl': Function,
     },
-    components: {
-        WebAuthnSingleFactor
-    },
-    data: function() {
+    data() {
         return {
-            // = waiting for server response
-            waiting_for_fetch: true,
+            realData: { // example (will be override by mounted() )
+                nonce: "",
+                auths: [], // [{credentialID: "", credentialPublicKey: "", counter: 0, name: ""}],
+                user_id: "",
+                rp: { "name": "Univ", "id": "univ.fr" },
+                pubKeyTypes: [{ "type": "public-key", "alg": -  7 }],
+            },
+            registrationInProgress: false,
+        }
+    },
+    async mounted() {
+        await this.fetchAuthData();
 
-            // = waiting for user interaction with the MFA factor
-            waiting_for_user_input: false,
-
-            // data about user fetched from api call
-            realData: null,
-        };
+        if(this.realData.auths.length === 0) {
+            this.generateWebauthn();
+        }
     },
     computed: {
-        showAddButton() {
-            if(this.data.auths.length === 0) {
-                return true;
-            }
-            // if a name is null, we're naming a new factor
-            return this.data.auths.every(auth => auth.name !== null);
-        },
-
-        data() {
-            return this.realData ?? {};
-        },
-
-        gotData() {
-            return this.realData !== null;
-        },
-
         descriptionMessage() {
-            if(this.data.auths.every(auth => auth.name !== null) === false) {
-                return this.messages.api.action.webauthn.give_name_to_factor.replace('%CANCEL_KEY%', `<kbd>${this.messages.api.key.escape}</kbd>`);
-            }
-
-            if(this.data.auths.length == 0) {
-                return this.messages.api.methods.webauthn.no_authentificators;
-            }
-            else if(this.data.auths.length == 1) {
-                return this.messages.api.methods.webauthn.single_auth;
-            }
-            else {
-                return this.messages.api.methods.webauthn.nb_of_auths.replace('%NB%', this.data.auths.length);
+            switch (this.realData.auths.length) {
+                case 0:
+                    return this.messages.api.methods.webauthn.no_authentificators;
+                case 1:
+                    return this.messages.api.methods.webauthn.single_auth;
+                default:
+                    return this.messages.api.methods.webauthn.nb_of_auths.replace('%NB%', this.realData.auths.length);
             }
         },
     },
+    watch: {
+        'user.uid': function(newUid, oldUid) {
+            if (newUid !== oldUid) {
+                this.fetchAuthData();
+            }
+        }
+    },
     methods: {
-        findAuthenticatorIndex: function(fromID) {
-            return this.realData.auths.findIndex(auth => auth.credentialID === fromID);
+        fetchAuthData: async function() {
+            const res = await fetch(this.formatApiUrl("/generate/webauthn"), { method: "POST" });
+            this.realData = await res.json()
+            return this.realData;
         },
+        getAuthById: function (id) {
+            return this.realData.auths.find(authenticator => authenticator.credentialID === id);
+        },
+        renameAuthenticator: function(authCredID) {
+            const auth = this.getAuthById(authCredID);
+            const previousName = auth.name;
+            return Swal.fire({ // https://sweetalert2.github.io/#configuration
+                title: this.messages.api.action.rename + ' ' + previousName,
+                input: "text",
+                icon: "question",
+                inputPlaceholder: this.messages.api.methods.webauthn.new_name,
+                inputValue: previousName,
+                customClass: { // https://sweetalert2.github.io/#customClass
+                    input: "webauthn-factor-rename-input",
+                    confirmButton: "waves-effect waves-light btn green darken-1",
+                    cancelButton: "waves-effect waves-light btn red darken-1",
+                },
+                showCancelButton: true,
+                allowOutsideClick: false,
+                inputValidator: (newName) => {
+                    if (!newName.trim()) {
+                        return this.messages.error.webauthn.registration_failed;
+                    }
+                },
+                showLoaderOnConfirm: true,
+                preConfirm: async (newName) => {
+                    if (previousName == newName) {
+                        return;
+                    }
 
-        updateFactorName: async function(name, prevName, id) {
-            // name is null => editing
-            if(name !== null) {
-                await this.renameAuthenticator(id, name, prevName);
-            }
-            else {
-                const matchingAuthIndex = this.findAuthenticatorIndex(id);
+                    let statusCode;
 
-                if(matchingAuthIndex === -1) {
-                    return;
+                    try {
+                        const res = await fetch(this.formatApiUrl("/webauthn/auth/" + authCredID), {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                name: newName
+                            })
+                        });
+                        await this.fetchAuthData();
+                        statusCode = res.status;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                    
+                    if (statusCode == 200) {
+                        Materialize.toast(this.messages.success.webauthn.renamed, 3000, 'green darken-1');
+                    } else {
+                        Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
+                    }
+
                 }
-                this.realData.auths[matchingAuthIndex].name = null;
-            }
+            });
         },
 
-        fetchAuthnData: async function() {
-            let fetchedData;
+        deleteAuthenticator: function(authCredID) {
+            // TODO : USE MESSAGES FILES FOR LOCALISATION
+            const auth = this.getAuthById(authCredID);
+            const name = auth.name;
+            return Swal.fire({ // https://sweetalert2.github.io/#configuration
+                title: this.messages.api.action.webauthn.confirm_delete.replace("%NAME%", name),
+                icon: "warning",
+                customClass: { // https://sweetalert2.github.io/#customClass
+                    confirmButton: "waves-effect waves-light btn red darken-1",
+                    cancelButton: "waves-effect waves-light btn green darken-1",
+                },
+                focusDeny: true,
+                reverseButtons: true,
+                showCancelButton: true,
+                allowOutsideClick: true,
+                showLoaderOnConfirm: true,
+                preConfirm: async () => {
+                    let statusCode;
+
+                    try {
+                        const res = await fetch(this.formatApiUrl("/webauthn/auth/" + authCredID), { method: "DELETE" });
+                        await this.fetchAuthData();
+                        statusCode = res.status;
+                    } catch (e) {
+                        console.error(e);
+                    }
+
+                    if (statusCode == 200) {
+                        Materialize.toast(this.messages.success.webauthn.deleted, 3000, 'green darken-1');
+                    } else {
+                        Materialize.toast(this.messages.error.webauthn.delete_failed, 3000, 'red darken-1');
+                    }
+
+                }
+            });
+        },
+        generateWebauthn: async function() {
+            this.registrationInProgress = true;
             try {
-                this.waiting_for_fetch = true;
-                const res = await fetch("/api/generate/webauthn", {method: "POST"});
-
-                if(res.headers.get('content-type').split(';').includes("application/json") === false) {
-                    //console.error("Incorrect api response type : " + res.headers.get('content-type'));
-                    throw new Error("Incorrect api response type : " + res.headers.get('content-type'));
-                }
-
-                fetchedData = await res.json();
-            }
-            catch(e) {
-                // @TODO(Guilian): improve error handling
-                fetchedData = null;
-                console.error(e);
-            }
-            finally {
-                this.waiting_for_fetch = false;
-
-            }
-            return fetchedData;
-        },
-        deleteAuthenticatorConfirm: async function(authCredID) {
-            if(window.confirm(this.messages.api.action.webauthn.confirm_delete)) {
-                this.deleteAuthenticator(authCredID);
-            }
-        },
-
-        renameAuthenticator: async function(authCredID, newName, previousName) {
-            const matchingAuthIndex = this.findAuthenticatorIndex(authCredID);
-
-            // optimistic UI (show change before server accepts)
-            this.realData.auths[matchingAuthIndex].name = newName;
-
-            // previousName is provided because editing the name of a factor
-            // sets it's name attribute to null.
-            if(previousName === newName) {
-                // don't send data to server
-                return;
-            }
-
-            try {
-                this.waiting_for_fetch = true;
-
-                const res = await fetch("/api/webauthn/auth/" + authCredID, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            name: newName
-                        })
-                    },
-                );
-
-                if(200 <= res.status && res.status < 300) {
-                    // update data
-                    this.realData = await this.fetchAuthnData();
-                    Materialize.toast(this.messages.success.webauthn.renamed, 3000, 'green darken-1');
-                }
-                else {
-                    Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
-                }
-            }
-            catch(e) {
-                Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
-            }
-            finally {
-                this.waiting_for_fetch = false;
-            }
-        },
-
-        deleteAuthenticator: async function(authCredID) {
-            try {
-                this.waiting_for_fetch = true;
-
-                const res = await fetch("/api/webauthn/auth/" + authCredID, {method: "DELETE"});
-
-                if(200 <= res.status && res.status < 300) {
-                    // @TODO(Guilian): can filter directly instead of refetching
-                    this.realData = await this.fetchAuthnData();
-                    Materialize.toast(this.messages.success.webauthn.deleted, 3000, 'green darken-1');
-                }
-                else {
-                    Materialize.toast(this.messages.error.webauthn.delete_failed, 3000, 'red darken-1');
-                }
-            }
-            catch(e) {
-                Materialize.toast(this.messages.error.webauthn.delete_failed, 3000, 'red darken-1');
-            }
-            finally {
-                this.waiting_for_fetch = false;
-            }
-        },
-        generateWebauthn: async function(onError) {
-            try {
-                const data = await this.fetchAuthnData();
+                const data = await this.fetchAuthData();
 
                 // arguments for the webauthn registration
                 const publicKeyCredentialCreationOptions = {
@@ -528,11 +361,8 @@ const WebAuthnMethod = Vue.extend({
                     excludeCredentials: data.auths.map(a => ({id: base64URLStringToBuffer(a.credentialID), type: "public-key"})),
                 };
 
-                this.waiting_for_user_input = true;
                 // register
                 const credentials = await navigator.credentials.create({publicKey: publicKeyCredentialCreationOptions});
-
-                this.waiting_for_user_input = false;
 
                 // PublicKeyCredential can not be serialized
                 // because it contains some ArrayBuffers, which
@@ -554,10 +384,7 @@ const WebAuthnMethod = Vue.extend({
                     };
                 }
 
-
-                this.waiting_for_fetch = true;
-
-                const verifyRes = await fetch("/api/webauthn/confirm_activate", {
+                const verifyRes = await fetch(this.formatApiUrl("/webauthn/confirm_activate"), {
                     method: "POST",
                     headers: {
                         'Content-type': 'application/json'
@@ -567,14 +394,13 @@ const WebAuthnMethod = Vue.extend({
                         cred_name: "Authenticator " + credentials.id.slice(-5),
                     }),
                 });
-                this.waiting_for_fetch = false;
 
                 if(200 <= verifyRes.status && verifyRes.status < 300) {
                     const { registered } = await verifyRes.json();
 
-                    if(registered) {
-                        // name chooser dialog
-                        this.realData = await this.fetchAuthnData();
+                    if(registered) { // SUCCESS
+                        await this.fetchAuthData();
+                        await this.renameAuthenticator(credentials.id);
                     }
                     else {
                         Materialize.toast(this.messages.error.webauthn.registration_failed, 3000, 'red darken-1');
@@ -591,11 +417,6 @@ const WebAuthnMethod = Vue.extend({
                 }
             }
             catch(e) {
-                if (typeof (onError) === "function") {
-                    onError();
-                }
-                this.user.methods.webauthn.waiting = false;
-
                 // Already registered
                 if(e.name === "InvalidStateError") {
                     Materialize.toast(this.messages.error.webauthn.already_registered, 3000, 'red darken-1');
@@ -606,22 +427,12 @@ const WebAuthnMethod = Vue.extend({
                 }
                 else {
                     Materialize.toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
-                    console.error("/api/webauthn/confirm_activate", status, e.toString());
+                    console.error("/api/webauthn/confirm_activate", e);
                 }
+            } finally {
+                this.registrationInProgress = false;
             }
         },
-    },
-    async mounted() {
-        this.realData = await this.fetchAuthnData();
-
-        if(this.realData.auths.length === 0) {
-            this.generateWebauthn();
-        }
-    },
-    beforeUnmount() {
-        if(this.data.auths.length === 0) {
-            fetch("/api/webauthn/activate", {method: "PUT"})
-        }
     },
     template: '#webauthn-method',
 });
@@ -675,8 +486,9 @@ const RandomCodeMethod = Vue.extend({
                                         return verifyCodeMessages.wrong;
                                     }
                                 },
+                                showLoaderOnConfirm: true,
                                 preConfirm: () => {
-                                    $.ajax({
+                                    return $.ajax({
                                         method: 'PUT',
                                         url: this.formatApiUrl('transport/' + transport + '/' + new_transport),
                                         dataType: 'json',
@@ -768,14 +580,14 @@ var UserDashboard = Vue.extend({
                     break;
                 case 'bypass':
                     this.standardActivate(method);
-            this.generateBypass(function () {
-                            this.user.methods.bypass.active = false;
-                        });
+                    this.generateBypass(function () {
+                        this.user.methods.bypass.active = false;
+                    });
                     break;
                 case 'random_code':
                     this.standardActivate(method);
                     break;
-        case 'random_code_mail':
+                case 'random_code_mail':
                     this.standardActivate(method);
                     break;
                 case 'totp':
@@ -794,7 +606,7 @@ var UserDashboard = Vue.extend({
         },
         askPushActivation: function (method) {
             this.user.methods.push.askActivation = true;
-        this.user.methods.push.active = true;
+            this.user.methods.push.active = true;
             //ajax
             $.ajax({
                 method: "PUT",

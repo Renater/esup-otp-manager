@@ -28,10 +28,8 @@
       "already_registered": "You already registered this authentificator.",
       "user_declined": "You aborted the registration.",
       "delete_failed": "Could not delete the authentificator. Please try again.",
-
-      "input_hint_type": "Please only use alphanumerics, underscores, and spaces.",
-      "input_hint_length": "Please only use 1 to 20 characters."
-  }
+      "empty_name": "The name cannot be blank"
+    }
   },
   "api": {
     "methods": {
@@ -90,11 +88,11 @@
       },
       "webauthn": {
           "name": "Hardware authenticator (WebAuthn)",
-          "description": "Hardware authentication factor.",
-          "usage": "If you have a physical device such as a Yubikey, you should plug it in now.",
+          "description": "WebAuthn hardware authentication factor (Smartphone, Windows Hello, TouchID, ...).",
           "no_authentificators": "You have no authentificators registered. Register one ?",
           "single_auth": "You have 1 authentification method registered.",
-          "nb_of_auths": "You have %NB% authentification methods registered." 
+          "nb_of_auths": "You have %NB% authentification methods registered.",
+          "new_name": "New name"
       }
     },
     "home":{
@@ -105,7 +103,7 @@
       "esupnfc":"Connection with student card or business card",
       "random_code":"Send random code by SMS.",
       "random_code_mail":"Send random code by mail.",
-      "webauthn":"WebAuthn hardware authentication factor (USB/NFC Yubikey, Smartphone, Windows Hello, TouchID, ...).",
+      "webauthn":"WebAuthn hardware authentication factor (Smartphone, Windows Hello, TouchID, ...).",
       "note":"Set up at least 2 methods among:"
     },
     "index": "Single use passwords management interface",
@@ -116,6 +114,7 @@
       "deactivate" : "Deactivate",
       "save" : "Save",
       "modify" : "Modify",
+      "rename" : "Rename",
       "remove" : "Remove",
       "search" : "Search",
       "select" : "Select",
@@ -128,10 +127,8 @@
       "confirm_generate" :"Old codes will be erased. Continue ?",
 
       "webauthn": {
-        "register": "Register an authentificator",
-        "confirm_delete": "You won't be able to log in with this authentificator anymore. Continue ?",
-        "give_name_to_factor": "Please enter a name for your factor. Press %CANCEL_KEY% to cancel."
-    }
+        "confirm_delete": "Do you really want to delete %NAME% ?"
+      }
     },
     "key": {
       "escape": "escape"
