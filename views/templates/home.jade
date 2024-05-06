@@ -10,13 +10,13 @@ script#home-dashboard(type='text/x-template').
        <p>{{messages.api.home.note}}</p>
      {{messages.api.home.methods}}
      <div class="flex-container">
-      <div v-for="method in methods" v-if="method.activate & method.authorize"  class="methode" v-on:click = "navigate(method.name);" >
+      <button v-for="method in methods" v-if="method.activate & method.authorize" role="link" class="methode" @click="navigate(method.name);" >
       <p>
       <img v-bind:src="'images/'+method.name+'.svg'" style = "max-width: 200px;" >
      </p>
      
       <span>{{messages.api.home[method.name]}}</span>
-     </div>
+     </button>
 
      </div>
      
