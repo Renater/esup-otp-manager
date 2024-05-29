@@ -12,7 +12,7 @@ script#home-dashboard(type='text/x-template').
      <div class="flex-container">
       <button v-for="method in methods" v-if="method.activate & method.authorize" role="link" class="methode" @click="navigate(method.name);" >
       <p>
-      <img v-bind:src="'images/'+method.name+'.svg'" style = "max-width: 200px;" >
+      <img v-bind:src="'images/'+method.name+'.svg'" style="max-width: 200px;" alt="">
      </p>
      
       <span>{{messages.api.home[method.name]}}</span>
