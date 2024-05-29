@@ -6,7 +6,7 @@ script#webauthn-method(type='text/x-template').
             <p v-html="descriptionMessage"></p>
           </div>
           <div class="col s6 right-align">
-            <button class="waves-effect waves-light btn green darken-1" @click="generateWebauthn()">{{messages.api.action.add}}<i class="material-icons right">add</i></button>
+            <button class="waves-effect waves-light btn green darken-1" @click="generateWebauthn()">{{messages.api.action.add}}<i class="material-icons right" aria-hidden="true">add</i></button>
           </div>
         </div>
         <div class="row">
@@ -15,9 +15,9 @@ script#webauthn-method(type='text/x-template').
               <div class="row valign-wrapper" style="margin-bottom:0;"> <!-- TODO : use secondary-content instead https://archives.materializecss.com/0.100.2/collections.html#secondary --> 
                 <div class="col s6">{{ auth.name }}</div>
                 <div class="col s6 right-align">
-                  <button class="waves-effect waves-light btn" @click="renameAuthenticator(auth.credentialID)">{{messages.api.action.rename}}<i class="material-icons right">mode_edit</i></button>
+                  <button class="waves-effect waves-light btn" @click="renameAuthenticator(auth.credentialID)">{{messages.api.action.rename}}<i class="material-icons right" aria-hidden="true">mode_edit</i></button>
                   <div style="margin-top: 5px;" class="hide-on-med-and-up"></div>
-                  <button class="waves-effect waves-light btn red darken-1" @click="deleteAuthenticator(auth.credentialID)">{{messages.api.action.remove}}<i class="material-icons right">delete_forever</i></button>
+                  <button class="waves-effect waves-light btn red darken-1" @click="deleteAuthenticator(auth.credentialID)">{{messages.api.action.remove}}<i class="material-icons right" aria-hidden="true">delete_forever</i></button>
                 </div>
               </div>
             </li>

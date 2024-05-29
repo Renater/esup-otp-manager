@@ -2,12 +2,12 @@ script#manager-dashboard(type='text/x-template').
     <div>
     <div class="row input-field">
     <div class="col s8">
-    <i class="material-icons prefix">account_box</i>
+    <i class="material-icons prefix" aria-hidden="true">account_box</i>
     <input v-on:keyup.enter="search" v-on:keyup="suggest" type="text" id="autocomplete-input" list="usersId">
     <label for="autocomplete-input">{{messages.api.label.user}}</label>
     </div>
-    <a v-if="!isHidden && textButton=='chercher'" class="waves-effect waves-light btn col s4" v-on:click="search">{{messages.api.action.select}}<i class="material-icons right">search</i></a>
-    <a v-if="!isHidden && textButton=='ajouter'" class="waves-effect waves-light btn col s4" v-on:click="addUser">{{messages.api.action.add}}<i class="material-icons right">add</i></a>
+    <a v-if="!isHidden && textButton=='chercher'" class="waves-effect waves-light btn col s4" v-on:click="search">{{messages.api.action.select}}<i class="material-icons right" aria-hidden="true">search</i></a>
+    <a v-if="!isHidden && textButton=='ajouter'" class="waves-effect waves-light btn col s4" v-on:click="addUser">{{messages.api.action.add}}<i class="material-icons right" aria-hidden="true">add</i></a>
     <datalist id="usersId">
     <option v-for="uid in suggestions" v-bind:value="uid">
     </datalist>

@@ -16,12 +16,12 @@ script#random_code-method(type='text/x-template').
     <label for="sms-input">{{messages.api.transports.sms}}</label>
     </div>
     <button type="submit"class="waves-effect waves-light btn col s5">
-    <span v-if="user.transports.sms">{{messages.api.action.modify}}<i class="material-icons right">mode_edit</i></span>
-    <span v-else>{{messages.api.action.save}}<i class="material-icons right">save</i></span>
+    <span v-if="user.transports.sms">{{messages.api.action.modify}}<i class="material-icons right" aria-hidden="true">mode_edit</i></span>
+    <span v-else>{{messages.api.action.save}}<i class="material-icons right" aria-hidden="true">save</i></span>
     </button>
     </form>
     <div class="row" style="margin-bottom: 0;" v-if="user.transports.sms">
-    <a class="waves-effect waves-light btn col s12  red darken-1" v-on:click="deleteTransport('sms')">{{messages.api.action.remove}}<i class="material-icons right">cancel</i></a>
+    <a class="waves-effect waves-light btn col s12  red darken-1" v-on:click="deleteTransport('sms')">{{messages.api.action.remove}}<i class="material-icons right" aria-hidden="true">cancel</i></a>
     </div>
     </div>
     </div>
@@ -44,12 +44,12 @@ script#random_code-method(type='text/x-template').
     <label for="mail-input">{{messages.api.transports.mail}}</label>
     </div>
     <button type="submit" class="waves-effect waves-light btn col s5">
-    <span v-if="user.transports.mail">{{messages.api.action.modify}}<i class="material-icons right">mode_edit</i></span>
-    <span v-else>{{messages.api.action.save}}<i class="material-icons right">save</i></span>
+    <span v-if="user.transports.mail">{{messages.api.action.modify}}<i class="material-icons right" aria-hidden="true">mode_edit</i></span>
+    <span v-else>{{messages.api.action.save}}<i class="material-icons right" aria-hidden="true">save</i></span>
     </button>
     </form>
     <div class="row" style="margin-bottom: 0;" v-if="user.transports.mail">
-    <a class="waves-effect waves-light btn col s12  red darken-1" v-on:click="deleteTransport('mail')">{{messages.api.action.remove}}<i class="material-icons right">cancel</i></a>
+    <a class="waves-effect waves-light btn col s12  red darken-1" v-on:click="deleteTransport('mail')">{{messages.api.action.remove}}<i class="material-icons right" aria-hidden="true">cancel</i></a>
     </div>
     </div>
     </div>

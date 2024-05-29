@@ -30,7 +30,7 @@ script#totp-method(type='text/x-template').
     <label for="totpCode-input" style="left: 0;">{{messages.api.methods.totp.enter_code}}</label>
     </div>
     <button type="submit" class="waves-effect waves-light btn green darken-1" style="margin-bottom: 1em;">
-    {{messages.api.action.validate}}<i class="material-icons right">check</i>
+    {{messages.api.action.validate}}<i class="material-icons right" aria-hidden="true">check</i>
     </button>
     </form>
     </div>
@@ -38,7 +38,7 @@ script#totp-method(type='text/x-template').
     </div>
     <div class="card-action" v-if="!user.methods.totp.qrCode">
     <div class="row" style="margin-bottom: 0;text-align: center;">
-    <a class="waves-effect waves-light btn" v-on:click=generate_totp>{{messages.api.action.generate_qrcode}}<i class="material-icons right">sync</i></a>
+    <a class="waves-effect waves-light btn" v-on:click=generate_totp>{{messages.api.action.generate_qrcode}}<i class="material-icons right" aria-hidden="true">sync</i></a>
     </div>
     </div>
     </div>

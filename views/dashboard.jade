@@ -26,7 +26,7 @@ block content
                 .no-padding.sidenav-header
                     .flex
                     #hide.flex()
-                        i.material-icons.medium account_circle
+                        i.material-icons.medium(aria-hidden="true") account_circle
                         p {{user.uid}}
                         a#closebtn(href='javascript:void(0)', onclick="hide('slide-out')", name='close') X
                 li.bold
@@ -47,7 +47,7 @@ block content
                             a#admin(href='#', v-on:click='navigate', name='admin') {{messages.api.menu.admin}}
                     .divider
                     li.bold.flex.waves-effect(style='display: flex !important;')
-                        i.material-icons.prefix exit_to_app
+                        i.material-icons.prefix(aria-hidden="true") exit_to_app
                         a(href='/logout') {{messages.api.action.logout}}
                     .divider
                     li.no-padding
