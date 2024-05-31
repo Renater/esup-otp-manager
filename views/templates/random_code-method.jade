@@ -21,7 +21,7 @@ script#random_code-method(type='text/x-template').
     </button>
     </form>
     <div class="row" style="margin-bottom: 0;" v-if="user.transports.sms">
-    <a class="waves-effect waves-light btn col s12  red darken-1" v-on:click="deleteTransport('sms')">{{messages.api.action.remove}}<i class="material-icons right" aria-hidden="true">cancel</i></a>
+    <button class="waves-effect waves-light btn col s12 red darken-1" @click="deleteTransport('sms')">{{messages.api.action.remove}}<i class="material-icons right" aria-hidden="true">cancel</i></button>
     </div>
     </div>
     </div>
@@ -49,7 +49,7 @@ script#random_code-method(type='text/x-template').
     </button>
     </form>
     <div class="row" style="margin-bottom: 0;" v-if="user.transports.mail">
-    <a class="waves-effect waves-light btn col s12  red darken-1" v-on:click="deleteTransport('mail')">{{messages.api.action.remove}}<i class="material-icons right" aria-hidden="true">cancel</i></a>
+    <button class="waves-effect waves-light btn col s12 red darken-1" @click="deleteTransport('mail')">{{messages.api.action.remove}}<i class="material-icons right" aria-hidden="true">cancel</i></button>
     </div>
     </div>
     </div>
