@@ -178,6 +178,11 @@ const TotpMethod = Vue.extend({
                         toast('Code validé', 3000, 'green darken-1');
                     }
                 }.bind(this),
+                statusCode: {
+                    401: function() {
+                        toast(this.messages.api.methods.random_code.verify_code.wrong, 3000, 'red darken-1');
+                    }.bind(this)
+                },
                 error: function (xhr, status, err) {
                     console.error("/api/totp/activate/confirm", status, err.toString());
                 }.bind(this)
