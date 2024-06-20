@@ -241,6 +241,10 @@ body.IE7 .Switch.Round {
 .card { padding-top:25px;  background-color: #eeeef0; } 
 .input-field label { top: 2rem; top:1rem; left: 10px; }
 
+#totpCode-input {
+    height: 4rem;
+}
+
 .swal2-input{
     width: 10ch !important;
     -moz-appearance: textfield; /* https://www.w3schools.com/howto/howto_css_hide_arrow_number.asp */
