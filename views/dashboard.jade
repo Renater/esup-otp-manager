@@ -16,13 +16,13 @@ block content
     include templates/esupnfc-method.jade
     #app.container
         header(v-if="messages.api")
-            nav#target.top-nav
+            nav(role="header")#target.top-nav
                 .container
                     a#navButton.button-collapse.top-nav.full.hide-on-large-only(href='#', data-activates='slide-out',onclick="toggle_visibility('slide-out')")
                         i#target.material-icons menu
                     .nav-wrapper
                         a.page-title {{messages.api.menu[currentView]}}
-            ul#slide-out.side-nav.fixed
+            ul(role="navigation")#slide-out.side-nav.fixed
                 .no-padding.sidenav-header
                     .flex
                     #hide.flex()
