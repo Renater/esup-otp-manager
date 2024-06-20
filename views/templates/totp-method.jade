@@ -38,7 +38,7 @@ script#totp-method(type='text/x-template').
     </div>
     <div class="card-action" v-if="!user.methods.totp.qrCode">
     <div class="row" style="margin-bottom: 0;text-align: center;">
-    <a class="waves-effect waves-light btn" v-on:click=generate_totp>{{messages.api.action.generate_qrcode}}<i class="material-icons right" aria-hidden="true">sync</i></a>
+    <button class="waves-effect waves-light btn" @click=generate_totp>{{messages.api.action.generate_qrcode}}<i class="material-icons right" aria-hidden="true">sync</i></button>
     </div>
     </div>
     </div>
