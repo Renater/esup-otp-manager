@@ -22,13 +22,14 @@ block content
                         i#target.material-icons menu
                     .nav-wrapper
                         a.page-title {{messages.api.menu[currentView]}}
-            ul(role="navigation")#slide-out.side-nav.fixed
+            ul(role="navigation")#slide-out.side-nav.fixed.may-be-hidden
                 .no-padding.sidenav-header
                     .flex
                     #hide.flex()
                         i.material-icons.medium(aria-hidden="true") account_circle
                         p {{user.uid}}
-                        a#closebtn(href='javascript:void(0)', onclick="hide('slide-out')", name='close') X
+                        a#closebtn(href='javascript:void(0)', onclick="hide('slide-out')", role="button", name='close')
+                            i.material-icons close
                 li.bold
                     a#home(href='#', v-on:click='navigate', name = 'home') {{messages.api.menu.home}}
                     li.no-padding

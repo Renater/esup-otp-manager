@@ -62,26 +62,25 @@ header { background:#424242; }
 
 
 .sidenav-header {
-     background-image: url("../images/wallpaper_polygons.jpg") !important;
-     background-size: 150% 500%;
-     background-repeat: no-repeat;
-    color: white !important;
+    background-image: url("../images/wallpaper_polygons.jpg") !important;
+    background-size: 150% 500%;
+    background-repeat: no-repeat;
+    color: white;
 }
 
-.sidenav-header a {
-    background-color: #424242 !important;
-    color: white !important;
-    height: initial !important;
-    line-height: initial !important;
-}
-.sidenav-header #closebtn {
+#closebtn {
     background-color: rgba(76, 175, 80, 0) !important;
-    color: white ;
+    color: #bbb ;
     height: initial !important;
     text-align: right;
     font-size: 21px;
     line-height: initial !important;
     margin: 0px 0 32px 74px;
+    float: right;
+}
+
+#closebtn:hover, #closebtn:focus {
+    color: white;
 }
 
 .flex {
@@ -190,10 +189,6 @@ body.IE7 .Switch.Round {
     background-color: #818181;
 }
 
-#closebtn {
-    float: right;
-}
-
 
 #slide-out { border: 1px solid #ccc; color: #444; } 
 
@@ -274,15 +269,23 @@ body.IE7 .Switch.Round {
     .methode img { width:60px; } 
 }
 
-
-@media only screen and (max-width: 992px) {
-    .sidenav-header a#closebtn {
-         --margin: 0 !important;  
-          color: #bbb !important;
+@media only screen and (min-width: 992px) {
+    #closebtn,
+    /* hide the "menu" button if the menu is already displayed */
+    #navButton {
+        display:none;
     }
-    .sidenav-header a#closebtn:hover { 
-          color: #000 !important;
-    } 
+}
+
+@media only screen and (max-width: 991px) {
+    #slide-out.may-be-hidden {
+        display:none;
+    }
+    
+    /* hide the "menu" button if the menu is already displayed */
+    header:not(:has(#slide-out.may-be-hidden)) #navButton {
+        display: none;
+    }
 }
 
 .methode  {

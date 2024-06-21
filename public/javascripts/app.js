@@ -8,30 +8,14 @@
 })(jQuery); // end of jQuery name space
 
 function toggle_visibility(id) {
-    var e = document.getElementById(id);
-        e.style.width = "240px";
-        e.style.left = "0";
+    const e = document.getElementById(id);
+    e.classList.remove('may-be-hidden');
 }
 
 function hide(id) {
-    var e = document.getElementById(id);
-    if(document.documentElement.clientWidth >= 992)
-        e.style.width = "240px";
-    else
-        e.style.width = "0";
+    const e = document.getElementById(id);
+    e.classList.add('may-be-hidden');
 }
-
-$(window).resize(function() {
-    var window_width = $(window).width();
-    if(window_width >= 992) {
-        $("#slide-out").width(240);
-        $("#closebtn").css('visibility','hidden');
-    }
-    else{
-        $("#slide-out").width(0);
-        $("#closebtn").css('visibility','visible');
-    }
-});
 
 /** WebSockets init**/
 var arr = window.location.href.split('/');
