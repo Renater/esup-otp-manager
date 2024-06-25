@@ -29,7 +29,7 @@ script#totp-method(type='text/x-template').
     <input type="text" v-model="user.methods.totp.validation_code" id="totpCode-input" required />
     <label for="totpCode-input" style="left: 0;">{{messages.api.methods.totp.enter_code}}</label>
     </div>
-    <button type="submit" class="waves-effect waves-light btn green darken-1" style="margin-bottom: 1em;">
+    <button type="submit" class="waves-effect waves-light btn green contrasted" style="margin-bottom: 1em;">
     {{messages.api.action.validate}}<i class="material-icons right" aria-hidden="true">check</i>
     </button>
     </form>

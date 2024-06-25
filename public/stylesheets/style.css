@@ -90,12 +90,6 @@ header { background:#424242; }
 }
 
 
-.btn:hover, .btn-large:hover {
-  background-color: #2bbbad;
-   filter: brightness(1.25);
-}
-
-
 /*****************************************
 Switch
 *****************************************/
@@ -302,11 +296,17 @@ label { color: #555; font-size: 1.2rem; }
 .btn, .btn-large {
   background-color: #00326e;
 }
+
+.green.contrasted {
+    background-color:#418545 !important
+}
   
-.btn:hover, .btn-large:hover {
-/* background-color: #2bbbad; */
-   background: #00326e;
-   filter: brightness(1.45);
+.btn:hover,
+.btn:focus,
+.btn-large:hover,
+.btn-large:focus {
+	background: #00326e; /** only for btn with no color specified */
+    outline: black solid 2px;
 }
 
 .webauthn-factor-rename-input {

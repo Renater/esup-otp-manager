@@ -159,7 +159,7 @@ const TotpMethod = Vue.extend({
                         this.user.methods.totp.active = true;
                         this.user.methods.totp.qrCode = '';
                         this.user.methods.totp.message = '';
-                        toast('Code validé', 3000, 'green darken-1');
+                        toast('Code validé', 3000, 'green contrasted');
                     }
                 }.bind(this),
                 statusCode: {
@@ -242,7 +242,7 @@ const WebAuthnMethod = Vue.extend({
                 inputValue: previousName,
                 customClass: { // https://sweetalert2.github.io/#customClass
                     input: "webauthn-factor-rename-input",
-                    confirmButton: "waves-effect waves-light btn green darken-1",
+                    confirmButton: "waves-effect waves-light btn green contrasted",
                     cancelButton: "waves-effect waves-light btn red darken-1",
                 },
                 showCancelButton: true,
@@ -277,7 +277,7 @@ const WebAuthnMethod = Vue.extend({
                     }
                     
                     if (statusCode == 200) {
-                        toast(this.messages.success.webauthn.renamed, 3000, 'green darken-1');
+                        toast(this.messages.success.webauthn.renamed, 3000, 'green contrasted');
                     } else {
                         toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
                     }
@@ -295,7 +295,7 @@ const WebAuthnMethod = Vue.extend({
                 icon: "warning",
                 customClass: { // https://sweetalert2.github.io/#customClass
                     confirmButton: "waves-effect waves-light btn red darken-1",
-                    cancelButton: "waves-effect waves-light btn green darken-1",
+                    cancelButton: "waves-effect waves-light btn green contrasted",
                 },
                 focusDeny: true,
                 reverseButtons: true,
@@ -314,7 +314,7 @@ const WebAuthnMethod = Vue.extend({
                     }
 
                     if (statusCode == 200) {
-                        toast(this.messages.success.webauthn.deleted, 3000, 'green darken-1');
+                        toast(this.messages.success.webauthn.deleted, 3000, 'green contrasted');
                     } else {
                         toast(this.messages.error.webauthn.delete_failed, 3000, 'red darken-1');
                     }
@@ -470,7 +470,7 @@ const RandomCodeMethod = Vue.extend({
                                     popup: "modal",
                                     container: "modal-content",
                                     input: "center-align",
-                                    confirmButton: "waves-effect waves-light btn green darken-1",
+                                    confirmButton: "waves-effect waves-light btn green contrasted",
                                     cancelButton: "waves-effect waves-light btn red darken-1",
                                 },
                                 showCancelButton: true,
@@ -494,7 +494,7 @@ const RandomCodeMethod = Vue.extend({
                                                 // equivalent to "this.user.transports[transport] = new_transport;", but allows new reactive property to be added dynamically
                                                 Vue.set(this.user.transports, transport, new_transport);
                                                 document.getElementById(transport + '-input').value = '';
-                                                toast('Transport vérifié', 3000, 'green darken-1');
+                                                toast('Transport vérifié', 3000, 'green contrasted');
                                             }
                                         }.bind(this),
                                         error: function(xhr, status, err) {
@@ -954,7 +954,7 @@ var ManagerDashboard = Vue.extend({
                 $('#autocomplete-input').val('');
                 this.isHidden = true;
                 this.getUsers();
-                toast('utilisateur '+$('#autocomplete-input').val()+' ajouté avec succès', 3000, 'green darken-1');
+                toast('utilisateur '+$('#autocomplete-input').val()+' ajouté avec succès', 3000, 'green contrasted');
             }
         },
 
