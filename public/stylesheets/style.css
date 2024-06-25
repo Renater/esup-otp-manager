@@ -236,6 +236,8 @@ body.IE7 .Switch.Round {
 .card { padding-top:25px;  background-color: #eeeef0; } 
 .input-field label { top: 2rem; top:1rem; left: 10px; }
 
+label { color: #555; font-size: 1.2rem; }
+
 #totpCode-input {
     height: 4rem;
 }
