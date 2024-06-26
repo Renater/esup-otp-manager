@@ -8,7 +8,7 @@ script#home-dashboard(type='text/x-template').
        {{messages.api.home.description}}
        </p>
        <p>{{messages.api.home.note}}</p>
-     {{messages.api.home.methods}}
+     <p>{{messages.api.home.methods}}</p>
      <div class="flex-container">
       <button v-for="method in methods" v-if="method.activate & method.authorize" role="link" class="methode" @click="navigate(method.name);" >
       <p>
