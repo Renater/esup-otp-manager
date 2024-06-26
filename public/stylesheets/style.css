@@ -186,7 +186,9 @@ body.IE7 .Switch.Round {
 
 #slide-out { border: 1px solid #ccc; color: #444; } 
 
-#slide-out  li.active { background-color: #26a69a; }
+#slide-out  li.active { background-color: #24847C; }
+
+#slide-out  li.active a:hover { background-color: inherit; } /* overrride materializeCSS */
 
 #slide-out  li.active #home { color:white ; }
 
