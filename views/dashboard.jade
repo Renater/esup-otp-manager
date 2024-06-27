@@ -21,7 +21,7 @@ block content
                     a#navButton.button-collapse.top-nav.full.hide-on-large-only(href='#', data-activates='slide-out',onclick="toggle_visibility('slide-out')")
                         i#target.material-icons menu
                     .nav-wrapper
-                        a.page-title {{messages.api.menu[currentView]}}
+                        span.page-title(role="heading", aria-level="1") {{messages.api.menu[currentView]}}
             ul(role="navigation")#slide-out.side-nav.fixed.may-be-hidden
                 .no-padding.sidenav-header
                     .flex
