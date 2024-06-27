@@ -126,6 +126,8 @@
       "logout" : "Se déconnecter",
       "confirm_deactivate" : "Voulez-vous vraiment désactiver ?",
       "confirm_generate" :"Les anciens codes seront invalidés. Voulez-vous continuer ?",
+      "hide_menu": "Masquer le menu",
+      "show_menu": "Afficher le menu",
 
       "webauthn": {
         "confirm_delete": "Voulez vous vraiment supprimer %NAME% ?"

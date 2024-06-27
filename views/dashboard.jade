@@ -18,7 +18,7 @@ block content
         header(v-if="messages.api")
             nav(role="header")#target.top-nav
                 .container
-                    a#navButton.button-collapse.top-nav.full.hide-on-large-only(href='#', data-activates='slide-out',onclick="toggle_visibility('slide-out')")
+                    button#navButton.button-collapse.top-nav.btn-flat(href='#', data-activates='slide-out', onclick="toggle_visibility('slide-out')", :title="messages.api.action.show_menu")
                         i#target.material-icons menu
                     .nav-wrapper
                         span.page-title(role="heading", aria-level="1") {{messages.api.menu[currentView]}}
@@ -28,8 +28,8 @@ block content
                     #hide.flex()
                         i.material-icons.medium(aria-hidden="true") account_circle
                         p {{user.uid}}
-                        a#closebtn(href='javascript:void(0)', onclick="hide('slide-out')", role="button", name='close')
-                            i.material-icons close
+                        button#closebtn(onclick="hide('slide-out');", class="btn-flat", :title="messages.api.action.hide_menu")
+                            i.material-icons(aria-hidden="true") close
                 li.bold
                     a#home(href='#', v-on:click='navigate', name = 'home') {{messages.api.menu.home}}
                     li.no-padding

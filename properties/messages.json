@@ -124,6 +124,8 @@
             "logout" : "Logout",
             "confirm_deactivate" : "Do you want to deactivate ?",
             "confirm_generate" :"Old codes will be erased. Continue ?",
+            "hide_menu": "Hide menu",
+            "show_menu": "Show menu",
 
             "webauthn": {
                 "confirm_delete": "Do you really want to delete %NAME% ?"

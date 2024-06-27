@@ -69,14 +69,15 @@ header { background:#424242; }
 }
 
 #closebtn {
-    background-color: rgba(76, 175, 80, 0) !important;
     color: #bbb ;
     height: initial !important;
-    text-align: right;
-    font-size: 21px;
     line-height: initial !important;
     margin: 0px 0 32px 74px;
-    float: right;
+    padding: 0 16px;
+}
+
+#closebtn i {
+    font-size: 24px;
 }
 
 #closebtn:hover, #closebtn:focus {
@@ -284,6 +285,21 @@ label { color: #555; font-size: 1.2rem; }
     header:not(:has(#slide-out.may-be-hidden)) #navButton {
         display: none;
     }
+}
+
+#navButton {
+    color: white;
+    padding: inherit;
+}
+
+#navButton {
+    height: 64px;
+    line-height: 64px;
+}
+
+#navButton:hover,
+#navButton:focus {
+    outline: white solid 1px;
 }
 
 .methode  {
