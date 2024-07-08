@@ -2,9 +2,11 @@
 Manager for the esup-otp-api. Allow users to edit theirs preferences and admins to administrate ;)
 
 ### Version
-1.2
-- validate TOTP and random_code(_mail) transport before activation
-- update some dependencies (requires "npm install")
+1.3 **Require "npm install"**
+- support Webauthn (**require esup-otp-api v1.5.0**)
+- update dependency versions
+- fix some accessibility problems (**may break custom CSS**)
+- allow international phone number (To authorize only certain numbers. Modify the [regex in the app.js file](https://github.com/EsupPortail/esup-otp-manager/blob/master/public/javascripts/app.js#L446) )
 
 ### Requirements
 - [esup-otp-api](https://github.com/EsupPortail/esup-otp-api)
