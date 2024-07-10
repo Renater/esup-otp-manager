@@ -20,7 +20,7 @@ async function request_otp_api(req, res, opts_) {
         method: opts_.method || 'GET',
     }
 
-    if (req.body) {
+    if (req.body && Object.keys(req.body).length) {
         opts.body = JSON.stringify(req.body);
     }
     
