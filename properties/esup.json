@@ -5,9 +5,8 @@
         "serviceBaseURL": "http://localhost:4000/"
     },
     "port": "",
-    "api_url": "http://localhost:3000/",
+    "api_url": "http://localhost:3000",
     "api_password":"changeit",
-    "users_secret":"changeit",
     "session_secret_key": "changeit",
     "admins": ["john"],
     "admins_attributes": {"memberof": "cn=esup-otp.admin,ou=groups,dc=univ-ville,dc=fr"},
