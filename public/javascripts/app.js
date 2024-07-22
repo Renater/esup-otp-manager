@@ -149,7 +149,7 @@ const TotpMethod = Vue.extend({
             this.user.methods.totp.validation_code = '';
             $.ajax({
                 method: "POST",
-                url: this.formatApiUrl("totp/activate/confirm/" + totpCode),
+                url: this.formatApiUrl("/totp/activate/confirm/" + totpCode),
                 dataType: 'json',
                 cache: false,
                 success: function (data) {
@@ -448,7 +448,7 @@ const RandomCodeMethod = Vue.extend({
             if (reg.test(new_transport)) {
                 $.ajax({
                     method: 'GET',
-                    url: this.formatApiUrl('transport/' + transport + '/' + new_transport + "/test"),
+                    url: this.formatApiUrl('/transport/' + transport + '/' + new_transport + "/test"),
                     dataType: 'json',
                     cache: false,
                     success: function(data) {
@@ -484,7 +484,7 @@ const RandomCodeMethod = Vue.extend({
                                 preConfirm: () => {
                                     return $.ajax({
                                         method: 'PUT',
-                                        url: this.formatApiUrl('transport/' + transport + '/' + new_transport),
+                                        url: this.formatApiUrl('/transport/' + transport + '/' + new_transport),
                                         dataType: 'json',
                                         cache: false,
                                         success: function(data) {
@@ -518,7 +518,7 @@ const RandomCodeMethod = Vue.extend({
             this.user.transports[transport]= null;
             $.ajax({
                 method: 'DELETE',
-                url: this.formatApiUrl('transport/' + transport),
+                url: this.formatApiUrl('/transport/' + transport),
                 dataType: 'json',
                 cache: false,
                 success: function(data) {
@@ -565,7 +565,7 @@ var UserDashboard = Vue.extend({
     },
     methods: {
         formatApiUrl: function(url) {
-            return '/api/' + url;
+            return '/api' + url;
         },
         activate: function (method) {
             switch (method) {
@@ -734,7 +734,7 @@ var UserView = Vue.extend({
     template: '#user-view',
     methods: {
         formatApiUrl: function(url) {
-            return '/api/admin/' + url + '/' + this.user.uid;
+            return '/api/admin' + url + '/' + this.user.uid;
         },
         activate: function (method) {
             switch (method) {
