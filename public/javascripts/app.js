@@ -22,6 +22,36 @@ var arr = window.location.href.split('/');
 var urlSockets = arr[0] + "//" + arr[2];
 var socket;
 
+async function fetchApi({
+    uri,
+    method = "GET",
+    headers = { "Content-Type": "application/json", 'Accept': 'application/json' },
+    body,
+    onSuccess, // res => {} (executed if status >= 200 && < 300)
+    onStatus = {}, // {status: (res) => {}}
+}) {
+    try {
+        const res = await fetch(uri, { method, headers, body });
+        res.data = await res.json();
+
+        if (res.ok) {
+            await onSuccess?.(res);
+        } else if (res.data?.code === 'REDIRECT') {
+            window.alert("Session expirée. Veuillez vous reconnecter.")
+            return document.location.replace(res.data.path); // redirect to res.data.path (/login or /forbidden)
+        } else if (onStatus[res.status]) {
+            await onStatus[res.status](res);
+        } else {
+            const err = new Error(JSON.stringify({ status: res.status, data: res.data }));
+            err.res = res;
+            throw err;
+        }
+        return res;
+    } catch (err) {
+        console.error(err.res?.url || uri, err);
+        throw err;
+    }
+}
 
 /** base64url helper functions **/
 /**
@@ -141,19 +171,17 @@ const TotpMethod = Vue.extend({
         'activate': Function,
         'deactivate': Function,
         'messages': Object,
-        'formatApiUrl': Function,
+        'formatApiUri': Function,
     },
     methods: {
         validate: function() {
             const totpCode = this.user.methods.totp.validation_code;
             this.user.methods.totp.validation_code = '';
-            $.ajax({
+            return fetchApi({
                 method: "POST",
-                url: this.formatApiUrl("/totp/activate/confirm/" + totpCode),
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code != "Ok") {
+                uri: this.formatApiUri("/totp/activate/confirm/" + totpCode),
+                onSuccess: res => {
+                    if (res.data.code != "Ok") {
                         toast('Erreur, veuillez réessayer.', 3000, 'red darken-1');
                     } else {
                         this.user.methods.totp.active = true;
@@ -161,15 +189,12 @@ const TotpMethod = Vue.extend({
                         this.user.methods.totp.message = '';
                         toast('Code validé', 3000, 'green contrasted');
                     }
-                }.bind(this),
-                statusCode: {
-                    401: function() {
-                        toast(this.messages.api.methods.random_code.verify_code.wrong, 3000, 'red darken-1');
-                    }.bind(this)
                 },
-                error: function (xhr, status, err) {
-                    console.error("/api/totp/activate/confirm", status, err.toString());
-                }.bind(this)
+                onStatus: {
+                    401: res => {
+                        toast(this.messages.api.methods.random_code.verify_code.wrong, 3000, 'red darken-1');
+                    }
+                }
             });
         }
     },
@@ -182,7 +207,7 @@ const WebAuthnMethod = Vue.extend({
         'activate': Function,
         'deactivate': Function,
         'messages': Object,
-        'formatApiUrl': Function,
+        'formatApiUri': Function,
     },
     data() {
         return {
@@ -224,8 +249,11 @@ const WebAuthnMethod = Vue.extend({
     },
     methods: {
         fetchAuthData: async function() {
-            const res = await fetch(this.formatApiUrl("/generate/webauthn"), { method: "POST" });
-            this.realData = await res.json()
+            const res = await fetchApi({
+                method: "POST",
+                uri: this.formatApiUri("/generate/webauthn"),
+            });
+            this.realData = res.data;
             return this.realData;
         },
         getAuthById: function (id) {
@@ -261,14 +289,12 @@ const WebAuthnMethod = Vue.extend({
                     let statusCode;
 
                     try {
-                        const res = await fetch(this.formatApiUrl("/webauthn/auth/" + authCredID), {
+                        const res = await fetchApi({
                             method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
+                            uri: this.formatApiUri("/webauthn/auth/" + authCredID),
                             body: JSON.stringify({
                                 name: newName
-                            })
+                            }),
                         });
                         await this.fetchAuthData();
                         statusCode = res.status;
@@ -306,7 +332,10 @@ const WebAuthnMethod = Vue.extend({
                     let statusCode;
 
                     try {
-                        const res = await fetch(this.formatApiUrl("/webauthn/auth/" + authCredID), { method: "DELETE" });
+                        const res = await fetchApi({
+                            method: "DELETE",
+                            uri: this.formatApiUri("/webauthn/auth/" + authCredID),
+                        });
                         await this.fetchAuthData();
                         statusCode = res.status;
                     } catch (e) {
@@ -377,38 +406,27 @@ const WebAuthnMethod = Vue.extend({
                         }
                     };
                 }
-
-                const verifyRes = await fetch(this.formatApiUrl("/webauthn/confirm_activate"), {
+                
+                await fetchApi({
                     method: "POST",
-                    headers: {
-                        'Content-type': 'application/json'
-                    },
+                    uri: this.formatApiUri("/webauthn/confirm_activate"),
                     body: JSON.stringify({
                         cred: SerializePKC(credentials),
                         cred_name: "Authenticator " + credentials.id.slice(-5),
                     }),
-                });
-
-                if(200 <= verifyRes.status && verifyRes.status < 300) {
-                    const { registered } = await verifyRes.json();
-
-                    if(registered) { // SUCCESS
-                        await this.fetchAuthData();
-                        await this.renameAuthenticator(credentials.id);
-                    }
-                    else {
-                        toast(this.messages.error.webauthn.registration_failed, 3000, 'red darken-1');
-                    }
-                }
-                else {
-                    // timed out
-                    if(verifyRes.status === 422) {
+                    onSuccess: async res => {
+                        if (res.data.registered) { // SUCCESS
+                            await this.fetchAuthData();
+                            await this.renameAuthenticator(credentials.id);
+                        }
+                        else {
+                            toast(this.messages.error.webauthn.registration_failed, 3000, 'red darken-1');
+                        }
+                    },
+                    onStatus: {422: () => {
                         toast(this.messages.error.webauthn.timeout, 3000, 'red darken-1');
-                    }
-                    else {
-                        toast(this.messages.error.webauthn.generic, 3000, 'red darken-1');
-                    }
-                }
+                    }},
+                });
             }
             catch(e) {
                 // Already registered
@@ -437,98 +455,90 @@ const RandomCodeMethod = Vue.extend({
         'messages': Object,
         'activate': Function,
         'deactivate': Function,
-        'formatApiUrl': Function,
+        'formatApiUri': Function,
     },
     methods: {
-        saveTransport: function(transport) {
+        saveTransport: async function(transport) {
             var new_transport = document.getElementById(transport + '-input').value;
             var reg;
             if (transport == 'sms') reg = new RegExp("^((0[67](([.]|[-]|[ ])?[0-9]){8})|((00|[+])(([.]|[-]|[ ])?[0-9]){7,15}))$");
             else reg = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
             if (reg.test(new_transport)) {
-                $.ajax({
-                    method: 'GET',
-                    url: this.formatApiUrl('/transport/' + transport + '/' + new_transport + "/test"),
-                    dataType: 'json',
-                    cache: false,
-                    success: function(data) {
-                        if (data.code != "Ok") {
-                            toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
-                        }else {
-                            const expected = data.otp;
 
-                            const verifyCodeMessages = this.messages.api.methods.random_code.verify_code;
+                try {
+                    const res = await fetchApi({
+                        method: "GET",
+                        uri: this.formatApiUri('/transport/' + transport + '/' + new_transport + "/test"),
+                    });
+                    const data = res.data;
+                    if (data.code != "Ok") {
+                        toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
+                    } else {
+                        const expected = data.otp;
 
-                            Swal.fire({ // https://sweetalert2.github.io/#configuration
-                                title: verifyCodeMessages[transport].title,
-                                html: verifyCodeMessages[transport].pre + new_transport + verifyCodeMessages[transport].post,
-                                input: "number",
-                                icon: "question",
-                                // inputLabel: "Code",
-                                inputPlaceholder: "000000",
-                                customClass: { // https://sweetalert2.github.io/#customClass
-                                    popup: "modal",
-                                    container: "modal-content",
-                                    input: "center-align",
-                                    confirmButton: "waves-effect waves-light btn green contrasted",
-                                    cancelButton: "waves-effect waves-light btn red darken-1",
-                                },
-                                showCancelButton: true,
-                                allowOutsideClick: false,
-                                inputValidator: input => {
-                                    if(input != expected) {
-                                        return verifyCodeMessages.wrong;
-                                    }
-                                },
-                                showLoaderOnConfirm: true,
-                                preConfirm: () => {
-                                    return $.ajax({
-                                        method: 'PUT',
-                                        url: this.formatApiUrl('/transport/' + transport + '/' + new_transport),
-                                        dataType: 'json',
-                                        cache: false,
-                                        success: function(data) {
-                                            if (data.code != "Ok") {
-                                                toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
-                                            } else {
-                                                // equivalent to "this.user.transports[transport] = new_transport;", but allows new reactive property to be added dynamically
-                                                Vue.set(this.user.transports, transport, new_transport);
-                                                document.getElementById(transport + '-input').value = '';
-                                                toast('Transport vérifié', 3000, 'green contrasted');
-                                            }
-                                        }.bind(this),
-                                        error: function(xhr, status, err) {
-                                            toast(err, 3000, 'red darken-1');
-                                            console.error('/api/transport/' + transport + '/' + new_transport, status, err.toString());
-                                        }.bind(this)
-                                    });
+                        const verifyCodeMessages = this.messages.api.methods.random_code.verify_code;
+ 
+                        Swal.fire({ // https://sweetalert2.github.io/#configuration
+                            title: verifyCodeMessages[transport].title,
+                            html: verifyCodeMessages[transport].pre + new_transport + verifyCodeMessages[transport].post,
+                            input: "number",
+                            icon: "question",
+                            // inputLabel: "Code",
+                            inputPlaceholder: "000000",
+                            customClass: { // https://sweetalert2.github.io/#customClass
+                                popup: "modal",
+                                container: "modal-content",
+                                input: "center-align",
+                                confirmButton: "waves-effect waves-light btn green contrasted",
+                                cancelButton: "waves-effect waves-light btn red darken-1",
+                            },
+                            showCancelButton: true,
+                            allowOutsideClick: false,
+                            inputValidator: input => {
+                                if (input != expected) {
+                                    return verifyCodeMessages.wrong;
                                 }
-                            });
-                        }
-                    }.bind(this),
-                    error: function(xhr, status, err) {
-                        toast(err, 3000, 'red darken-1');
-                        console.error('/api/transport/' + transport + '/' + new_transport + "/test", status, err.toString());
-                    }.bind(this)
-                });
-            }else toast('Format invalide.', 3000, 'red darken-1');
+                            },
+                            showLoaderOnConfirm: true,
+                            preConfirm: async () => {
+                                const res = await fetchApi({
+                                    method: "PUT",
+                                    uri: this.formatApiUri('/transport/' + transport + '/' + new_transport),
+                                });
+                                const data = res.data;
+                                if (data.code != "Ok") {
+                                    toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
+                                } else {
+                                    // equivalent to "this.user.transports[transport] = new_transport;", but allows new reactive property to be added dynamically
+                                    Vue.set(this.user.transports, transport, new_transport);
+                                    document.getElementById(transport + '-input').value = '';
+                                    toast('Transport vérifié', 3000, 'green contrasted');
+                                }
+                            }
+                        });
+                    }
+
+
+                } catch (err) {
+                    toast(err, 3000, 'red darken-1');
+                };
+            } else toast('Format invalide.', 3000, 'red darken-1');
         },
         deleteTransport: function(transport) {
             var oldTransport = this.user.transports[transport];
-            this.user.transports[transport]= null;
-            $.ajax({
-                method: 'DELETE',
-                url: this.formatApiUrl('/transport/' + transport),
-                dataType: 'json',
-                cache: false,
-                success: function(data) {
-                    if (data.code != "Ok") this.user.transports[transport]= oldTransport;
-                }.bind(this),
-                error: function(xhr, status, err) {
-                    this.user.transports[transport]= oldTransport;
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/data/deactivate.json", status, err.toString());
-                }.bind(this)
+            this.user.transports[transport] = null;
+
+            return fetchApi({
+                method: "DELETE",
+                uri: this.formatApiUri('/transport/' + transport),
+                onSuccess: res => {
+                    if (res.data.code != "Ok") {
+                        throw new Error(JSON.stringify({ code: res.data.code }));
+                    }
+                },
+            }).catch(err => {
+                this.user.transports[transport] = oldTransport;
+                toast(err, 3000, 'red darken-1');
             });
         },
     },
@@ -564,19 +574,20 @@ var UserDashboard = Vue.extend({
     created: function () {
     },
     methods: {
-        formatApiUrl: function(url) {
+        formatApiUri: function(url) {
             return '/api' + url;
         },
         activate: function (method) {
             switch (method) {
                 case 'push':
-                    this.askPushActivation(method);
+                    this.askPushActivation();
                     break;
                 case 'bypass':
                     this.standardActivate(method);
-                    this.generateBypass(function () {
-                        this.user.methods.bypass.active = false;
-                    });
+                    this.generateBypass()
+                        .catch(err => {
+                            this.user.methods.bypass.active = false;
+                        });
                     break;
                 case 'random_code':
                     this.standardActivate(method);
@@ -598,65 +609,64 @@ var UserDashboard = Vue.extend({
                     break;
             }
         },
-        askPushActivation: function (method) {
+        askPushActivation: function() {
             this.user.methods.push.askActivation = true;
             this.user.methods.push.active = true;
-            //ajax
-            $.ajax({
+
+            return fetchApi({
                 method: "PUT",
-                url: "/api/push/activate",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
+                uri: "/api/push/activate",
+                onSuccess: res => {
+                    const data = res.data;
                     if (data.code == "Ok") {
                         this.user.methods.push.activationCode = data.activationCode;
                         this.user.methods.push.qrCode = data.qrCode;
                         this.user.methods.push.api_url = data.api_url;
-                    }else toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    console.error("/api/push/activate", status, err.toString());
-                }.bind(this)
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
+                    }
+                },
+            }).catch(err => {
+                toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
             });
         },
-        standardActivate: function (method) {
-            $.ajax({
+        standardActivate: function(method) {
+            return fetchApi({
                 method: "PUT",
-                url: "/api/"+method+"/activate",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code != "Ok") {
-            this.user.methods[method].active = false;
-                        toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
-                    } else this.user.methods[method].active = true;
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    console.error("/api/"+method+"/activate", status, err.toString());
-                }.bind(this)
+                uri: "/api/" + method + "/activate",
+                onSuccess: res => {
+                    const data = res.data;
+                    if (data.code == "Ok") {
+                        this.user.methods[method].active = true;
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
+                    }
+                },
+            }).catch(err => {
+                toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
             });
         },
-        deactivate: function (method) {
+        deactivate: function(method) {
             if (window.confirm(this.messages.api.action.confirm_deactivate)) {
-                if (this.user.methods[method].askActivation)
+                if (this.user.methods[method].askActivation) {
                     this.user.methods[method].askActivation = false;
-                $.ajax({
+                }
+
+                return fetchApi({
                     method: "PUT",
-                    url: "/api/" + method + "/deactivate",
-                    dataType: 'json',
-                    cache: false,
-                    success: function (data) {
-                        if (data.code != "Ok") {
-                            toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
-                        } else
+                    uri: "/api/" + method + "/deactivate",
+                    onSuccess: res => {
+                        const data = res.data;
+                        if (data.code == "Ok") {
                             this.user.methods[method].active = false;
-                    }
-                    .bind(this),
-                    error: function (xhr, status, err) {
-                        toast(err, 3000, 'red darken-1');
-                        console.error("/api/" + method + "/deactivate", status, err.toString());
-                    }
-                    .bind(this)
+                        } else {
+                            console.error(JSON.stringify({ code: data.code }));
+                            throw new Error("Erreur interne, veuillez réessayer plus tard.");
+                        }
+                    },
+                }).catch(err => {
+                    this.user.methods[method].active = true;
+                    toast(err, 3000, 'red darken-1');
                 });
             }
         },
@@ -668,42 +678,41 @@ var UserDashboard = Vue.extend({
             if (window.confirm(this.messages.api.action.confirm_generate))
                 this.generateTotp();
         },
-        generateBypass: function (onError) {
-            $.ajax({
+        generateBypass: function() {
+            return fetchApi({
                 method: "POST",
-                url: "/api/generate/bypass",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code == "Ok") this.user.methods.bypass.codes = data.codes;
-                    else if (typeof(onError) === "function") onError();
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    if (typeof(onError) === "function") onError();
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/generate/bypass", status, err.toString());
-                }.bind(this)
+                uri: "/api/generate/bypass",
+                onSuccess: res => {
+                    const data = res.data;
+                    if (data.code == "Ok") {
+                        this.user.methods.bypass.codes = data.codes;
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
+                    }
+                },
+            }).catch(err => {
+                toast(err, 3000, 'red darken-1');
+                throw err;
             });
         },
-        generateTotp: function (onError) {
-            $.ajax({
+        generateTotp: function() {
+            return fetchApi({
                 method: "POST",
-                url: "/api/generate/totp?require_method_validation=true",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
+                uri: "/api/generate/totp?require_method_validation=true",
+                onSuccess: res => {
+                    const data = res.data;
                     if (data.code == "Ok") {
                         this.user.methods.totp.active = true;
                         this.user.methods.totp.message = data.message;
                         this.user.methods.totp.qrCode = data.qrCode;
                         this.user.methods.totp.uid = data.uid;
-                    } else if (typeof(onError) === "function") onError();
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    if (typeof(onError) === "function") onError();
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/generate/totp", status, err.toString());
-                }.bind(this)
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
+                    }
+                },
+            }).catch(err => {
+                toast(err, 3000, 'red darken-1');
+                throw err;
             });
         }
     }
@@ -733,19 +742,20 @@ var UserView = Vue.extend({
     },
     template: '#user-view',
     methods: {
-        formatApiUrl: function(url) {
+        formatApiUri: function(url) {
             return '/api/admin' + url + '/' + this.user.uid;
         },
         activate: function (method) {
             switch (method) {
                 case 'push':
-                    this.askPushActivation(method);
+                    this.askPushActivation();
                     break;
                 case 'bypass':
                     this.standardActivate(method);
-                    this.generateBypass(function () {
-                        this.user.methods.bypass.active = false;
-                    });
+                    this.generateBypass()
+                        .catch(err => {
+                            this.user.methods.bypass.active = false;
+                        });
                     break;
                 case 'webauthn':
                     this.standardActivate(method);
@@ -771,68 +781,60 @@ var UserView = Vue.extend({
         askPushActivation: function () {
             this.user.methods.push.askActivation = true;
             this.user.methods.push.active = true;
-            //ajax
-            $.ajax({
+
+            return fetchApi({
                 method: "PUT",
-                url: "/api/admin/" + this.user.uid + "/push/activate",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
+                uri: "/api/admin/" + this.user.uid + "/push/activate",
+                onSuccess: res => {
+                    const data = res.data;
                     if (data.code == "Ok") {
                         this.user.methods.push.activationCode = data.activationCode;
                         this.user.methods.push.qrCode = data.qrCode;
                         this.user.methods.push.api_url = data.api_url;
-                    }else toast('Erreur interne, veuillez réessayer plus tard', 3000, 'red darken-1');
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/" + this.user.uid + "/push/activate", status, err.toString());
-                }.bind(this)
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
+                    }
+                },
+            }).catch(err => {
+                toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
             });
         },
-        standardActivate: function (method) {
-            $.ajax({
+        standardActivate: function(method) {
+            return fetchApi({
                 method: "PUT",
-                url: "/api/admin/" + this.user.uid + "/"+method+"/activate",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code != "Ok") {
-                        this.user.methods[method].active = false;
-                        toast('Erreur interne, veuillez réessayer plus tard', 3000, 'red darken-1');
-                    }else this.user.methods[method].active = true;
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    this.user.methods[method].active = false;
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/" + this.user.uid + "/"+method+"/activate", status, err.toString());
-                }.bind(this)
+                uri: "/api/admin/" + this.user.uid + "/" + method + "/activate",
+                onSuccess: res => {
+                    const data = res.data;
+                    if (data.code == "Ok") {
+                        this.user.methods[method].active = true;
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
+                    }
+                },
+            }).catch(err => {
+                toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
             });
         },
-        deactivate: function (method) {
+        deactivate: function(method) {
             if (window.confirm(this.messages.api.action.confirm_deactivate)) {
                 if (this.user.methods[method].askActivation)
                     this.user.methods[method].askActivation = false;
-                $.ajax({
+                
+                return fetchApi({
                     method: "PUT",
-                    url: "/api/admin/" + this.user.uid + "/" + method + "/deactivate",
-                    dataType: 'json',
-                    cache: false,
-                    success: function (data) {
-                        if (data.code == "Ok")
+                    uri: "/api/admin/" + this.user.uid + "/" + method + "/deactivate",
+                    onSuccess: res => {
+                        const data = res.data;
+                        if (data.code == "Ok") {
                             this.user.methods[method].active = false;
-                        else {
-                            toast('Erreur interne, veuillez réessayer plus tard', 3000, 'red darken-1');
-                            this.user.methods[method].active = true;
+                        } else {
+                            console.error(JSON.stringify({ code: data.code }));
+                            throw new Error("Erreur interne, veuillez réessayer plus tard.");
                         }
-                    }
-                    .bind(this),
-                    error: function (xhr, status, err) {
-                        this.user.methods[method].active = true;
-                        toast(err, 3000, 'red darken-1');
-                        console.error("/api/admin/" + this.user.uid + "/" + method + "/activate", status, err.toString());
-                    }
-                    .bind(this)
+                    },
+                }).catch(err => {
+                    this.user.methods[method].active = true;
+                    toast(err, 3000, 'red darken-1');
                 });
             }
         },
@@ -842,42 +844,41 @@ var UserView = Vue.extend({
         generateTotpConfirm : function(){
             if (window.confirm(this.messages.api.action.confirm_generate)) this.generateTotp();
         },
-        generateBypass: function (onError) {
-            $.ajax({
+        generateBypass: function() {
+            return fetchApi({
                 method: "POST",
-                url: "/api/admin/generate/bypass/" + this.user.uid,
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code == "Ok") this.user.methods.bypass.codes = data.codes;
-                    else if (typeof(onError) === "function") onError();
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    if (typeof(onError) === "function") onError();
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/generate/bypass/" + this.user.uid, status, err.toString());
-                }.bind(this)
+                uri: "/api/admin/generate/bypass/" + this.user.uid,
+                onSuccess: res => {
+                    const data = res.data;
+                    if (data.code == "Ok") {
+                        this.user.methods.bypass.codes = data.codes;
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
+                    }
+                },
+            }).catch(err => {
+                toast(err, 3000, 'red darken-1');
+                throw err;
             });
         },
-        generateTotp: function (onError) {
-            $.ajax({
+        generateTotp: function() {
+            return fetchApi({
                 method: "POST",
-                url: "/api/admin/generate/totp/" + this.user.uid + "?require_method_validation=true",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
+                uri: "/api/admin/generate/totp/" + this.user.uid + "?require_method_validation=true",
+                onSuccess: res => {
+                    const data = res.data;
                     if (data.code == "Ok") {
                         this.user.methods.totp.active = true;
                         this.user.methods.totp.message = data.message;
                         this.user.methods.totp.qrCode = data.qrCode;
                         this.user.methods.totp.uid = data.uid;
-                    } else if (typeof(onError) === "function") onError();
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    if (typeof(onError) === "function") onError();
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/generate/bypass/" + this.user.uid, status, err.toString());
-                }.bind(this)
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
+                    }
+                },
+            }).catch(err => {
+                toast(err, 3000, 'red darken-1');
+                throw err;
             });
         },
     }
@@ -958,41 +959,36 @@ var ManagerDashboard = Vue.extend({
             }
         },
 
-        getUsers: function () {
-            $.ajax({
-                url: "/api/admin/users",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    this.setUsers(data);
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/users", status, err.toString());
-                }.bind(this)
+        getUsers: function() {
+            return fetchApi({
+                method: "GET",
+                uri: "/api/admin/users",
+                onSuccess: res => {
+                    this.setUsers(res.data);
+                },
+            }).catch(err => {
+                toast(err, 3000, 'red darken-1');
             });
         },
 
-        setUsers: function (data) {
+        setUsers: function(data) {
             this.uids = data.uids;
         },
 
-        getUser: function (uid) {
-            $.ajax({
-                url: "/api/admin/user/" + uid,
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
+        getUser: function(uid) {
+            return fetchApi({
+                method: "GET",
+                uri: "/api/admin/user/" + uid,
+                onSuccess: res => {
+                    const data = res.data;
                     data.uid = uid;
                     this.setUser(data);
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/user/" + uid, status, err.toString());
-                }.bind(this)
+                },
+            }).catch(err => {
+                toast(err, 3000, 'red darken-1');
             });
         },
-        setUser: function (data) {
+        setUser: function(data) {
             this.user = {
                 uid: data.uid,
                 methods: data.user.methods,
@@ -1011,91 +1007,77 @@ var AdminDashboard = Vue.extend({
     },
     template: '#admin-dashboard',
     methods: {
-        activate: function (event) {
+        activate: function(event) {
             event.target.checked = true;
-            $.ajax({
+            return fetchApi({
                 method: "PUT",
-                url: "/api/admin/" + event.target.name + "/activate",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code != "Ok") {
-                        event.target.checked = false;
-                        toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
-                    } else {
+                uri: "/api/admin/" + event.target.name + "/activate",
+                onSuccess: res => {
+                    const data = res.data;
+                    if (data.code == "Ok") {
                         this.methods[event.target.name].activate = true;
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
                     }
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    event.target.checked = false;
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/" + event.target.name + "/activate", status, err.toString());
-                }.bind(this)
+                },
+            }).catch(err => {
+                event.target.checked = false;
+                this.methods[event.target.name].activate = false;
+                toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
             });
         },
-        deactivate: function (event) {
+        deactivate: function(event) {
             event.target.checked = false;
-            $.ajax({
+            return fetchApi({
                 method: "PUT",
-                url: "/api/admin/" + event.target.name + "/deactivate",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code != "Ok") {
-                        this.methods[event.target.name].activate = true;
-                        toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
-                    } else this.methods[event.target.name].activate = false;
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    event.target.checked = true;
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/" + event.target.name + "/deactivate", status, err.toString());
-                }.bind(this)
+                uri: "/api/admin/" + event.target.name + "/deactivate",
+                onSuccess: res => {
+                    const data = res.data;
+                    if (data.code == "Ok") {
+                        this.methods[event.target.name].activate = false;
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
+                    }
+                },
+            }).catch(err => {
+                event.target.checked = true;
+                this.methods[event.target.name].activate = true;
+                toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
             });
         },
-        activateTransport: function (method, transport) {
-            event.target.checked = true;
-            $.ajax({
+        activateTransport: function(method, transport) {
+            return fetchApi({
                 method: "PUT",
-                url: "/api/admin/" + method + "/transport/" + transport + "/activate",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code != "Ok") {
-                        event.target.checked = false;
-                        toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
-                    } else {
+                uri: "/api/admin/" + method + "/transport/" + transport + "/activate",
+                onSuccess: res => {
+                    const data = res.data;
+                    if (data.code == "Ok") {
                         this.methods[method].transports.push(transport);
+                    } else {
+                        throw new Error(JSON.stringify({ code: data.code }));
                     }
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    event.target.checked = false;
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/" + method + "/transport/" + transport + "/activate", status, err.toString());
-                }.bind(this)
+                },
+            }).catch(err => {
+                toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
             });
         },
-        deactivateTransport: function (method, transport) {
-            event.target.checked = false;
-            $.ajax({
+        deactivateTransport: function(method, transport) {
+            return fetchApi({
                 method: "PUT",
-                url: "/api/admin/" + method + "/transport/" + transport + "/deactivate",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    if (data.code != "Ok") {
-                        event.target.checked = true;
-                        toast('Erreur interne, veuillez réessayer plus tard', 3000, 'red darken-1');
+                uri: "/api/admin/" + method + "/transport/" + transport + "/deactivate",
+                onSuccess: res => {
+                    const data = res.data;
+                    if (data.code == "Ok") {
+                        const index = this.methods[method].transports.indexOf(transport);
+                        if (index > -1) {
+                            this.methods[method].transports.splice(index, 1);
+                        }
                     } else {
-                        var index = this.methods[method].transports.indexOf(transport);
-                        if (index > (-1)) this.methods[method].transports.splice(index, 1);
+                        throw new Error(JSON.stringify({ code: data.code }));
                     }
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    event.target.checked = true;
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/admin/" + method + "/transport/" + transport + "/deactivate", status, err.toString());
-                }.bind(this)
+                },
+            }).catch(err => {
+                toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
             });
         },
     }
@@ -1179,18 +1161,15 @@ var app = new Vue({
             this.getUser();
         },
 
-        getUser: function () {
-            $.ajax({
-                url: "/api/user",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    this.setUser(data);
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/user", status, err.toString());
-                }.bind(this)
+        getUser: function() {
+            return fetchApi({
+                method: "GET",
+                uri: "/api/user",
+                onSuccess: res => {
+                    this.setUser(res.data);
+                },
+            }).catch(err => {
+                toast(err, 3000, 'red darken-1');
             });
         },
 
@@ -1199,50 +1178,39 @@ var app = new Vue({
             this.user.methods = data.user.methods;
             this.user.transports = data.user.transports;
         },
-        getMethods: function () {
-            $.ajax({
-                url: "/api/methods",
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    $.ajax({
-                        url: "/manager/users_methods",
-                        dataType: 'json',
-                        cache: false,
-                        success: function (users_methods) {
-                            this.users_methods=users_methods;
-                            this.setMethods(data);
-                        }.bind(this),
-                        error: function (xhr, status, err) {
-                            toast(err, 3000, 'red darken-1');
-                            console.error("/manager/users_methods", status, err.toString());
-                        }.bind(this)
-                    });
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/methods", status, err.toString());
-                }.bind(this)
-            });
+        getMethods: async function() {
+            try {
+                const methods = (await fetchApi({
+                    method: "GET",
+                    uri: "/api/methods",
+                })).data;
+
+                const users_methods = (await fetchApi({
+                    method: "GET",
+                    uri: "/manager/users_methods",
+                })).data;
+
+                this.users_methods = users_methods;
+                this.setMethods(methods);
+            } catch (err) {
+                toast(err, 3000, 'red darken-1');
+            }
         },
         setMethods: function (data) {
             this.methods = data.methods;
             this.cleanMethods();
         },
-        getMessages: function (language) {
+        getMessages: function(language) {
             var query = '';
-            if(language)query="/"+language;
-            $.ajax({
-                url: "/api/messages" + query,
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    this.setMessages(data);
-                }.bind(this),
-                error: function (xhr, status, err) {
-                    toast(err, 3000, 'red darken-1');
-                    console.error("/api/messages", status, err.toString());
-                }.bind(this)
+            if (language) query = "/" + language;
+            return fetchApi({
+                method: "GET",
+                uri: "/api/messages" + query,
+                onSuccess: res => {
+                    this.setMessages(res.data);
+                },
+            }).catch(err => {
+                toast(err, 3000, 'red darken-1');
             });
         },
         setMessages: function (data) {

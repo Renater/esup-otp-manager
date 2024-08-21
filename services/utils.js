@@ -1,5 +1,4 @@
 var properties = require(__dirname+'/../properties/properties');
-var CryptoJS = require('crypto-js');
 
 exports.is_admin = function(user){
     var result = false;
@@ -31,4 +30,8 @@ exports.is_manager = function(user){
 	}
     }
     return result;
+}
+
+exports.isAuthenticated = function(req) {
+    return Boolean(req.session.passport?.user);
 }
