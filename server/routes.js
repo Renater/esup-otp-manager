@@ -177,10 +177,7 @@ function routing() {
     });
 
     router.get('/manager/users_methods', isUser, function(req, res) {
-        var data = new Object();
-        data=properties.esup.users_methods;
-        data.user=req.user;
-        res.send(data);
+        res.send({ ...properties.esup.users_methods, user: req.user });
     });
 
     router.get('/api/methods', isUser, function(req, res) {
