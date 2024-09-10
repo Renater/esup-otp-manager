@@ -54,7 +54,13 @@ function routing() {
                     return next(err);
                 }
                 req.session.messages = '';
-                return res.redirect('/preferences');
+
+                let params = new URLSearchParams()
+                for (const param of ['user']) {
+                    const val = req.query[param]
+                    if (val) params.set(param, val)
+                }
+                return res.redirect('/preferences' + (params.size ? "?" + params : ""));
             });
         })(req, res, next);
     });

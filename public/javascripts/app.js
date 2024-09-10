@@ -912,6 +912,17 @@ var ManagerDashboard = Vue.extend({
     updated: function () {
         this.getUsers();
     },
+    mounted: async function() {
+        const url = new URL(location);
+        const user = url.searchParams.get('user');
+        if (user) { // if url contains ?user=xxx
+            await this.$nextTick();
+            await this.getUser(user); // display user xxx
+            await this.$nextTick();
+            url.searchParams.set('user', '');
+            history.pushState({}, '', url); // and remove xxx from current url
+        }
+    },
     methods: {
         isInArray: function(value, array) {
             return array.indexOf(value) > -1;
@@ -1124,6 +1135,15 @@ var app = new Vue({
         this.getMessages();
         this.getUser();
         this.getMethods();
+    },
+    updated: async function () {
+        await this.$nextTick();
+        const managerButton = document.getElementById('manager');
+        if (managerButton) { // if is manager
+            if (new URL(window.location).searchParams.get('user')) { // if url contains ?user=xxx
+                managerButton.click(); // switch to manager dashboard
+            };
+        }
     },
     methods: {
         cleanMethods: function () {
