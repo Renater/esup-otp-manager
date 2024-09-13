@@ -888,29 +888,42 @@ var ManagerDashboard = Vue.extend({
     props: {
         'methods': Object,
         'messages': Object,
-        //'show':Boolean,
     },
     components: {
         "user-view": UserView
     },
     data: function () {
         return {
-            suggestions: [],
             user: {
                 uid: String,
                 methods: Object,
                 transports: Object
             },
-            uids: Array,
-            isHidden: true,
-            textButton: String,
+            uids: [],
+            requestedUid: '',
         }
     },
-    created: function () {
-        this.getUsers();
+    computed: {
+        suggestions() {
+            return this.uids.filter(uid => uid.toLowerCase().includes(this.requestedUid.toLowerCase()));
+        },
+        requestedUidExists() {
+          return this.suggestions.includes(this.requestedUid);
+        },
     },
-    updated: function () {
-        this.getUsers();
+    created: function () {
+        if (this.uids?.length) {
+            return;
+        }
+        return fetchApi({
+            method: "GET",
+            uri: "/api/admin/users",
+            onSuccess: res => {
+                this.uids = res.data.uids;
+            },
+        }).catch(err => {
+            toast(err, 3000, 'red darken-1');
+        });
     },
     mounted: async function() {
         const url = new URL(location);
@@ -924,66 +937,15 @@ var ManagerDashboard = Vue.extend({
         }
     },
     methods: {
-        isInArray: function(value, array) {
-            return array.indexOf(value) > -1;
-        },
-
-        suggest: function (event) {
-            this.suggestions = [];
-            if (event.target.value !== "") {
-                for (const uid in this.uids) {
-                    this.isHidden= true;
-
-                    if (this.uids[uid].includes(event.target.value)) {
-                        this.suggestions.push(this.uids[uid]);
-                    }
+        search: function () {
+            if (this.requestedUid) {
+                this.getUser(this.requestedUid);
+                if(!this.requestedUidExists) {
+                    this.uids.push.push(this.requestedUid);
+                    toast('utilisateur '+this.requestedUid+' ajouté avec succès', 3000, 'green contrasted');
                 }
+                this.requestedUid = '';
             }
-            if(this.isInArray($('#autocomplete-input').val(), this.suggestions)){
-                this.isHidden= false;
-                this.textButton = "chercher";
-            }
-            else{
-                this.textButton = "ajouter";
-                this.isHidden= false;
-            }
-            if ($('#autocomplete-input').val() === "")
-                this.isHidden = true;
-        },
-
-        search: function (event) {
-            if ($('#autocomplete-input').val() !== "" && this.suggestions.includes($('#autocomplete-input').val())) {
-                this.getUser($('#autocomplete-input').val());
-                $('#autocomplete-input').val('');
-                this.isHidden = true;
-                this.show = false;//
-            }
-        },
-
-        addUser: function (event) {
-            if ($('#autocomplete-input').val() !== "") {
-                this.getUser($('#autocomplete-input').val());
-                $('#autocomplete-input').val('');
-                this.isHidden = true;
-                this.getUsers();
-                toast('utilisateur '+$('#autocomplete-input').val()+' ajouté avec succès', 3000, 'green contrasted');
-            }
-        },
-
-        getUsers: function() {
-            return fetchApi({
-                method: "GET",
-                uri: "/api/admin/users",
-                onSuccess: res => {
-                    this.setUsers(res.data);
-                },
-            }).catch(err => {
-                toast(err, 3000, 'red darken-1');
-            });
-        },
-
-        setUsers: function(data) {
-            this.uids = data.uids;
         },
 
         getUser: function(uid) {
