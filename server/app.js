@@ -26,6 +26,7 @@ app.use('/css/materialize.min.css', express.static(path.join(__dirname + '/..', 
 app.use('/fonts/roboto/', express.static(path.join(__dirname + '/..', '/node_modules/materialize-css/dist/fonts/roboto/')));
 app.use('/js/jquery.min.js', express.static(path.join(__dirname + '/..', '/node_modules/jquery/dist/jquery.min.js')));
 app.use('/js/socket.io.min.js', express.static(path.join(__dirname + '/..', '/node_modules/socket.io-client/dist/socket.io.min.js')));
+app.use('/js/socket.io.min.js.map', express.static(path.join(__dirname + '/..', '/node_modules/socket.io-client/dist/socket.io.min.js.map')));
 app.use('/js/materialize.min.js', express.static(path.join(__dirname + '/..', '/node_modules/materialize-css/dist/js/materialize.min.js')));
 app.use('/js/vue.js', express.static(path.join(__dirname + '/..', '/node_modules/vue/dist/vue.js')));
 app.use('/js/sweetalert2.all.min.js', express.static(path.join(__dirname + '/..', '/node_modules/sweetalert2/dist/sweetalert2.all.min.js')));
