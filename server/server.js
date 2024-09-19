@@ -28,7 +28,6 @@ var server = http.createServer(app);
  */
 
 server.listen(port, process.env.IP);
-var api_sockets = require('../client/sockets');
 var sockets = require('./sockets');
 sockets.attach(server);
 
