@@ -24,6 +24,8 @@ function isUser(req, res, next) {
     redirectLogin(req, res);
 }
 
+exports.isUser = isUser;
+
 function isManager(req, res, next) {
     isUser(req, res, () => {
         if (utils.is_manager(req.session.passport.user) || utils.is_admin(req.session.passport.user)) {
@@ -108,27 +110,6 @@ exports.routing = function(router) {
             relUrl: '/protected/users/' + req.session.passport.user.uid,
             bearerAuth: true,
         });
-    });
-    
-    router.get('/api/messages', function(req, res) {
-        var lang = req.acceptsLanguages('fr', 'en');
-        if(lang) {
-            res.json(properties["messages_" + lang]); 
-        } else {
-            res.json(properties.messages);
-        }
-    });
-    
-    router.get('/api/messages/:language', isUser, function(req, res) {
-            switch (req.params.language){
-                case "français": res.json(properties.messages_fr); break;
-                case "english": res.json(properties.messages_en); break;
-                default : res.json(properties.messages); break;
-            }
-    });
-
-    router.get('/manager/users_methods', isUser, function(req, res) {
-        res.send({ ...properties.esup.users_methods, user: req.user });
     });
 
     router.get('/api/methods', isUser, function(req, res) {

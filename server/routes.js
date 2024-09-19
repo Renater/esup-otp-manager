@@ -2,13 +2,36 @@ var express = require('express');
 var router = express.Router();
 var properties = require(__dirname+'/../properties/properties');
 var utils = require(__dirname+'/../services/utils');
+const apiRoutes = require('./routes/apiRoutes');
+const isUser = apiRoutes.isUser;
 
 var passport;
 
 
 function routing() {
+    router.get('/api/messages', function(req, res) {
+        var lang = req.acceptsLanguages('fr', 'en');
+        if (lang) {
+            res.json(properties["messages_" + lang]);
+        } else {
+            res.json(properties.messages);
+        }
+    });
+
+    router.get('/api/messages/:language', isUser, function(req, res) {
+        switch (req.params.language) {
+            case "français": res.json(properties.messages_fr); break;
+            case "english": res.json(properties.messages_en); break;
+            default: res.json(properties.messages); break;
+        }
+    });
+
+    router.get('/manager/users_methods', isUser, function(req, res) {
+        res.send({ ...properties.esup.users_methods, user: req.user });
+    });
+
     require('./routes/pagesRoutes').routing(router, passport);
-    require('./routes/apiRoutes').routing(router);
+    apiRoutes.routing(router);
 }
 
 module.exports = function(_passport) {
