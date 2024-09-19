@@ -72,7 +72,7 @@ function routing() {
           });
     });
     
-    require('./apiRoutes').routing(router);
+    require('./routes/apiRoutes').routing(router);
 }
 
 module.exports = function(_passport) {

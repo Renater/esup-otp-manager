@@ -1,6 +1,6 @@
 const { request } = require('undici');
-const properties = require(__dirname + '/../properties/properties');
-const utils = require(__dirname + '/../services/utils');
+const properties = require(__dirname + '/../../properties/properties');
+const utils = require(__dirname + '/../../services/utils');
 
 function redirect(req, res, status, path) {
     res
