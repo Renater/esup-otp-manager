@@ -449,6 +449,11 @@ const WebAuthnMethod = Vue.extend({
     template: '#webauthn-method',
 });
 
+const transportRegex = {
+    sms: new RegExp("^((0[67](([.]|[-]|[ ])?[0-9]){8})|((00|[+])(([.]|[-]|[ ])?[0-9]){7,15}))$"),
+    mail: new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/),
+}
+
 const RandomCodeMethod = Vue.extend({
     props: {
         'user': Object,
@@ -459,70 +464,68 @@ const RandomCodeMethod = Vue.extend({
     },
     methods: {
         saveTransport: async function(transport) {
-            var new_transport = document.getElementById(transport + '-input').value;
-            var reg;
-            if (transport == 'sms') reg = new RegExp("^((0[67](([.]|[-]|[ ])?[0-9]){8})|((00|[+])(([.]|[-]|[ ])?[0-9]){7,15}))$");
-            else reg = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-            if (reg.test(new_transport)) {
+            const new_transport = document.getElementById(transport + '-input').value.trim();
+            try {
+                if (!transportRegex[transport].test(new_transport)) {
+                    throw new Error('Format invalide.');
+                }
+                
+                const res = await fetchApi({
+                    method: "GET",
+                    uri: this.formatApiUri('/transport/' + transport + '/' + new_transport + "/test"),
+                });
+                const data = res.data;
+                if (data.code != "Ok") {
+                    toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
+                } else {
+                    const expected = data.otp;
 
-                try {
-                    const res = await fetchApi({
-                        method: "GET",
-                        uri: this.formatApiUri('/transport/' + transport + '/' + new_transport + "/test"),
-                    });
-                    const data = res.data;
-                    if (data.code != "Ok") {
-                        toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
-                    } else {
-                        const expected = data.otp;
+                    const verifyCodeMessages = this.messages.api.methods.random_code.verify_code;
 
-                        const verifyCodeMessages = this.messages.api.methods.random_code.verify_code;
- 
-                        Swal.fire({ // https://sweetalert2.github.io/#configuration
-                            title: verifyCodeMessages[transport].title,
-                            html: verifyCodeMessages[transport].pre + new_transport + verifyCodeMessages[transport].post,
-                            input: "number",
-                            icon: "question",
-                            // inputLabel: "Code",
-                            inputPlaceholder: "000000",
-                            customClass: { // https://sweetalert2.github.io/#customClass
-                                popup: "modal",
-                                container: "modal-content",
-                                input: "center-align",
-                                confirmButton: "waves-effect waves-light btn green contrasted",
-                                cancelButton: "waves-effect waves-light btn red darken-1",
-                            },
-                            showCancelButton: true,
-                            allowOutsideClick: false,
-                            inputValidator: input => {
-                                if (input != expected) {
-                                    return verifyCodeMessages.wrong;
-                                }
-                            },
-                            showLoaderOnConfirm: true,
-                            preConfirm: async () => {
-                                const res = await fetchApi({
-                                    method: "PUT",
-                                    uri: this.formatApiUri('/transport/' + transport + '/' + new_transport),
-                                });
-                                const data = res.data;
-                                if (data.code != "Ok") {
-                                    toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
-                                } else {
-                                    // equivalent to "this.user.transports[transport] = new_transport;", but allows new reactive property to be added dynamically
-                                    Vue.set(this.user.transports, transport, new_transport);
-                                    document.getElementById(transport + '-input').value = '';
-                                    toast('Transport vérifié', 3000, 'green contrasted');
-                                }
+                    Swal.fire({ // https://sweetalert2.github.io/#configuration
+                        title: verifyCodeMessages[transport].title,
+                        html: verifyCodeMessages[transport].pre + new_transport + verifyCodeMessages[transport].post,
+                        input: "number",
+                        icon: "question",
+                        // inputLabel: "Code",
+                        inputPlaceholder: "000000",
+                        customClass: { // https://sweetalert2.github.io/#customClass
+                            popup: "modal",
+                            container: "modal-content",
+                            input: "center-align",
+                            confirmButton: "waves-effect waves-light btn green contrasted",
+                            cancelButton: "waves-effect waves-light btn red darken-1",
+                        },
+                        showCancelButton: true,
+                        allowOutsideClick: false,
+                        inputValidator: input => {
+                            if (input != expected) {
+                                return verifyCodeMessages.wrong;
                             }
-                        });
-                    }
+                        },
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            const res = await fetchApi({
+                                method: "PUT",
+                                uri: this.formatApiUri('/transport/' + transport + '/' + new_transport),
+                            });
+                            const data = res.data;
+                            if (data.code != "Ok") {
+                                toast('Erreur interne, veuillez réessayer plus tard.', 3000, 'red darken-1');
+                            } else {
+                                // equivalent to "this.user.transports[transport] = new_transport;", but allows new reactive property to be added dynamically
+                                Vue.set(this.user.transports, transport, new_transport);
+                                document.getElementById(transport + '-input').value = '';
+                                toast('Transport vérifié', 3000, 'green contrasted');
+                            }
+                        }
+                    });
+                }
 
 
-                } catch (err) {
-                    toast(err, 3000, 'red darken-1');
-                };
-            } else toast('Format invalide.', 3000, 'red darken-1');
+            } catch (err) {
+                toast(err, 3000, 'red darken-1');
+            };
         },
         deleteTransport: function(transport) {
             var oldTransport = this.user.transports[transport];
