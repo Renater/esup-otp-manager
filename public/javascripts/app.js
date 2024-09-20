@@ -453,6 +453,19 @@ const WebAuthnMethod = Vue.extend({
     template: '#webauthn-method',
 });
 
+Vue.component('transport-form', {
+    props: {
+        'user': Object,
+        'messages': Object,
+        'infos': Object,
+        'transport': String,
+        'inputType': String,
+        'saveTransport': Function,
+        'deleteTransport': Function,
+    },
+    template: '#transport_form'
+});
+
 const transportRegex = {
     sms: new RegExp("^((0[67](([.]|[-]|[ ])?[0-9]){8})|((00|[+])(([.]|[-]|[ ])?[0-9]){7,15}))$"),
     mail: new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/),

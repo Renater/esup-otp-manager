@@ -1,30 +1,6 @@
 script#random_code_mail-method(type='text/x-template').
    <div class="section">
     <div class="card" style="max-width: 500px;margin: auto;margin-bottom: 15px;">
-    <div class="card-content">
-    <div class="row" style="margin-bottom: 0;">
-    <div class="col s2 m3">
-    <img src="images/mail.svg" alt="">
-    </div>
-    <div class="col s10 m9" style="text-align: justify;">
-    <div class="row" v-if="user.transports.mail">
-    <p class="col s7">{{user.transports.mail}}</p>
-    </div>
-    <form @submit.prevent="saveTransport('mail')" class="row" style="margin-bottom: 0;">
-    <div class="input-field col s7">
-    <input type="email" id="mail-input" required />
-    <label for="mail-input">{{messages.api.transports.mail}}</label>
-    </div>
-    <button type="submit"class="waves-effect waves-light btn col s5">
-    <span v-if="user.transports.mail">{{messages.api.action.modify}}<i class="material-icons right" aria-hidden="true">mode_edit</i></span>
-    <span v-else>{{messages.api.action.save}}<i class="material-icons right" aria-hidden="true">save</i></span>
-    </button>
-    </form>
-    <div class="row" style="margin-bottom: 0;" v-if="user.transports.mail">
-    <button class="waves-effect waves-light btn col s12 red darken-1" @click="deleteTransport('mail')">{{messages.api.action.remove}}<i class="material-icons right" aria-hidden="true">cancel</i></button>
-    </div>
-    </div>
-    </div>
-    </div>
+     <transport-form :user=user :messages=messages :infos=infos transport="mail" inputType="email" :saveTransport=saveTransport :deleteTransport=deleteTransport />
     </div>
     </div>
