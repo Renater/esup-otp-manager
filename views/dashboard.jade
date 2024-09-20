@@ -65,7 +65,7 @@ block content
                                             a(href='#', v-on:click="getMessages('english')") English
         main
             .container
-                component(:is='currentView', v-bind:methods='methods', v-bind:messages='messages', v-bind:current_view.sync='currentView', v-bind:currentmethod='currentMethod', v-bind:user='user' v-bind:get_user='getUser')
+                component(:is='currentView', v-bind:methods='methods', v-bind:messages='messages', v-bind:infos='infos', v-bind:current_view.sync='currentView', v-bind:currentmethod='currentMethod', v-bind:user='user' v-bind:get_user='getUser')
 
 
 block script

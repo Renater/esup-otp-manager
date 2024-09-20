@@ -98,8 +98,6 @@ async function request_otp_api(req, res, opts_) {
     res.status(response.statusCode);
     /** @type {Object} */
     const infos = await response.body.json();
-    if (req.session.passport.user.uid) infos.uid = req.session.passport.user.uid;
-    infos.api_url = properties.esup.api_url;
     //console.log(infos)
     res.send(infos);
 }

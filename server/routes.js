@@ -9,7 +9,7 @@ var passport;
 
 
 function routing() {
-    router.get('/api/messages', function(req, res) {
+    router.get('/manager/messages', function(req, res) {
         var lang = req.acceptsLanguages('fr', 'en');
         if (lang) {
             res.json(properties["messages_" + lang]);
@@ -18,7 +18,7 @@ function routing() {
         }
     });
 
-    router.get('/api/messages/:language', isUser, function(req, res) {
+    router.get('/manager/messages/:language', isUser, function(req, res) {
         switch (req.params.language) {
             case "français": res.json(properties.messages_fr); break;
             case "english": res.json(properties.messages_en); break;
@@ -28,6 +28,13 @@ function routing() {
 
     router.get('/manager/users_methods', isUser, function(req, res) {
         res.send({ ...properties.esup.users_methods, user: req.user });
+    });
+    
+    router.get('/manager/infos', isUser, function(req, res) {
+        res.send({
+            api_url: properties.esup.api_url,
+            uid: req.session.passport.user.uid,
+        });
     });
 
     require('./routes/pagesRoutes').routing(router, passport);

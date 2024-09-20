@@ -122,6 +122,7 @@ var PushMethod = Vue.extend({
         'user': Object,
         'get_user': Function,
         'messages': Object,
+        'infos': Object,
         'activate': Function,
         'deactivate': Function,
         'switch_push_event': {}
@@ -159,7 +160,8 @@ var BypassMethod = Vue.extend({
         'generate_bypass': Function,
         'activate': Function,
         'deactivate': Function,
-        'messages': Object
+        'messages': Object,
+        'infos': Object,
     },
     template: '#bypass-method'
 });
@@ -171,6 +173,7 @@ const TotpMethod = Vue.extend({
         'activate': Function,
         'deactivate': Function,
         'messages': Object,
+        'infos': Object,
         'formatApiUri': Function,
     },
     methods: {
@@ -207,6 +210,7 @@ const WebAuthnMethod = Vue.extend({
         'activate': Function,
         'deactivate': Function,
         'messages': Object,
+        'infos': Object,
         'formatApiUri': Function,
     },
     data() {
@@ -458,6 +462,7 @@ const RandomCodeMethod = Vue.extend({
     props: {
         'user': Object,
         'messages': Object,
+        'infos': Object,
         'activate': Function,
         'deactivate': Function,
         'formatApiUri': Function,
@@ -559,6 +564,7 @@ template:'#esupnfc-method'
 var UserDashboard = Vue.extend({
     props: {
         'messages': Object,
+        'infos': Object,
         'methods': Object,
         'user': Object,
         'currentmethod': String,
@@ -624,7 +630,7 @@ var UserDashboard = Vue.extend({
                     if (data.code == "Ok") {
                         this.user.methods.push.activationCode = data.activationCode;
                         this.user.methods.push.qrCode = data.qrCode;
-                        this.user.methods.push.api_url = data.api_url;
+                        this.user.methods.push.api_url = this.infos.api_url;
                     } else {
                         throw new Error(JSON.stringify({ code: data.code }));
                     }
@@ -708,7 +714,7 @@ var UserDashboard = Vue.extend({
                         this.user.methods.totp.active = true;
                         this.user.methods.totp.message = data.message;
                         this.user.methods.totp.qrCode = data.qrCode;
-                        this.user.methods.totp.uid = data.uid;
+                        this.user.methods.totp.uid = this.user.uid;
                     } else {
                         throw new Error(JSON.stringify({ code: data.code }));
                     }
@@ -727,6 +733,7 @@ var UserView = Vue.extend({
         'user': Object,
         'methods': Object,
         'messages': Object,
+        'infos': Object,
         "get_user": Function
     },
     components: {
@@ -793,7 +800,7 @@ var UserView = Vue.extend({
                     if (data.code == "Ok") {
                         this.user.methods.push.activationCode = data.activationCode;
                         this.user.methods.push.qrCode = data.qrCode;
-                        this.user.methods.push.api_url = data.api_url;
+                        this.user.methods.push.api_url = this.infos.api_url;
                     } else {
                         throw new Error(JSON.stringify({ code: data.code }));
                     }
@@ -874,7 +881,7 @@ var UserView = Vue.extend({
                         this.user.methods.totp.active = true;
                         this.user.methods.totp.message = data.message;
                         this.user.methods.totp.qrCode = data.qrCode;
-                        this.user.methods.totp.uid = data.uid;
+                        this.user.methods.totp.uid = this.user.uid;
                     } else {
                         throw new Error(JSON.stringify({ code: data.code }));
                     }
@@ -891,6 +898,7 @@ var ManagerDashboard = Vue.extend({
     props: {
         'methods': Object,
         'messages': Object,
+        'infos': Object,
     },
     components: {
         "user-view": UserView
@@ -979,6 +987,7 @@ var ManagerDashboard = Vue.extend({
 var AdminDashboard = Vue.extend({
     props: {
         'messages': Object,
+        'infos': Object,
         'methods': Object
     },
     template: '#admin-dashboard',
@@ -1063,6 +1072,7 @@ var AdminDashboard = Vue.extend({
 var Home = Vue.extend({
     props: {
         messages: Object,
+        'infos': Object,
         'methods': Object,
     },
     methods: {
@@ -1094,12 +1104,14 @@ var app = new Vue({
         },
         users_methods:{},
         uids: [],
-        messages: {}
+        messages: {},
+        infos: {},
     },
-    created: function () {
+    created: async function () {
         this.getMessages();
-        this.getUser();
         this.getMethods();
+        await this.getInfos();
+        this.getUser();
     },
     updated: async function () {
         await this.$nextTick();
@@ -1159,7 +1171,7 @@ var app = new Vue({
         },
 
         setUser: function (data) {
-            this.user.uid = data.uid;
+            this.user.uid = this.infos.uid;
             this.user.methods = data.user.methods;
             this.user.transports = data.user.transports;
         },
@@ -1181,6 +1193,16 @@ var app = new Vue({
                 toast(err, 3000, 'red darken-1');
             }
         },
+        getInfos: async function() {
+            try {
+                 this.infos = (await fetchApi({
+                    method: "GET",
+                    uri: "/manager/infos",
+                })).data;
+            } catch (err) {
+                toast(err, 3000, 'red darken-1');
+            }
+        },
         setMethods: function (data) {
             this.methods = data.methods;
             this.cleanMethods();
@@ -1190,7 +1212,7 @@ var app = new Vue({
             if (language) query = "/" + language;
             return fetchApi({
                 method: "GET",
-                uri: "/api/messages" + query,
+                uri: "/manager/messages" + query,
                 onSuccess: res => {
                     this.setMessages(res.data);
                 },
