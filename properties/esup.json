@@ -18,6 +18,10 @@
        "#random_code_mail" : {"allow" : {"edupersonaffiliation":["student","alum"],"memberof":["cn=esup-otp.random_code_mail,ou=groups,dc=univ-ville,dc=fr"]}},
        "#bypass" : {"allow" : {"memberof":["cn=esup-otp.bypass,ou=groups,dc=univ-ville,dc=fr"]}}
     },
+    "transport_regexes": {
+        "sms":  "^((0[67](([.]|-| )?[0-9]){8})|((00|[+])(([.]|-| )?[0-9]){7,15}))$",
+        "#mail": "^(?!.*(?:univ[.]fr|univ-paris[.]fr)$).*$"
+    },
     "dev": {},
     "#how_to":"Usually CAS works in Secure mode, so ssBaseURL must be a HTTPS url",
     "trustedProxies": ["127.0.0.1", "loopback", "::1"]

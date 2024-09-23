@@ -34,6 +34,7 @@ function routing() {
         res.send({
             api_url: properties.esup.api_url,
             uid: req.session.passport.user.uid,
+            transport_regexes: properties.esup.transport_regexes,
         });
     });
 

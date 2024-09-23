@@ -10,7 +10,7 @@ script#transport_form(type='text/x-template').
         </div>
         <form @submit.prevent="saveTransport(transport)" class="row" style="margin-bottom: 0;">
           <div class="input-field col s7">
-            <input :type="inputType" :id="`${transport}-input`" required />
+            <input :type="inputType" :id="`${transport}-input`" required :pattern="infos.transport_regexes[transport] || null"/>
             <label :for="`${transport}-input`">{{ messages.api.transports[transport] }}</label>
           </div>
           <button type="submit" class="waves-effect waves-light btn col s5">

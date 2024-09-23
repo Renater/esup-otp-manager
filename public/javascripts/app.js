@@ -466,11 +466,6 @@ Vue.component('transport-form', {
     template: '#transport_form'
 });
 
-const transportRegex = {
-    sms: new RegExp("^((0[67](([.]|[-]|[ ])?[0-9]){8})|((00|[+])(([.]|[-]|[ ])?[0-9]){7,15}))$"),
-    mail: new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/),
-}
-
 const RandomCodeMethod = Vue.extend({
     props: {
         'user': Object,
@@ -484,10 +479,6 @@ const RandomCodeMethod = Vue.extend({
         saveTransport: async function(transport) {
             const new_transport = document.getElementById(transport + '-input').value.trim();
             try {
-                if (!transportRegex[transport].test(new_transport)) {
-                    throw new Error('Format invalide.');
-                }
-                
                 const res = await fetchApi({
                     method: "GET",
                     uri: this.formatApiUri('/transport/' + transport + '/' + new_transport + "/test"),
