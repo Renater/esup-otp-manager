@@ -3,19 +3,19 @@ script#manager-dashboard(type='text/x-template').
     <div class="row input-field">
     <div class="col s8">
     <i class="material-icons prefix" aria-hidden="true">account_box</i>
-    <input v-on:keyup.enter="search" v-model="requestedUid" type="text" id="autocomplete-input" list="usersId">
+    <input @keyup.enter="search" v-model="requestedUid" type="text" id="autocomplete-input" list="usersId">
     <label for="autocomplete-input">{{messages.api.label.user}}</label>
     </div>
     
-    <a v-if="requestedUid" class="waves-effect waves-light btn col s4" v-on:click="search">
+    <a v-if="requestedUid" class="waves-effect waves-light btn col s4" @click="search">
         {{requestedUidExists ? messages.api.action.select : messages.api.action.add}}
         <i class="material-icons right" aria-hidden="true">{{requestedUidExists ? 'search' : 'add'}}</i>
     </a>
     <datalist id="usersId">
-    <option v-for="uid in suggestions" v-bind:value="uid"/>
+    <option v-for="uid in suggestions" :value="uid"/>
     </datalist>
     </div>
     <div v-show="user.uid">
-    <user-view v-bind:methods=methods v-bind:user.sync=user v-bind:messages=messages v-bind:infos=infos v-bind:get_user=getUser></user-view>
+    <user-view :methods=methods :user.sync=user :messages=messages :infos=infos :get_user=getUser></user-view>
     </div>
     </div>

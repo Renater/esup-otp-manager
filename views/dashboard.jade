@@ -32,7 +32,7 @@ block content
                         button#closebtn(onclick="hide('slide-out');", class="btn-flat", :title="messages.api.action.hide_menu")
                             i.material-icons(aria-hidden="true") close
                 li.bold
-                    a#home(href='#', v-on:click='navigate', name = 'home') {{messages.api.menu.home}}
+                    a#home(href='#', @click='navigate', name = 'home') {{messages.api.menu.home}}
                     li.no-padding
                         ul.collapsible.collapsible-accordion(data-collapsible='accordion')
                             li
@@ -40,13 +40,13 @@ block content
                                 .collapsible-body
                                     ul
                                         li.bold(v-for='method in methods', v-show='method.activate && method.authorize')
-                                            a(href='#', v-on:click='navigate', v-bind:id='method.name', v-bind:name='method.name') {{method.label || method.name}}
+                                            a(href='#', @click='navigate', :id='method.name', :name='method.name') {{method.label || method.name}}
                     if right == "manager" || right == "admin"
                         li.bold
-                            a#manager(href='#', v-on:click='navigate', name='manager') {{messages.api.menu.manager}}
+                            a#manager(href='#', @click='navigate', name='manager') {{messages.api.menu.manager}}
                     if right == "admin"
                         li.bold
-                            a#admin(href='#', v-on:click='navigate', name='admin') {{messages.api.menu.admin}}
+                            a#admin(href='#', @click='navigate', name='admin') {{messages.api.menu.admin}}
                     .divider
                     li.bold.flex.waves-effect(style='display: flex !important;')
                         i.material-icons.prefix(aria-hidden="true") exit_to_app
@@ -61,12 +61,12 @@ block content
                                 .collapsible-body
                                     ul
                                         li.bold
-                                            a(href='#', v-on:click="getMessages('français')") Français
+                                            a(href='#', @click="getMessages('français')") Français
                                         li.bold
-                                            a(href='#', v-on:click="getMessages('english')") English
+                                            a(href='#', @click="getMessages('english')") English
         main
             .container
-                component(:is='currentView', v-bind:methods='methods', v-bind:messages='messages', v-bind:infos='infos', v-bind:current_view.sync='currentView', v-bind:currentmethod='currentMethod', v-bind:user='user' v-bind:get_user='getUser')
+                component(:is='currentView', :methods='methods', :messages='messages', :infos='infos', :current_view.sync='currentView', :currentmethod='currentMethod', :user='user' :get_user='getUser')
 
 
 block script

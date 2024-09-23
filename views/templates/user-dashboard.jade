@@ -10,14 +10,14 @@ script#user-dashboard(type='text/x-template').
         <div class='switch'>
           <label>
             {{messages.api.action.deactivate}}
-            <input type='checkbox' :id="method.name+'_switch'" @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)" v-bind:name="method.name" role="switch" :aria-label="method.label" v-model="user.methods[method.name].active"/>
+            <input type='checkbox' :id="method.name+'_switch'" @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)" :name="method.name" role="switch" :aria-label="method.label" v-model="user.methods[method.name].active"/>
             <span class='lever'></span>
             {{messages.api.action.activate}}
           </label>
         </div>
          <div class="divider"></div>
          <div class="method-component-wrapper" v-if="user.methods[method.name].active || typeof(user.methods[method.name].activationCode)=='string'">
-            <component :is=currentmethod v-bind:methods=methods v-bind:generate_totp=generateTotpConfirm v-bind:generate_bypass=generateBypassConfirm v-bind:get_user=get_user v-bind:messages=messages v-bind:infos=infos v-bind:user=user v-bind:formatApiUri=formatApiUri></component>
+            <component :is=currentmethod :methods=methods :generate_totp=generateTotpConfirm :generate_bypass=generateBypassConfirm :get_user=get_user :messages=messages :infos=infos :user=user :formatApiUri=formatApiUri></component>
          </div>
       </div>
    </div>

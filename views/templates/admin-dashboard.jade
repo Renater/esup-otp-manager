@@ -6,8 +6,8 @@ script#admin-dashboard(type='text/x-template').
     <div class='switch'>
     <label>
     {{messages.api.action.deactivate}}
-    <input type='checkbox' v-if="methods[method.name].activate" v-on:click="deactivate" v-bind:name=method.name checked>
-    <input type='checkbox' v-on:click="activate" v-bind:name=method.name v-else>
+    <input type='checkbox' v-if="methods[method.name].activate" @click="deactivate" :name=method.name checked>
+    <input type='checkbox' @click="activate" :name=method.name v-else>
     <span class='lever'></span> {{messages.api.action.activate}}
     </label>
     </div>
@@ -17,8 +17,8 @@ script#admin-dashboard(type='text/x-template').
     <div class='switch'>
     <label>
     {{messages.api.action.deactivate}}
-    <input type='checkbox' v-if="methods[method.name].transports.includes('sms')" v-on:click="deactivateTransport(method.name,'sms')" v-bind:name=method.name checked>
-    <input type='checkbox' v-on:click="activateTransport(method.name,'sms')" v-bind:name=method.name v-else>
+    <input type='checkbox' v-if="methods[method.name].transports.includes('sms')" @click="deactivateTransport(method.name,'sms')" :name=method.name checked>
+    <input type='checkbox' @click="activateTransport(method.name,'sms')" :name=method.name v-else>
     <span class='lever'></span> {{messages.api.action.activate}}
     </label>
     </div>
@@ -26,8 +26,8 @@ script#admin-dashboard(type='text/x-template').
     <div class='switch'>
     <label>
     {{messages.api.action.deactivate}}
-    <input type='checkbox' v-if="methods[method.name].transports.includes('mail')" v-on:click="deactivateTransport(method.name,'mail')" v-bind:name=method.name checked>
-    <input type='checkbox' v-on:click="activateTransport(method.name,'mail')" v-bind:name=method.name v-else>
+    <input type='checkbox' v-if="methods[method.name].transports.includes('mail')" @click="deactivateTransport(method.name,'mail')" :name=method.name checked>
+    <input type='checkbox' @click="activateTransport(method.name,'mail')" :name=method.name v-else>
     <span class='lever'></span> {{messages.api.action.activate}}
     </label>
     </div>
