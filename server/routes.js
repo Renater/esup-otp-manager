@@ -10,12 +10,7 @@ var passport;
 
 function routing() {
     router.get('/manager/messages', function(req, res) {
-        var lang = req.acceptsLanguages('fr', 'en');
-        if (lang) {
-            res.json(properties["messages_" + lang]);
-        } else {
-            res.json(properties.messages);
-        }
+        res.json(utils.getMessagesForRequest(req));
     });
 
     router.get('/manager/messages/:language', isUser, function(req, res) {

@@ -35,3 +35,12 @@ exports.is_manager = function(user){
 exports.isAuthenticated = function(req) {
     return Boolean(req.session.passport?.user);
 }
+
+const supportedLanguages = Object.keys(properties)
+    .filter(key => key.startsWith('messages_'))
+    .map(key => key.replace('messages_', ''));
+
+exports.getMessagesForRequest = function(req) {
+    const lang = req.acceptsLanguages(supportedLanguages);
+    return properties["messages_" + lang] || properties.messages;
+}
