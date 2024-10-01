@@ -144,9 +144,14 @@ var PushMethod = Vue.extend({
     },
     methods: {
         activatePush: function() {
-            this.get_user(this.user.uid);
+            this.setActivePush(true);
         },
         deActivatePush: function() {
+            this.setActivePush(false);
+        },
+        setActivePush: async function(active) {
+            // Temporarily set the opposite value, to help VueJs detect the change #33
+            this.$set(this.user.methods.push, "active", !active);
             this.get_user(this.user.uid);
         }
     },
