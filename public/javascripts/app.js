@@ -127,27 +127,26 @@ var PushMethod = Vue.extend({
         'deactivate': Function,
         'switch_push_event': {}
     },
-    created: function () {
-        var self = this;
-        socket = io.connect(urlSockets, {reconnect: true, path: "/sockets"});
+    created: function() {
+        socket = io.connect(urlSockets, { reconnect: true, path: "/sockets" });
 
-        socket.on('userPushActivate', function () {
-            self.activatePush();
+        socket.on('userPushActivate', () => {
+            this.activatePush();
         });
 
-        socket.on('userPushActivateManager', function (data) {
-            self.activatePush();
+        socket.on('userPushActivateManager', () => {
+            this.activatePush();
         });
 
-    socket.on('userPushDeactivate', function () {
-            self.deActivatePush();
+        socket.on('userPushDeactivate', () => {
+            this.deActivatePush();
         });
     },
     methods: {
-        activatePush: function () {
+        activatePush: function() {
             this.get_user(this.user.uid);
         },
-    deActivatePush: function () {
+        deActivatePush: function() {
             this.get_user(this.user.uid);
         }
     },
