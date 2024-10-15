@@ -40,7 +40,7 @@ function routing() {
     apiRoutes.routing(router);
 }
 
-export default function(_passport) {
+export default async function(_passport) {
     passport = _passport;
 
     // used to serialize the user for the session
@@ -57,26 +57,25 @@ export default function(_passport) {
 
     // used to deserialize the user
     passport.deserializeUser(function(user, done) {
-            done(null, user);
+        done(null, user);
     });
 
-    const CAS = properties.esup.CAS;
-    if (CAS.casBaseURL.endsWith('/')) {
-        CAS.casBaseURL = CAS.casBaseURL.slice(0, -1);
+    function verifyFunction(profile, done) {
+        // console.log("profile : " + JSON.stringify(profile, null ,2));
+        return done(null, { uid: profile.user, attributes: profile.attributes });
     }
 
-    const passportCasOpts = {
-        version: CAS.version,
-        ssoBaseURL: CAS.casBaseURL,
-        serverBaseURL: CAS.serviceBaseURL,
+    if (properties.esup.CAS) {
+        const { default: casStrategy } = await import('./strategies/casStrategy.mjs');
+        properties.strategy = await casStrategy(properties.esup.CAS, verifyFunction);
+    } else if (properties.esup.SAML) {
+        const { default: samlStrategy } = await import('./strategies/samlStrategy.mjs');
+        properties.strategy = await samlStrategy(properties.esup.SAML, verifyFunction);
+    } else {
+        throw new Error("No strategy defined in esup.properties");
     }
 
-    passport.use(new CasStrategy(passportCasOpts, function(profile, done) {
-        if(logger.isDebugEnabled) {
-            logger.debug("profile : " + JSON.stringify(profile, null ,2));
-        }
-        return done(null, {uid:profile.user, attributes:profile.attributes});
-    }));
+    passport.use(properties.strategy.strategy);
 
     routing();
 
