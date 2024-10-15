@@ -89,6 +89,7 @@ async function request_otp_api(req, res, opts_) {
 
     logger.debug(opts.method + ':' + opts.url);
     logger.debug(req.session.passport)
+    logger.debug(JSON.stringify(opts.headers, null, 2));
 
     let response;
     try {

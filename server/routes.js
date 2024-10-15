@@ -6,8 +6,6 @@ import * as aclUtils from '../services/aclUtils.js';
 import * as apiRoutes from './routes/apiRoutes.js';
 const isUser = apiRoutes.isUser;
 import * as pagesRoutes from './routes/pagesRoutes.js';
-import logger from '../services/logger.js';
-import { Strategy as CasStrategy } from '@coursetable/passport-cas';
 
 let passport;
 
@@ -32,6 +30,7 @@ function routing() {
         res.send({
             api_url: properties.esup.api_url,
             uid: req.session.passport.user.uid,
+            name: req.session.passport.user.name,
             transport_regexes: properties.esup.transport_regexes,
         });
     });
@@ -40,14 +39,20 @@ function routing() {
     apiRoutes.routing(router);
 }
 
-export default function(_passport) {
+export default async function(_passport) {
     passport = _passport;
 
     // used to serialize the user for the session
     passport.serializeUser(function(user, done) {
-        const _user = {};
-        _user.uid=user.uid;
-        _user.attributes=user.attributes;
+        const _user = {
+            uid:          user.uid,
+            name:         user.name,
+            attributes:   user.attributes,
+            issuer:       user.issuer,
+            context:      user.context,
+            nameID:       user.nameID,
+            nameIDFormat: user.nameIDFormat
+        };
         aclUtils.prepareUserForAcl(_user);
         if (aclUtils.is_admin(user)) _user.role = "admin";
         else if (aclUtils.is_manager(user)) _user.role = "manager";
@@ -57,26 +62,18 @@ export default function(_passport) {
 
     // used to deserialize the user
     passport.deserializeUser(function(user, done) {
-            done(null, user);
+        done(null, user);
     });
 
-    const CAS = properties.esup.CAS;
-    if (CAS.casBaseURL.endsWith('/')) {
-        CAS.casBaseURL = CAS.casBaseURL.slice(0, -1);
+    const authenticationName = properties.esup.authentication || "CAS";
+    const authenticationProperties = properties.esup[authenticationName];
+    if (!authenticationProperties) {
+        throw new Error("No authentication backend defined in esup.properties");
     }
+    const { default: authentication } = await import(`./authentication/${authenticationName}.js`);
+    properties.authentication = await authentication(authenticationProperties);
 
-    const passportCasOpts = {
-        version: CAS.version,
-        ssoBaseURL: CAS.casBaseURL,
-        serverBaseURL: CAS.serviceBaseURL,
-    }
-
-    passport.use(new CasStrategy(passportCasOpts, function(profile, done) {
-        if(logger.isDebugEnabled) {
-            logger.debug("profile : " + JSON.stringify(profile, null ,2));
-        }
-        return done(null, {uid:profile.user, attributes:profile.attributes});
-    }));
+    passport.use(properties.authentication.strategy);
 
     routing();
 
