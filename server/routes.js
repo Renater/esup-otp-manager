@@ -49,8 +49,8 @@ module.exports = function(_passport) {
     });
 
     const CAS = properties.esup.CAS;
-    if (!CAS.casBaseURL.endsWith('/')) {
-        CAS.casBaseURL += "/";
+    if (CAS.casBaseURL.endsWith('/')) {
+        CAS.casBaseURL = CAS.casBaseURL.slice(0, -1);
     }
 
     const passportCasOpts = {
