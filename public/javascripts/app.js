@@ -1091,6 +1091,7 @@ var Home = Vue.extend({
         messages: Object,
         'infos': Object,
         'methods': Object,
+        'user': Object,
     },
     methods: {
         navigate: function (name) {

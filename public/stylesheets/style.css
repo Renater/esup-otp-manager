@@ -229,17 +229,32 @@ body.IE7 .Switch.Round {
   margin-top: 19px; 
 }
 
-
-.methode { 
-	 margin  : 7px; 
-	 margin-top:9px; 
-	 padding:  4px 11px 18px 14px;   
-	 background : #eeeef0;   
-	 width:31% !important;  
-	 color : #00326e ; 
+.status {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: white;
+    padding: 2px;
 }
 
- 
+.status.enabled {
+    background-color: green;
+}
+
+.status.disabled {
+    background-color: #757575; /* grey darken-1 */
+}
+
+.methode {
+    margin: 7px;
+    margin-top: 9px;
+    padding: 4px 11px 18px 14px;
+    background: #eeeef0;
+    width: 31% !important;
+    color: #00326e;
+    position: relative;
+}
+
 .methode:hover { box-shadow: 0px 2px 2px 2px rgba(0,0,0,0.16), 2px 2px 10px 1px rgba(0,0,0,0.22); color : #2055aa}
 .methode p { text-align: center; margin-bottom:0px; margin-top:10px;  }
 .methode img {  padding: 0px; margin:0px; width:88px; }

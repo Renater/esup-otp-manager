@@ -104,6 +104,8 @@
       "random_code":"Send random code by SMS.",
       "random_code_mail":"Send random code by mail.",
       "webauthn":"WebAuthn hardware authentication factor (Smartphone, Windows Hello, TouchID, ...).",
+      "activated": "Activated",
+      "deactivated": "Deactivated",
       "note":"Set up at least 2 methods among:"
     },
     "index": "Single use passwords management interface",

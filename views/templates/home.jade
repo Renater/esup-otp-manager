@@ -16,6 +16,8 @@ script#home-dashboard(type='text/x-template').
      </p>
      
       <span>{{messages.api.home[method.name]}}</span>
+      <span v-if="user.methods[method.name]?.active" class="status enabled">{{messages.api.home.activated}}</span>
+      <span v-else class="status disabled">{{messages.api.home.deactivated}}</span>
      </button>
 
      </div>
