@@ -1126,15 +1126,16 @@ var app = new Vue({
         infos: {},
     },
     created: async function () {
-        this.getMessages();
+        const messagesPromise = this.getMessages();
         this.getMethods();
         await this.getInfos();
         this.getUser();
 
         // wait for the #home button, then click on it
+        await messagesPromise;
         await $('#home').promise();
         await this.$nextTick();
-        document.getElementById("home").click();
+        document.getElementById("home")?.click();
     },
     updated: async function () {
         await this.$nextTick();
