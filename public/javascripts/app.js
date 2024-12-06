@@ -1125,7 +1125,7 @@ var app = new Vue({
         messages: {},
         infos: {},
     },
-    created: async function () {
+    created: async function() {
         const messagesPromise = this.getMessages();
         this.getMethods();
         await this.getInfos();
@@ -1136,12 +1136,12 @@ var app = new Vue({
         await $('#home').promise();
         await this.$nextTick();
         document.getElementById("home")?.click();
-    },
-    updated: async function () {
+
+        // if applicable, redirect to the user page specified in the URL
         await this.$nextTick();
         const managerButton = document.getElementById('manager');
         if (managerButton) { // if is manager
-            if (new URL(window.location).searchParams.get('user')) { // if url contains ?user=xxx
+            if (new URL(window.location).searchParams.get('user')) { // and if url contains ?user=xxx
                 managerButton.click(); // switch to manager dashboard
             };
         }
