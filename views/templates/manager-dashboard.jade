@@ -3,7 +3,7 @@ script#manager-dashboard(type='text/x-template').
     <div class="row input-field">
     <div class="col s8">
     <i class="material-icons prefix" aria-hidden="true">account_box</i>
-    <input @keyup.enter="search" v-model="requestedUid" type="text" id="autocomplete-input" list="usersId">
+    <input @keyup.enter="search" v-model.trim="requestedUid" type="text" id="autocomplete-input" list="usersId">
     <label for="autocomplete-input">{{messages.api.label.user}}</label>
     </div>
     
