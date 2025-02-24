@@ -4,7 +4,7 @@ import logger from '../services/logger.js'
 import io from 'socket.io-client';
 
 const apiSockets = io.connect(properties.esup.api_url, {reconnect: true, path: "/sockets", query: 'app=manager', extraHeaders: {
-    Authorization: "Bearer " + properties.esup.api_password,
+    Authorization: "Bearer " + properties.esup.admin_password,
 }});
 import * as sockets from '../server/sockets.js';
 const users = {};
