@@ -9,13 +9,15 @@ var debug = require('debug')('esup-otp-manager:server');
 var http = require('http');
 var properties = require(__dirname + '/../properties/properties');
 
+const logger = require('../services/logger');
+
 /**
  * Get port from environment and store in Express.
  */
 
 var port = normalizePort(properties.esup.port || process.env.PORT || '4000');
 app.set('port', port);
-console.log("Port: " + port);
+logger.logger.info("Port: " + port);
 
 /**
  * Create HTTP server.
@@ -70,11 +72,11 @@ function onError(error) {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      logger.logger.error(bind + ' requires elevated privileges');
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      logger.logger.error(bind + ' is already in use');
       process.exit(1);
       break;
     default:
