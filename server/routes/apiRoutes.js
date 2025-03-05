@@ -1,6 +1,7 @@
 const { request } = require('undici');
 const properties = require(__dirname + '/../../properties/properties');
 const utils = require(__dirname + '/../../services/utils');
+const logger = require(__dirname + '/../../services/logger');
 
 const tenantsApiPassword = new Map();
 
@@ -76,7 +77,7 @@ async function getTenantApiPassword(tenantName) {
 
 /** @param {{ relUrl: string; bearerAuth?: true, method?: 'GET'|'POST'|'PUT'|'DELETE' }} opts_ */
 async function request_otp_api(req, res, opts_) {
-    console.log("requesting api");
+    logger.info("requesting api");
     const clientIP = req.ip;
     const userAgent = req.headers['user-agent'];
     /**
@@ -108,9 +109,9 @@ async function request_otp_api(req, res, opts_) {
         opts.headers.Authorization = 'Bearer ' + tenantsApiPassword.get(tenant);
     }
 
-    //console.log(opts.method +':'+ opts.url);
-    //console.log(req.session.passport);
-    //console.log(JSON.stringify(opts.headers, null, 2));
+    //logger.info(opts.method +':'+ opts.url);
+    //logger.info(req.session.passport);
+    //logger.info(JSON.stringify(opts.headers, null, 2));
     let response;
     try {
         response = await request(url, opts);
@@ -132,7 +133,7 @@ async function request_otp_api(req, res, opts_) {
     res.status(response.statusCode);
     /** @type {Object} */
     const infos = await response.body.json();
-    //console.log(infos)
+    //logger.info(infos)
     res.send(infos);
 }
 
