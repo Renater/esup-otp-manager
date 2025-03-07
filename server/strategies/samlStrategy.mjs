@@ -30,7 +30,7 @@ export default async function strategy(samlProperties, verifyFunction) {
         samlProperties.idpCert = samlProperties.idpCert.replace(/\s/g, '');
     }
 
-    for (const certType of ["publicCert", "privateKey"]) {
+    for (const certType of ["publicCert", "privateKey", "decryptionPvk", "decryptionPbc"]) {
         const certPathPropertyName = certType + "Path";
         const declaredPath = samlProperties[certPathPropertyName];
         if (declaredPath) {
@@ -58,6 +58,6 @@ export default async function strategy(samlProperties, verifyFunction) {
     return {
         name: "saml",
         strategy: samlStrategy,
-        spMetadata: samlStrategy.generateServiceProviderMetadata(null, samlProperties.publicCert),
+        spMetadata: samlStrategy.generateServiceProviderMetadata(samlProperties.decryptionPbc, samlProperties.publicCert),
     };
 }
