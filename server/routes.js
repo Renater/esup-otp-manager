@@ -32,6 +32,7 @@ function routing() {
         res.send({
             api_url: properties.esup.api_url,
             uid: req.session.passport.user.uid,
+            name: req.session.passport.user.name,
             transport_regexes: properties.esup.transport_regexes,
         });
     });
@@ -47,6 +48,7 @@ export default async function(_passport) {
     passport.serializeUser(function(user, done) {
         const _user = {};
         _user.uid=user.uid;
+        _name.uid=user.name;
         _user.attributes=user.attributes;
         aclUtils.prepareUserForAcl(_user);
         if (aclUtils.is_admin(user)) _user.role = "admin";
@@ -62,7 +64,7 @@ export default async function(_passport) {
 
     function verifyFunction(profile, done) {
         // console.log("profile : " + JSON.stringify(profile, null ,2));
-        return done(null, { uid: profile.user, attributes: profile.attributes });
+        return done(null, { uid: profile.uid, name: profile.name, attributes: profile.attributes });
     }
 
     if (properties.esup.CAS) {

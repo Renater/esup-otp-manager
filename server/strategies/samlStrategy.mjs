@@ -48,7 +48,8 @@ export default async function strategy(samlProperties, verifyFunction) {
          */
     function verify(profile, done) {
         verifyFunction({
-            user: profile[samlProperties.uidSamlAttribute],
+            uid: profile[samlProperties.uidSamlAttribute],
+            name: profile[samlProperties.nameSamlAttribute],
             attributes: profile
         }, done);
     }
