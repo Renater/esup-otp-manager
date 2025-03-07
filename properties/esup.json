@@ -9,6 +9,8 @@
         "issuer": "esup-otp-manager",
         "privateKeyPath": "/etc/shibboleth/sp-key.pem",
         "publicCertPath": "/etc/shibboleth/sp-cert.pem",
+        "decryptionPvkPath": "/etc/shibboleth/sp-key.pem",
+        "decryptionPbcPath": "/etc/shibboleth/sp-cert.pem",
         "uidSamlAttribute": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6",
         "#how_to_spMetadataUrl": "if defined, expose ServiceProviderMetadata on localhost/${spMetadataUrl}",
         "spMetadataUrl": "saml2/metadata",
