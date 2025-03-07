@@ -116,7 +116,7 @@ async function request_otp_api(req, res, opts_) {
         if(!tenantsApiPassword.has(tenant)) {
             tenantsApiPassword.set(tenant, await getTenantApiPassword(tenant));
         }
-        opts.headers['x-tenant'] = tenant;
+        opts.headers['X-Tenant'] = tenant;
         opts.headers.Authorization = 'Bearer ' + tenantsApiPassword.get(tenant);
     }
 
