@@ -37,7 +37,7 @@ block content
                     li#preferences-accordion.no-padding
                         ul.collapsible.collapsible-accordion(data-collapsible='accordion')
                             li
-                                details
+                                details(open)
                                     summary.collapsible-header {{messages.api.menu.preferences}}
                                     ul.collapsible-body
                                         li.bold(v-for='method in methods', v-show='method.activate && method.authorize')
