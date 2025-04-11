@@ -32,36 +32,40 @@ export function routing(router, passport) {
         });
     });
 
-    router.all('/login', function(req, res, next) {
-        passport.authenticate(properties.strategy.name, function(err, user, info) {
+    function log_user(req, res, next, user) {
+        req.logIn(user, function(err) {
             if (err) {
                 logger.error(err);
                 return next(err);
             }
+            req.session.messages = '';
 
-            if (!user) {
-                logger.info(info?.message);
-                return res.redirect('/');
+            let params = new URLSearchParams()
+            for (const param of ['user']) {
+                const val = req.query[param]
+                if (val) params.set(param, val)
             }
+            return res.redirect('/preferences' + (params.size ? "?" + params : ""));
+        });
+    };
 
-            req.logIn(user, function(err) {
+    if (properties.strategy.name == 'cas') {
+        router.all('/login', function(req, res, next) {
+            passport.authenticate('cas', function(err, user, info) {
                 if (err) {
                     logger.error(err);
                     return next(err);
                 }
-                req.session.messages = '';
 
-                let params = new URLSearchParams()
-                for (const param of ['user']) {
-                    const val = req.query[param]
-                    if (val) params.set(param, val)
+                if (!user) {
+                    console.log(info.message);
+                    return res.redirect('/');
                 }
-                return res.redirect('/preferences' + (params.size ? "?" + params : ""));
-            });
-        })(req, res, next);
-    });
 
-    if (properties.strategy.name == 'cas') {
+                return log_user(req, res, next, user);
+            })(req, res, next);
+        });
+
         router.get('/logout', function(req, res, next) {
             req.logout(function(err) {
                 if (err) { return next(err); }
@@ -69,6 +73,22 @@ export function routing(router, passport) {
             });
         });
     } else if (properties.strategy.name == 'saml') {
+        router.all('/login', function(req, res, next) {
+            passport.authenticate('saml', function(err, user, info) {
+                if (err) {
+                    console.log(err);
+                    return next(err);
+                }
+
+                if (!user) {
+                    console.log(info.message);
+                    return res.redirect('/');
+                }
+
+                return log_user(req, res, next, user);
+            })(req, res, next);
+        });
+
         router.get('/logout', function(req, res, next) {
             properties.strategy.strategy.logout(req, (err, logoutUrl) => {
                 if (err) { return next(err); }
