@@ -75,7 +75,11 @@ exports.routing = function(router, passport) {
             });
         });
     } else if (properties.strategy.name == 'saml') {
-        router.all('/login', function(req, res, next) {
+        router.get('/login', function(req, res, next) {
+            passport.authenticate('saml')(req, res, next);
+        });
+
+        router.post('/login', function(req, res, next) {
             passport.authenticate('saml', function(err, user, info) {
                 if (err) {
                     console.log(err);
