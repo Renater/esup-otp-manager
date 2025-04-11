@@ -48,7 +48,7 @@ export default async function(_passport) {
     passport.serializeUser(function(user, done) {
         const _user = {};
         _user.uid=user.uid;
-        _name.uid=user.name;
+        _user.name=user.name;
         _user.attributes=user.attributes;
         aclUtils.prepareUserForAcl(_user);
         if (aclUtils.is_admin(user)) _user.role = "admin";
