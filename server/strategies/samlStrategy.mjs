@@ -42,6 +42,18 @@ export default async function strategy(samlProperties, verifyFunction) {
         }
     }
 
+    samlProperties['passReqToCallback'] = true;
+    samlProperties['getSamlOptions'] = function (req, done) {
+        var options;
+        if (req.query.authnContext) {
+            options = { authnContext: [ req.query.authnContext ] };
+        } else {
+            options = { disableRequestedAuthnContext: true };
+        }
+        console.log('SAML options: ' + options);
+        return done(null, options);
+    };
+
     /**
          * @param {import('@node-saml/node-saml/lib/types').Profile} profile
          * @param {import('@node-saml/passport-saml/lib/types').VerifiedCallback} done 
@@ -55,12 +67,7 @@ export default async function strategy(samlProperties, verifyFunction) {
     }
 
     const samlStrategy = new MultiSamlStrategy(
-        {
-            passReqToCallback: true,
-            getSamlOptions: function (req, done) {
-                return done(null, samlProperties);
-            },
-        },
+        samlProperties,
         verify,
         verify
     );
