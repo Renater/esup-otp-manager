@@ -1,8 +1,7 @@
 const { request } = require('undici');
 const properties = require(__dirname + '/../../properties/properties');
 const utils = require(__dirname + '/../../services/utils');
-
-const tenantsApiPassword = new Map();
+const tenants = require(__dirname + '/../tenants');
 
 function redirect(req, res, status, path) {
     res
@@ -48,32 +47,6 @@ function isAdmin(req, res, next) {
     });
 }
 
-async function getApiTenantByName(tenant) {
-    const response = await fetch(properties.esup.api_url + '/admin/tenants', {headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + properties.esup.admin_password
-    }});
-    const data = await response.json();
-    return data.find(item => item.name === tenant);
-}
-
-async function getApiTenant(tenantId) {
-    const response = await fetch(properties.esup.api_url + '/admin/tenant/' + tenantId, {headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + properties.esup.admin_password
-    }});
-    return await response.json();
-}
-
-async function getTenantApiPassword(tenantName) {
-    const apiTenant = await getApiTenantByName(tenantName);
-
-    if(apiTenant) {
-        const tenant = await getApiTenant(apiTenant.id);
-        return tenant.api_password;
-    }
-}
-
 /** @param {{ relUrl: string, queryParams?: Object; bearerAuth?: true, method?: 'GET'|'POST'|'PUT'|'DELETE' }} opts_ */
 async function request_otp_api(req, res, opts_) {
     console.log("requesting api");
@@ -103,11 +76,8 @@ async function request_otp_api(req, res, opts_) {
 
     if (opts_.bearerAuth) {
         const tenant = req.session.passport.user.attributes.issuer;
-        if(!tenantsApiPassword.has(tenant)) {
-            tenantsApiPassword.set(tenant, await getTenantApiPassword(tenant));
-        }
         opts.headers['X-Tenant'] = tenant;
-        opts.headers.Authorization = 'Bearer ' + tenantsApiPassword.get(tenant);
+        opts.headers.Authorization = 'Bearer ' + await tenants.getApiPassword(tenant);
     }
 
     //console.log(opts.method +':'+ opts.url);
