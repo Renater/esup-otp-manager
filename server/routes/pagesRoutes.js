@@ -33,7 +33,7 @@ export function routing(router, passport) {
         });
     });
 
-    function log_user(req, res, next, user) {
+    function logUser(req, res, next, user) {
         req.logIn(user, function(err) {
             if (err) {
                 logger.error(err);
@@ -63,7 +63,7 @@ export function routing(router, passport) {
                     return res.redirect('/');
                 }
 
-                return log_user(req, res, next, user);
+                return logUser(req, res, next, user);
             })(req, res, next);
         });
 
@@ -96,14 +96,14 @@ export function routing(router, passport) {
                 const assertion = user.attributes.getAssertion();
                 const context = assertion.Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
                 if (context == properties.esup.SAML.normalAuthnContext) {
-                    return log_user(req, res, next, user);
+                    return logUser(req, res, next, user);
                 } else {
                     let params = new URLSearchParams();
                     params.set('authnContext', properties.esup.SAML.normalAuthnContext);
                     return res.redirect('/login' + "?" + params);
                 }
             } else {
-                return log_user(req, res, next, user);
+                return logUser(req, res, next, user);
             }
         }
 
