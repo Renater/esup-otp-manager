@@ -37,7 +37,7 @@ module.exports = async function(_passport) {
     passport.serializeUser(function(user, done) {
         var _user = {};
         _user.uid=user.uid;
-        _name.uid=user.name;
+        _user.name=user.name;
         _user.attributes=user.attributes;
         if(utils.is_admin(user))_user.role="admin";
         else if(utils.is_manager(user))_user.role="manager";

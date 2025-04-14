@@ -1,6 +1,7 @@
 const properties = require(__dirname + '/../../properties/properties');
 const utils = require(__dirname + '/../../services/utils');
 const logger = require(__dirname + '/../../services/logger');
+const tenants = require(__dirname + '/../tenants');
 
 function isUser(req, res, next) {
     if (utils.isAuthenticated(req)) return next();
@@ -35,36 +36,40 @@ exports.routing = function(router, passport) {
         });
     });
 
-    router.all('/login', function(req, res, next) {
-        passport.authenticate(properties.strategy.name, function(err, user, info) {
+    function logUser(req, res, next, user) {
+        req.logIn(user, function(err) {
             if (err) {
                 logger.error(err);
                 return next(err);
             }
+            req.session.messages = '';
 
-            if (!user) {
-                logger.info(info.message);
-                return res.redirect('/');
+            let params = new URLSearchParams()
+            for (const param of ['user']) {
+                const val = req.query[param]
+                if (val) params.set(param, val)
             }
+            return res.redirect('/preferences' + (params.size ? "?" + params : ""));
+        });
+    };
 
-            req.logIn(user, function(err) {
+    if (properties.strategy.name == 'cas') {
+        router.all('/login', function(req, res, next) {
+            passport.authenticate('cas', function(err, user, info) {
                 if (err) {
                     logger.error(err);
                     return next(err);
                 }
-                req.session.messages = '';
 
-                let params = new URLSearchParams()
-                for (const param of ['user']) {
-                    const val = req.query[param]
-                    if (val) params.set(param, val)
+                if (!user) {
+                    console.log(info.message);
+                    return res.redirect('/');
                 }
-                return res.redirect('/preferences' + (params.size ? "?" + params : ""));
-            });
-        })(req, res, next);
-    });
 
-    if (properties.strategy.name == 'cas') {
+                return logUser(req, res, next, user);
+            })(req, res, next);
+        });
+
         router.get('/logout', function(req, res, next) {
             req.logout(function(err) {
                 if (err) { return next(err); }
@@ -72,6 +77,59 @@ exports.routing = function(router, passport) {
             });
         });
     } else if (properties.strategy.name == 'saml') {
+
+        async function getUserLastValidation(user) {
+            const tenant = user.attributes.issuer;
+            const password = await tenants.getApiPassword(tenant);
+            console.log('tenant: ' + tenant);
+            console.log('password: ' + password);
+
+            const response = await fetch(properties.esup.api_url + '/protected/users/' + user.uid, {headers: {
+                'Content-Type': 'application/json',
+                'X-Tenant': tenant,
+                'Authorization':  'Bearer ' + password
+            }});
+            const data = await response.json();
+            return data.user.last_validated;
+        }
+
+        async function logOrReauthUser(req, res, next, user) {
+            const result = await getUserLastValidation(user);
+            if ('time' in result) {
+                const assertion = user.attributes.getAssertion();
+                const context = assertion.Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
+                if (context == properties.esup.SAML.normalAuthnContext) {
+                    return logUser(req, res, next, user);
+                } else {
+                    let params = new URLSearchParams();
+                    params.set('authnContext', properties.esup.SAML.normalAuthnContext);
+                    return res.redirect('/login' + "?" + params);
+                }
+            } else {
+                return logUser(req, res, next, user);
+            }
+        }
+
+        router.get('/login', function(req, res, next) {
+            passport.authenticate('saml')(req, res, next);
+        });
+
+        router.post('/login', function(req, res, next) {
+            passport.authenticate('saml', function(err, user, info) {
+                if (err) {
+                    console.log(err);
+                    return next(err);
+                }
+
+                if (!user) {
+                    console.log(info.message);
+                    return res.redirect('/');
+                }
+
+                return logOrReauthUser(req, res, next, user);
+            })(req, res, next);
+        });
+
         router.get('/logout', function(req, res, next) {
             properties.strategy.strategy.logout(req, (err, logoutUrl) => {
                 if (err) { return next(err); }
@@ -85,8 +143,7 @@ exports.routing = function(router, passport) {
         const spMetadataUrl = properties.esup.SAML.spMetadataUrl;
         if (spMetadataUrl) {
             router.get("/" + spMetadataUrl, function(req, res, next) {
-                res.type('xml');
-                res.send(properties.strategy.spMetadata);
+                properties.strategy.generateMetadata(req, res, next);
             });
         }
     }

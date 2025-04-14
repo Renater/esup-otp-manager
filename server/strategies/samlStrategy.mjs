@@ -1,4 +1,4 @@
-import { Strategy as SamlStrategy } from "@node-saml/passport-saml";
+import { MultiSamlStrategy } from "@node-saml/passport-saml";
 import { fetch, toPassportConfig } from 'passport-saml-metadata';
 import { Cache } from 'file-system-cache';
 import os from 'os';
@@ -42,11 +42,23 @@ export default async function strategy(samlProperties, verifyFunction) {
         }
     }
 
+    samlProperties['passReqToCallback'] = true;
+    samlProperties['getSamlOptions'] = function (req, done) {
+        var options;
+        if (req.query.authnContext) {
+            options = { authnContext: [ req.query.authnContext ] };
+        } else {
+            options = { disableRequestedAuthnContext: true };
+        }
+        console.log('SAML options: ' + options);
+        return done(null, options);
+    };
+
     /**
          * @param {import('@node-saml/node-saml/lib/types').Profile} profile
          * @param {import('@node-saml/passport-saml/lib/types').VerifiedCallback} done 
          */
-    function verify(profile, done) {
+    function verify(req, profile, done) {
         verifyFunction({
             uid: profile[samlProperties.uidSamlAttribute],
             name: profile[samlProperties.nameSamlAttribute],
@@ -54,11 +66,30 @@ export default async function strategy(samlProperties, verifyFunction) {
         }, done);
     }
 
-    const samlStrategy = new SamlStrategy(samlProperties, verify, verify);
+    const samlStrategy = new MultiSamlStrategy(
+        samlProperties,
+        verify,
+        verify
+    );
 
     return {
         name: "saml",
         strategy: samlStrategy,
-        spMetadata: samlStrategy.generateServiceProviderMetadata(samlProperties.decryptionPbc, samlProperties.publicCert),
+        generateMetadata: function(req, res, next) {
+            res.send(
+                samlStrategy.generateServiceProviderMetadata(
+                    req,
+                    samlProperties.decryptionPbc,
+                    samlProperties.publicCert,
+                    function (err, data) {
+                        if (err) {
+                            return next();
+                        }
+                        res.type('xml');
+                        res.send(data);
+                    }
+                )
+            );
+        }
     };
 }
