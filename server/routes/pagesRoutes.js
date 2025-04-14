@@ -1,6 +1,7 @@
 import properties from '../../properties/properties.js';
 import * as utils from '../../services/utils.js';
 import logger from '../../services/logger.js';
+const tenants = require(__dirname + '/../tenants');
 
 function isUser(req, res, next) {
     if (utils.isAuthenticated(req)) return next();
@@ -73,6 +74,39 @@ export function routing(router, passport) {
             });
         });
     } else if (properties.strategy.name == 'saml') {
+
+        async function getUserLastValidation(user) {
+            const tenant = user.attributes.issuer;
+            const password = await tenants.getApiPassword(tenant);
+            console.log('tenant: ' + tenant);
+            console.log('password: ' + password);
+
+            const response = await fetch(properties.esup.api_url + '/protected/users/' + user.uid, {headers: {
+                'Content-Type': 'application/json',
+                'X-Tenant': tenant,
+                'Authorization':  'Bearer ' + password
+            }});
+            const data = await response.json();
+            return data.user.last_validated;
+        }
+
+        async function logOrReauthUser(req, res, next, user) {
+            const result = await getUserLastValidation(user);
+            if ('time' in result) {
+                const assertion = user.attributes.getAssertion();
+                const context = assertion.Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
+                if (context == properties.esup.SAML.normalAuthnContext) {
+                    return log_user(req, res, next, user);
+                } else {
+                    let params = new URLSearchParams();
+                    params.set('authnContext', properties.esup.SAML.normalAuthnContext);
+                    return res.redirect('/login' + "?" + params);
+                }
+            } else {
+                return log_user(req, res, next, user);
+            }
+        }
+
         router.get('/login', function(req, res, next) {
             passport.authenticate('saml')(req, res, next);
         });
@@ -89,7 +123,7 @@ export function routing(router, passport) {
                     return res.redirect('/');
                 }
 
-                return log_user(req, res, next, user);
+                return logOrReauthUser(req, res, next, user);
             })(req, res, next);
         });
 
