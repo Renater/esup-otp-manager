@@ -78,8 +78,6 @@ export function routing(router, passport) {
         async function getUserLastValidation(user) {
             const tenant = user.attributes.issuer;
             const password = await tenants.getApiPassword(tenant);
-            console.log('tenant: ' + tenant);
-            console.log('password: ' + password);
 
             const response = await fetch(properties.esup.api_url + '/protected/users/' + user.uid, {headers: {
                 'Content-Type': 'application/json',
