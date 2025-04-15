@@ -50,7 +50,6 @@ export default async function strategy(samlProperties, verifyFunction) {
         } else {
             options = { disableRequestedAuthnContext: true };
         }
-        console.log('SAML options: ' + options);
         return done(null, options);
     };
 
