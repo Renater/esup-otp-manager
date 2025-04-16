@@ -3,6 +3,7 @@ import { fetch, toPassportConfig } from 'passport-saml-metadata';
 import { Cache } from 'file-system-cache';
 import os from 'os';
 import * as utils from "../../services/utils.js";
+import logger from "../../services/logger.js";
 import * as fs from 'fs';
 
 /**
@@ -59,7 +60,7 @@ export default async function strategy(samlProperties) {
     const samlStrategy = new MultiSamlStrategy(
         samlProperties,
         function(req, profile, done) {
-            console.log("profile: " + JSON.stringify(profile, null, 2));
+            logger.debug("profile: " + JSON.stringify(profile, null, 2));
             const context = profile.getAssertion().Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
             return done(null, {
                 uid:          profile.attributes[samlProperties.uidSamlAttribute],
