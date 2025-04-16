@@ -59,6 +59,7 @@ export default async function strategy(samlProperties) {
     const samlStrategy = new MultiSamlStrategy(
         samlProperties,
         function(req, profile, done) {
+            console.log("profile: " + JSON.stringify(profile, null, 2));
             const context = profile.getAssertion().Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
             return done(null, {
                 uid:          profile.attributes[samlProperties.uidSamlAttribute],

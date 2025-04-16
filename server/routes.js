@@ -55,11 +55,6 @@ module.exports = async function(_passport) {
         done(null, user);
     });
 
-    function verifyFunction(profile, done) {
-        // console.log("profile : " + JSON.stringify(profile, null ,2));
-        return done(null, { uid: profile.uid, name: profile.name, attributes: profile.attributes });
-    }
-
     if (properties.esup.CAS) {
         const { default: casStrategy } = await import('./strategies/casStrategy.mjs');
         properties.strategy = await casStrategy(properties.esup.CAS);
