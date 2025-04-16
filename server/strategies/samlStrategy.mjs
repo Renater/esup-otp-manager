@@ -55,18 +55,16 @@ export default async function strategy(samlProperties) {
          * @param {import('@node-saml/node-saml/lib/types').Profile} profile
          * @param {import('@node-saml/passport-saml/lib/types').VerifiedCallback} done 
          */
-    function verify(req, profile, done) {
-        return done(null, {
-            uid:        profile.attributes[samlProperties.uidSamlAttribute],
-            name:       profile.attributes[samlProperties.nameSamlAttribute],
-            attributes: profile.attributes,
-        });
-    }
 
     const samlStrategy = new MultiSamlStrategy(
         samlProperties,
-        verify,
-        verify
+        function(req, profile, done) {
+            return done(null, {
+                uid:        profile.attributes[samlProperties.uidSamlAttribute],
+                name:       profile.attributes[samlProperties.nameSamlAttribute],
+                attributes: profile.attributes,
+            });
+        }
     );
 
     return {
