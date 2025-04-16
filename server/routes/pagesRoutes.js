@@ -76,7 +76,7 @@ export function routing(router, passport) {
     } else if (properties.strategy.name == 'saml') {
 
         async function getUserLastValidation(user) {
-            const tenant = user.attributes.issuer;
+            const tenant = user.issuer;
             const password = await tenants.getApiPassword(tenant);
 
             const response = await fetch(properties.esup.api_url + '/protected/users/' + user.uid, {headers: {
@@ -91,9 +91,7 @@ export function routing(router, passport) {
         async function logOrReauthUser(req, res, next, user) {
             const result = await getUserLastValidation(user);
             if ('time' in result) {
-                const assertion = user.attributes.getAssertion();
-                const context = assertion.Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
-                if (context == properties.esup.SAML.normalAuthnContext) {
+                if (user.context == properties.esup.SAML.normalAuthnContext) {
                     return logUser(req, res, next, user);
                 } else {
                     let params = new URLSearchParams();

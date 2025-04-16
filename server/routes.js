@@ -50,6 +50,10 @@ export default async function(_passport) {
         _user.uid=user.uid;
         _user.name=user.name;
         _user.attributes=user.attributes;
+        _user.issuer=user.issuer;
+        _user.context=user.context;
+        _user.nameID=user.nameID;
+        _user.nameIDFormat=user.nameIDFormat;
         aclUtils.prepareUserForAcl(_user);
         if (aclUtils.is_admin(user)) _user.role = "admin";
         else if (aclUtils.is_manager(user)) _user.role = "manager";
