@@ -46,14 +46,15 @@ export default async function(_passport) {
 
     // used to serialize the user for the session
     passport.serializeUser(function(user, done) {
-        const _user = {};
-        _user.uid=user.uid;
-        _user.name=user.name;
-        _user.attributes=user.attributes;
-        _user.issuer=user.issuer;
-        _user.context=user.context;
-        _user.nameID=user.nameID;
-        _user.nameIDFormat=user.nameIDFormat;
+        const _user = {
+            uid:          user.uid,
+            name:         user.name,
+            attributes:   user.attributes,
+            issuer:       user.issuer,
+            context:      user.context,
+            nameID:       user.nameID,
+            nameIDFormat: user.nameIDFormat
+        };
         aclUtils.prepareUserForAcl(_user);
         if (aclUtils.is_admin(user)) _user.role = "admin";
         else if (aclUtils.is_manager(user)) _user.role = "manager";
