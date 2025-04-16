@@ -94,6 +94,7 @@ export function routing(router, passport) {
                 if (user.context == properties.esup.SAML.normalAuthnContext) {
                     return logUser(req, res, next, user);
                 } else {
+                    console.log(`authentication context ${user.context} insufficient for user ${user.uid}, reauthentication required`);
                     let params = new URLSearchParams();
                     params.set('authnContext', properties.esup.SAML.normalAuthnContext);
                     return res.redirect('/login' + "?" + params);
@@ -104,10 +105,12 @@ export function routing(router, passport) {
         }
 
         router.get('/login', function(req, res, next) {
+            console.log("initiating login");
             passport.authenticate('saml')(req, res, next);
         });
 
         router.post('/login', function(req, res, next) {
+            console.log("completing login");
             passport.authenticate('saml', function(err, user, info) {
                 if (err) {
                     console.log(err);
@@ -125,14 +128,14 @@ export function routing(router, passport) {
 
         router.get('/logout', function(req, res, next) {
             if (!req.user) { res.redirect('/') };
-            console.log("initiating logout for user " + req.user);
+            console.log(`initiating logout for user ${req.user.uid}`);
             return properties.strategy.strategy.logout(req, function(err, url) {
                 return res.redirect(url);
             });
         });
 
         router.post('/logout', function(req, res, next) {
-            console.log("completing logout for user " + req.user);
+            console.log(`completing logout for user ${req.user.uid}`);
             req.logout(function(err) {
                 if (err) { return next(err); }
                 res.redirect('/');
