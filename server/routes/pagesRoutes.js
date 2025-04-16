@@ -124,12 +124,18 @@ export function routing(router, passport) {
         });
 
         router.get('/logout', function(req, res, next) {
-            properties.strategy.strategy.logout(req, (err, logoutUrl) => {
+            if (!req.user) { res.redirect('/') };
+            console.log("initiating logout for user " + req.user);
+            return properties.strategy.strategy.logout(req, function(err, url) {
+                return res.redirect(url);
+            });
+        });
+
+        router.post('/logout', function(req, res, next) {
+            console.log("completing logout for user " + req.user);
+            req.logout(function(err) {
                 if (err) { return next(err); }
-                req.logout(function(err) {
-                    if (err) { return next(err); }
-                    res.redirect(logoutUrl);
-                });
+                res.redirect('/');
             });
         });
 
