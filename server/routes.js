@@ -57,10 +57,10 @@ module.exports = async function(_passport) {
 
     if (properties.esup.CAS) {
         const { default: casStrategy } = await import('./strategies/casStrategy.mjs');
-        properties.strategy = await casStrategy(properties.esup.CAS, verifyFunction);
+        properties.strategy = await casStrategy(properties.esup.CAS);
     } else if (properties.esup.SAML) {
         const { default: samlStrategy } = await import('./strategies/samlStrategy.mjs');
-        properties.strategy = await samlStrategy(properties.esup.SAML, verifyFunction);
+        properties.strategy = await samlStrategy(properties.esup.SAML);
     } else {
         throw new Error("No strategy defined in esup.properties");
     }

@@ -7,10 +7,8 @@ import * as fs from 'fs';
 
 /**
  * @param {import('@node-saml/passport-saml/lib/types').PassportSamlConfig & {printServiceProviderMetadata: boolean}} samlProperties
- * 
- * @param {(login: {user: String, attributes: {}}, done: Function) => void} verifyFunction 
  */
-export default async function strategy(samlProperties, verifyFunction) {
+export default async function strategy(samlProperties) {
 
     if (!samlProperties.identifierFormat) {
         samlProperties.identifierFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
@@ -58,11 +56,11 @@ export default async function strategy(samlProperties, verifyFunction) {
          * @param {import('@node-saml/passport-saml/lib/types').VerifiedCallback} done 
          */
     function verify(req, profile, done) {
-        verifyFunction({
-            uid: profile[samlProperties.uidSamlAttribute],
-            name: profile[samlProperties.nameSamlAttribute],
-            attributes: profile
-        }, done);
+        return done(null, {
+            uid:        profile.attributes[samlProperties.uidSamlAttribute],
+            name:       profile.attributes[samlProperties.nameSamlAttribute],
+            attributes: profile.attributes,
+        });
     }
 
     const samlStrategy = new MultiSamlStrategy(
