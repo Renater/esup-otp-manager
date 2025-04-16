@@ -35,10 +35,15 @@ module.exports = async function(_passport) {
 
     // used to serialize the user for the session
     passport.serializeUser(function(user, done) {
-        var _user = {};
-        _user.uid=user.uid;
-        _user.name=user.name;
-        _user.attributes=user.attributes;
+        var _user = {
+            uid:          user.uid,
+            name:         user.name,
+            attributes:   user.attributes,
+            issuer:       user.issuer,
+            context:      user.context,
+            nameID:       user.nameID,
+            nameIDFormat: user.nameIDFormat
+        };
         if(utils.is_admin(user))_user.role="admin";
         else if(utils.is_manager(user))_user.role="manager";
         else _user.role="user";
@@ -57,10 +62,10 @@ module.exports = async function(_passport) {
 
     if (properties.esup.CAS) {
         const { default: casStrategy } = await import('./strategies/casStrategy.mjs');
-        properties.strategy = await casStrategy(properties.esup.CAS, verifyFunction);
+        properties.strategy = await casStrategy(properties.esup.CAS);
     } else if (properties.esup.SAML) {
         const { default: samlStrategy } = await import('./strategies/samlStrategy.mjs');
-        properties.strategy = await samlStrategy(properties.esup.SAML, verifyFunction);
+        properties.strategy = await samlStrategy(properties.esup.SAML);
     } else {
         throw new Error("No strategy defined in esup.properties");
     }

@@ -79,10 +79,8 @@ exports.routing = function(router, passport) {
     } else if (properties.strategy.name == 'saml') {
 
         async function getUserLastValidation(user) {
-            const tenant = user.attributes.issuer;
+            const tenant = user.issuer;
             const password = await tenants.getApiPassword(tenant);
-            console.log('tenant: ' + tenant);
-            console.log('password: ' + password);
 
             const response = await fetch(properties.esup.api_url + '/protected/users/' + user.uid, {headers: {
                 'Content-Type': 'application/json',
@@ -96,9 +94,7 @@ exports.routing = function(router, passport) {
         async function logOrReauthUser(req, res, next, user) {
             const result = await getUserLastValidation(user);
             if ('time' in result) {
-                const assertion = user.attributes.getAssertion();
-                const context = assertion.Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
-                if (context == properties.esup.SAML.normalAuthnContext) {
+                if (user.context == properties.esup.SAML.normalAuthnContext) {
                     return logUser(req, res, next, user);
                 } else {
                     let params = new URLSearchParams();
@@ -131,12 +127,18 @@ exports.routing = function(router, passport) {
         });
 
         router.get('/logout', function(req, res, next) {
-            properties.strategy.strategy.logout(req, (err, logoutUrl) => {
+            if (!req.user) { res.redirect('/') };
+            console.log("initiating logout for user " + req.user);
+            return properties.strategy.strategy.logout(req, function(err, url) {
+                return res.redirect(url);
+            });
+        });
+
+        router.post('/logout', function(req, res, next) {
+            console.log("completing logout for user " + req.user);
+            req.logout(function(err) {
                 if (err) { return next(err); }
-                req.logout(function(err) {
-                    if (err) { return next(err); }
-                    res.redirect(logoutUrl);
-                });
+                res.redirect('/');
             });
         });
 

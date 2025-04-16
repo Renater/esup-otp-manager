@@ -7,10 +7,8 @@ import * as fs from 'fs';
 
 /**
  * @param {import('@node-saml/passport-saml/lib/types').PassportSamlConfig & {printServiceProviderMetadata: boolean}} samlProperties
- * 
- * @param {(login: {user: String, attributes: {}}, done: Function) => void} verifyFunction 
  */
-export default async function strategy(samlProperties, verifyFunction) {
+export default async function strategy(samlProperties) {
 
     if (!samlProperties.identifierFormat) {
         samlProperties.identifierFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
@@ -50,7 +48,6 @@ export default async function strategy(samlProperties, verifyFunction) {
         } else {
             options = { disableRequestedAuthnContext: true };
         }
-        console.log('SAML options: ' + options);
         return done(null, options);
     };
 
@@ -58,18 +55,21 @@ export default async function strategy(samlProperties, verifyFunction) {
          * @param {import('@node-saml/node-saml/lib/types').Profile} profile
          * @param {import('@node-saml/passport-saml/lib/types').VerifiedCallback} done 
          */
-    function verify(req, profile, done) {
-        verifyFunction({
-            uid: profile[samlProperties.uidSamlAttribute],
-            name: profile[samlProperties.nameSamlAttribute],
-            attributes: profile
-        }, done);
-    }
 
     const samlStrategy = new MultiSamlStrategy(
         samlProperties,
-        verify,
-        verify
+        function(req, profile, done) {
+            const context = profile.getAssertion().Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
+            return done(null, {
+                uid:          profile.attributes[samlProperties.uidSamlAttribute],
+                name:         profile.attributes[samlProperties.nameSamlAttribute],
+                attributes:   profile.attributes,
+                issuer:       profile.issuer,
+                context:      context,
+                nameID:       profile.nameID,
+                nameIDFormat: profile.nameIDFormat
+            });
+        }
     );
 
     return {
