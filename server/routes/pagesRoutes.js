@@ -77,7 +77,8 @@ exports.routing = function(router, passport) {
         });
     } else if (properties.strategy.name == 'saml') {
 
-        async function getUserLastValidation(user) {
+        async function getUserActiveMethods(user) {
+            // TODO: do it on API-side
             const tenant = user.issuer;
             const password = await tenants.getApiPassword(tenant);
 
@@ -87,12 +88,21 @@ exports.routing = function(router, passport) {
                 'Authorization':  'Bearer ' + password
             }});
             const data = await response.json();
-            return data.user.last_validated;
+            const methods = data.user.methods;
+
+            var active_methods = [];
+            for (const method of ['random_code', 'random_code_mail', 'bypass', 'passcode_grid', 'totp', 'push', 'esupnfc', 'webauthn']) {
+                if (method in methods && methods[method].active === true) {
+                    active_methods.push(method);
+                }
+            }
+
+            return active_methods;
         }
 
         async function logOrReauthUser(req, res, next, user) {
-            const result = await getUserLastValidation(user);
-            if ('time' in result) {
+            const methods = await getUserActiveMethods(user);
+            if (methods.length) {
                 if (user.context == properties.esup.SAML.normalAuthnContext) {
                     return logUser(req, res, next, user);
                 } else {
