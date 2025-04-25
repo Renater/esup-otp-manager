@@ -116,7 +116,7 @@
       "deactivated": "Deactivated",
       "note":"Set up at least 2 methods among:"
     },
-    "index": "Single use passwords management interface",
+    "index": "Multi-Factor Authentication Management Interface",
     "action":{
       "connection": "Login",
       "activate": "Activate",
