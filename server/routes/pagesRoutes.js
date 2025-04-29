@@ -24,13 +24,10 @@ exports.routing = function(router, passport) {
     });
 
     router.get('/preferences', isUser, function(req, res) {
-        var right = "user";
-        if (utils.is_manager(req.session.passport.user)) right = "manager";
-        if (utils.is_admin(req.session.passport.user)) right = "admin";
         res.render('dashboard', {
             title: 'Esup Otp Manager : Test',
             user: req.session.passport.user,
-            right: right
+            right: req.session.passport.user.role
         });
     });
 

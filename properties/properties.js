@@ -1,4 +1,4 @@
-var fs = fs = require('fs');
+const fs = require('fs');
 
 var properties = {};
 

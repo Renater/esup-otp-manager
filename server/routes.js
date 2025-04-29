@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var properties = require(__dirname+'/../properties/properties');
 var utils = require(__dirname+'/../services/utils');
+const aclUtils = require(__dirname + '/../services/aclUtils.mjs');
 const apiRoutes = require('./routes/apiRoutes');
 const isUser = apiRoutes.isUser;
 
@@ -14,7 +15,7 @@ function routing() {
     });
 
     router.get('/manager/users_methods', isUser, function(req, res) {
-        res.send({ ...properties.esup.users_methods, user: req.user });
+        res.send({ unauthorized: aclUtils.getUnauthorizedMethods(req.user) });
     });
 
     router.get('/manager/infos', isUser, function(req, res) {
@@ -37,9 +38,10 @@ module.exports = function(_passport) {
         var _user = {};
         _user.uid=user.uid;
         _user.attributes=user.attributes;
-        if(utils.is_admin(user))_user.role="admin";
-        else if(utils.is_manager(user))_user.role="manager";
-        else _user.role="user";
+        aclUtils.prepareUserForAcl(_user);
+        if (aclUtils.is_admin(user)) _user.role = "admin";
+        else if (aclUtils.is_manager(user)) _user.role = "manager";
+        else _user.role = "user";
         done(null, _user);
     });
 

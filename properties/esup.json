@@ -9,9 +9,9 @@
     "api_password":"changeit",
     "session_secret_key": "changeit",
     "admins": ["john"],
-    "admins_attributes": {"memberof": "cn=esup-otp.admin,ou=groups,dc=univ-ville,dc=fr"},
+    "admins_attributes": {"memberof": ["cn=esup-otp.admin,ou=groups,dc=univ-ville,dc=fr"]},
     "managers": ["paul"],
-    "managers_attributes": {"supannentiteaffectation": "DSI"},
+    "managers_attributes": {"supannentiteaffectation": ["DSI"]},
     "#how_to use users_method": "remove '#' in front of methods. You can add others acls",
     "users_methods" :{
        "#random_code" : {"deny" : {"edupersonaffiliation" : ["student","alum"],"memberof":["cn=esup-otp.not_random_code,ou=groups,dc=univ-ville,dc=fr"]}},

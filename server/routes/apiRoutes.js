@@ -1,6 +1,7 @@
 const { request } = require('undici');
 const properties = require(__dirname + '/../../properties/properties');
 const utils = require(__dirname + '/../../services/utils');
+const aclUtils = require(__dirname + '/../../services/aclUtils.mjs');
 
 function redirect(req, res, status, path) {
     res
@@ -28,7 +29,7 @@ exports.isUser = isUser;
 
 function isManager(req, res, next) {
     isUser(req, res, () => {
-        if (utils.is_manager(req.session.passport.user) || utils.is_admin(req.session.passport.user)) {
+        if (["admin", "manager"].includes(req.session.passport.user.role)) {
             return next();
         } else {
             redirectForbidden(req, res);
@@ -38,7 +39,17 @@ function isManager(req, res, next) {
 
 function isAdmin(req, res, next) {
     isUser(req, res, () => {
-        if (utils.is_admin(req.session.passport.user)) {
+        if (req.session.passport.user.role == "admin") {
+            return next();
+        } else {
+            redirectForbidden(req, res);
+        }
+    });
+}
+
+function canAccessUserMethod(req, res, next) {
+    isUser(req, res, () => {
+        if (aclUtils.is_authorized(req.session.passport.user, req.params.method)) {
             return next();
         } else {
             redirectForbidden(req, res);
@@ -119,7 +130,7 @@ exports.routing = function(router) {
         });
     });
 
-    router.put('/api/:method/activate', isUser, function(req, res) {
+    router.put('/api/:method/activate', canAccessUserMethod, function(req, res) {
         request_otp_api(req, res, {
             method: 'PUT',
             relUrl: '/protected/users/'+req.session.passport.user.uid+'/methods/'+req.params.method+'/activate',
@@ -127,7 +138,7 @@ exports.routing = function(router) {
         });
     });
     
-    router.post('/api/:method/activate/confirm/:activation_code', isUser, function(req, res) {
+    router.post('/api/:method/activate/confirm/:activation_code', canAccessUserMethod, function(req, res) {
         request_otp_api(req, res, {
             method: 'POST',
             relUrl: '/protected/users/' + req.session.passport.user.uid + '/methods/' + req.params.method + '/activate/' + req.params.activation_code,
@@ -143,7 +154,7 @@ exports.routing = function(router) {
         });
     });
 
-    router.post('/api/:method/confirm_activate', isUser, function(req, res) {
+    router.post('/api/:method/confirm_activate', canAccessUserMethod, function(req, res) {
         request_otp_api(req, res, {
             method: 'POST',
             relUrl: '/protected/users/' + req.session.passport.user.uid + '/methods/' + req.params.method + '/confirm_activate/',
@@ -151,7 +162,7 @@ exports.routing = function(router) {
         });
     });
 
-    router.post('/api/:method/auth/:authenticator_id', isUser, function(req, res) {
+    router.post('/api/:method/auth/:authenticator_id', canAccessUserMethod, function(req, res) {
         request_otp_api(req, res, {
             method: 'POST',
             relUrl: `/protected/users/${req.session.passport.user.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}`,
@@ -159,7 +170,7 @@ exports.routing = function(router) {
         });
     });
 
-    router.delete('/api/:method/auth/:authenticator_id', isUser, function(req, res) {
+    router.delete('/api/:method/auth/:authenticator_id', canAccessUserMethod, function(req, res) {
         request_otp_api(req, res, {
             method: 'DELETE',
             relUrl: `/protected/users/${req.session.passport.user.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}`,
@@ -191,7 +202,7 @@ exports.routing = function(router) {
         });
     });
 
-    router.put('/api/:method/deactivate', isUser, function(req, res) {
+    router.put('/api/:method/deactivate', canAccessUserMethod, function(req, res) {
         request_otp_api(req, res, {
             method: 'PUT',
             relUrl: '/protected/users/'+req.session.passport.user.uid+'/methods/'+req.params.method+'/deactivate/',
@@ -247,7 +258,7 @@ exports.routing = function(router) {
         });
     });
 
-    router.post('/api/generate/:method', isUser, function(req, res) {
+    router.post('/api/generate/:method', canAccessUserMethod, function(req, res) {
         const uri = '/protected/users/'+ req.session.passport.user.uid + '/methods/' + req.params.method + '/secret';
         const queryParams = {};
         if (req.query.require_method_validation === 'true') {
