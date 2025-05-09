@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var server = require('./server/server');
+import './server/server.js';
 
 process.on('SIGINT', function() {
     process.exit(0);

@@ -1,7 +1,7 @@
-const { request } = require('undici');
-const properties = require(__dirname + '/../../properties/properties');
-const utils = require(__dirname + '/../../services/utils');
-const aclUtils = require(__dirname + '/../../services/aclUtils.mjs');
+import { request } from 'undici';
+import properties from '../../properties/properties.js';
+import * as utils from '../../services/utils.js';
+import * as aclUtils from '../../services/aclUtils.js';
 
 function redirect(req, res, status, path) {
     res
@@ -20,12 +20,10 @@ function redirectForbidden(req, res) {
     redirect(req, res, 401, '/forbidden');
 }
 
-function isUser(req, res, next) {
+export function isUser(req, res, next) {
     if (utils.isAuthenticated(req)) return next();
     redirectLogin(req, res);
 }
-
-exports.isUser = isUser;
 
 function isManager(req, res, next) {
     isUser(req, res, () => {
@@ -115,7 +113,7 @@ async function request_otp_api(req, res, opts_) {
     res.send(infos);
 }
 
-exports.routing = function(router) {
+export function routing(router) {
     router.get('/api/user', isUser, function(req, res) {
         request_otp_api(req, res, {
             relUrl: '/protected/users/' + req.session.passport.user.uid,

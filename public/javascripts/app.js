@@ -360,7 +360,6 @@ const WebAuthnMethod = Vue.extend({
         },
 
         deleteAuthenticator: function(authCredID) {
-            // TODO : USE MESSAGES FILES FOR LOCALISATION
             const auth = this.getAuthById(authCredID);
             const name = auth.name;
             return Swal.fire({ // https://sweetalert2.github.io/#configuration

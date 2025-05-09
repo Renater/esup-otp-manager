@@ -1,22 +1,20 @@
-/**
- * Created by abousk01 on 07/09/2016.
- */
-var io;
-var sharedSession;
-var sharedsession = require("express-socket.io-session");
-var apiSockets = require('../client/sockets');
+import { Server as SocketServer } from "socket.io";
+let io;
+let sharedSession;
+import SharedSession from 'express-socket.io-session';
+import * as apiSockets from '../client/sockets.js';
 
-exports.attach = function(server){
-    io = require('socket.io')({path: "/sockets"}).attach(server);
-    io.use(sharedsession(sharedSession, {
+export function attach(server) {
+    io = new SocketServer(server, {path: "/sockets"});
+    io.use(SharedSession(sharedSession, {
         autoSave:true
     }));
     initialize();
-};
+}
 
-exports.sharedSession = function(session){
+export function setSharedSession(session) {
     sharedSession = session;
-};
+}
 
 function initialize(){
     io.on("connection", function(socket) {
@@ -34,6 +32,6 @@ function initialize(){
     });
 }
 
-exports.emit = function(socket, emit, data){
+export function emit(socket, emit, data) {
     io.to(socket).emit(emit, data);
-};
+}

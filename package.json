@@ -7,6 +7,7 @@
     "url": "git://github.com/EsupPortail/esup-otp-manager.git"
   },
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "start": "node run"
   },
@@ -40,6 +41,13 @@
     }
   },
   "devDependencies": {
-    "@types/node": "20.x"
+    "@types/cookie-parser": "1.x",
+    "@types/debug": "4.x",
+    "@types/express-session": "1.x",
+    "@types/express-socket.io-session": "1.x",
+    "@types/morgan": "1.x",
+    "@types/node": "20.x",
+    "@types/passport": "x",
+    "eslint": "8.x"
   }
 }

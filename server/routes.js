@@ -1,12 +1,14 @@
-var express = require('express');
-var router = express.Router();
-var properties = require(__dirname+'/../properties/properties');
-var utils = require(__dirname+'/../services/utils');
-const aclUtils = require(__dirname + '/../services/aclUtils.mjs');
-const apiRoutes = require('./routes/apiRoutes');
+import express from 'express';
+const router = express.Router();
+import properties from '../properties/properties.js';
+import * as utils from '../services/utils.js';
+import * as aclUtils from '../services/aclUtils.js';
+import * as apiRoutes from './routes/apiRoutes.js';
 const isUser = apiRoutes.isUser;
+import * as pagesRoutes from './routes/pagesRoutes.js';
+import { Strategy as CasStrategy } from '@coursetable/passport-cas';
 
-var passport;
+let passport;
 
 
 function routing() {
@@ -33,16 +35,16 @@ function routing() {
         });
     });
 
-    require('./routes/pagesRoutes').routing(router, passport);
+    pagesRoutes.routing(router, passport);
     apiRoutes.routing(router);
 }
 
-module.exports = function(_passport) {
+export default function(_passport) {
     passport = _passport;
 
     // used to serialize the user for the session
     passport.serializeUser(function(user, done) {
-        var _user = {};
+        const _user = {};
         _user.uid=user.uid;
         _user.attributes=user.attributes;
         aclUtils.prepareUserForAcl(_user);
@@ -68,7 +70,7 @@ module.exports = function(_passport) {
         serverBaseURL: CAS.serviceBaseURL,
     }
 
-    passport.use(new(require('@coursetable/passport-cas').Strategy)(passportCasOpts, function(profile, done) {
+    passport.use(new CasStrategy(passportCasOpts, function(profile, done) {
 	// console.log("profile : " + JSON.stringify(profile, null ,2));
         return done(null, {uid:profile.user, attributes:profile.attributes});
     }));
@@ -76,4 +78,4 @@ module.exports = function(_passport) {
     routing();
 
     return router
-};
+}

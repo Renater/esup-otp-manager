@@ -1,14 +1,14 @@
-const properties = require(__dirname + '/../../properties/properties');
-const utils = require(__dirname + '/../../services/utils');
+import properties from '../../properties/properties.js';
+import * as utils from '../../services/utils.js';
 
 function isUser(req, res, next) {
     if (utils.isAuthenticated(req)) return next();
     res.redirect('/login'); // can't use 401 because of https://www.rfc-editor.org/rfc/rfc7235#section-3.1 (302 is used by default)
 }
 
-exports.routing = function(router, passport) {
+export function routing(router, passport) {
     router.get('/', function(req, res) {
-        var reqMessages = utils.getMessagesForRequest(req);
+        const reqMessages = utils.getMessagesForRequest(req);
         res.render('index', {
             title: 'ESUP OTP Manager',
             messages: reqMessages.messages,

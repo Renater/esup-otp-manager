@@ -1,14 +1,19 @@
-const fs = require('fs');
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'node:url';
 
-var properties = {};
+const __dirname = import.meta.dirname || path.dirname(fileURLToPath(import.meta.url));
 
-fs.readdirSync(__dirname).forEach(function(file) {
-    var strFile = file.split('.');
-    if (strFile[strFile.length - 1] == 'json') {
-        properties[file.split('.')[0]] = JSON.parse(fs.readFileSync(__dirname+ '/' + file));
+const properties = {};
+
+for (const file of await fs.readdir(__dirname)) {
+    const parsed = path.parse(file);
+    if (parsed.ext === '.json') {
+        const filePath = path.join(__dirname, file);
+        properties[parsed.name] = JSON.parse(await fs.readFile(filePath, 'utf-8'));
     }
-})
-
-for (const properties_file in properties) {
-    exports[properties_file] = properties[properties_file];
 }
+
+console.log("properties", Object.keys(properties));
+
+export default properties;

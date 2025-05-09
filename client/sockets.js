@@ -1,13 +1,15 @@
 /**
  * Created by abousk01 on 07/09/2016.
  */
-var properties = require(__dirname+'/../properties/properties');
+import properties from '../properties/properties.js';
 
-var apiSockets = require("socket.io-client").connect(properties.esup.api_url, {reconnect: true, path: "/sockets", query: 'app=manager', extraHeaders: {
+import io from 'socket.io-client';
+
+const apiSockets = io.connect(properties.esup.api_url, {reconnect: true, path: "/sockets", query: 'app=manager', extraHeaders: {
     Authorization: "Bearer " + properties.esup.api_password,
 }});
-var sockets = require('../server/sockets');
-var users = {};
+import * as sockets from '../server/sockets.js';
+const users = {};
 
 apiSockets.on('connect', function () {
     console.log("Api Sockets connected");
@@ -34,16 +36,18 @@ apiSockets.on('userPushDeactivateManager', function (data) {
     if(users[data.uid])sockets.emit(users[data.uid], 'userPushDectivateManager', {uid : data.target});
 });
 
-exports.userConnection = function(uid, idSocket){
-    users[uid]=idSocket;
-};
+export function userConnection(uid, idSocket) {
+    users[uid] = idSocket;
+}
 
-exports.userDisconnection = function(idSocket){
-    for(user in users){
-        if(users[user]==idSocket)delete users[user];
+export function userDisconnection(idSocket) {
+    for (const user in users) {
+        if (users[user] == idSocket) {
+            delete users[user];
+        }
     }
-};
+}
 
-exports.emit = function(emit, data){
+export function emit(emit, data) {
     apiSockets.emit(emit, data);
-};
+}

@@ -1,7 +1,7 @@
 import { before, describe, it } from "node:test";
 import assert from "node:assert"
 
-import { normalizeEsupProperties, is_admin, is_manager, is_authorized, prepareUserForAcl } from '../services/aclUtils.mjs';
+import { normalizeEsupProperties, is_admin, is_manager, is_authorized, prepareUserForAcl } from '../services/aclUtils.js';
 import properties from "../properties/properties.js";
 const { esup } = properties;
 

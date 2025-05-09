@@ -1,6 +1,8 @@
-var properties = require(__dirname + '/../properties/properties');
-var express = require('express');
-var expressSession = require('express-session')({
+import properties from '../properties/properties.js';
+import express from 'express';
+import session from 'express-session';
+import { fileURLToPath } from 'node:url';
+const expressSession = session({
     secret: properties.esup.session_secret_key,
     resave: true,
     saveUninitialized: true,
@@ -9,15 +11,16 @@ var expressSession = require('express-session')({
         sameSite: "lax",
     },
 });
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var passport = require('passport');
+import path from 'path';
+import logger from 'morgan';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import passport from 'passport';
 
-var app = express();
-var sockets = require('./sockets');
+const app = express();
+import * as sockets from './sockets.js';
+
+const __dirname = import.meta.dirname || path.dirname(fileURLToPath(import.meta.url));
 
 // view engine setup
 app.set('views', path.join(__dirname + '/..', 'views'));
@@ -35,6 +38,7 @@ app.use('/js/vue.js', express.static(path.join(__dirname + '/..', '/node_modules
 app.use('/js/sweetalert2.all.min.js', express.static(path.join(__dirname + '/..', '/node_modules/sweetalert2/dist/sweetalert2.all.min.js')));
 
 // uncomment after placing your favicon in /public
+//import favicon from 'serve-favicon';
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -45,19 +49,19 @@ app.use(express.static(path.join(__dirname + '/..', 'public')));
 app.use(expressSession);
 app.use(passport.initialize());
 app.use(passport.session());
-sockets.sharedSession(expressSession);
+sockets.setSharedSession(expressSession);
 
 app.use(function(req, res, next) {
     res.locals.session = req.session;
     next();
 });
 
-var routes = require('./routes');
+import routes from './routes.js';
 app.use('/', routes(passport));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
+    const err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
@@ -87,4 +91,4 @@ app.use(function(err, req, res, next) {
 });
 
 
-module.exports = app;
+export default app;
