@@ -14,6 +14,4 @@ for (const file of await fs.readdir(__dirname)) {
     }
 }
 
-console.log("properties", Object.keys(properties));
-
 export default properties;
