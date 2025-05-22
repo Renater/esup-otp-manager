@@ -1,7 +1,7 @@
 import properties from '../../properties/properties.js';
 import * as utils from '../../services/utils.js';
+import * as tenants from '../tenants.js';
 import logger from '../../services/logger.js';
-const tenants = require(__dirname + '/../tenants');
 
 function isUser(req, res, next) {
     if (utils.isAuthenticated(req)) return next();

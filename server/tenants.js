@@ -1,4 +1,4 @@
-const properties = require(__dirname + '/../properties/properties');
+import properties from '../properties/properties.js';
 
 const passwords = new Map();
 
@@ -19,7 +19,7 @@ async function getTenantById(id) {
     return await response.json();
 }
 
-async function getApiPassword(name) {
+export async function getApiPassword(name) {
     if (!passwords.has(name)) {
 	const apiTenant = await getTenantByName(name);
 
@@ -31,5 +31,3 @@ async function getApiPassword(name) {
 
     return passwords.get(name);
 }
-
-exports.getApiPassword = getApiPassword;

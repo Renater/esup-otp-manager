@@ -2,9 +2,8 @@ import { request } from 'undici';
 import properties from '../../properties/properties.js';
 import * as utils from '../../services/utils.js';
 import * as aclUtils from '../../services/aclUtils.js';
+import * as tenants from '../tenants.js';
 import logger from '../../services/logger.js';
-
-const tenants = require(__dirname + '/../tenants');
 
 function redirect(req, res, status, path) {
     res
