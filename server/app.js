@@ -65,7 +65,7 @@ app.use(function(req, res, next) {
 });
 
 import routes from './routes.js';
-app.use('/', routes(passport));
+app.use('/', await routes(passport));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

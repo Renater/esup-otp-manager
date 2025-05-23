@@ -1292,6 +1292,7 @@ var app = new Vue({
 
         setUser: function (data) {
             this.user.uid = this.infos.uid;
+            this.user.name = this.infos.name;
             this.user.methods = data.user.methods;
             this.user.transports = data.user.transports;
         },
