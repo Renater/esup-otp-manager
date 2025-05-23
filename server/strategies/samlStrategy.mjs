@@ -2,7 +2,7 @@ import { MultiSamlStrategy } from "@node-saml/passport-saml";
 import { fetch, toPassportConfig } from 'passport-saml-metadata';
 import { Cache } from 'file-system-cache';
 import os from 'os';
-import * as utils from "../../services/utils.js";
+import path from 'path';
 import * as fs from 'fs';
 
 /**
@@ -33,9 +33,9 @@ export default async function strategy(samlProperties) {
         const declaredPath = samlProperties[certPathPropertyName];
         if (declaredPath) {
             delete samlProperties[certPathPropertyName];
-            const path = utils.resolvePath(declaredPath);
+            const certPath = path.resolve(declaredPath);
 
-            const cert = fs.readFileSync(path).toString()
+            const cert = fs.readFileSync(certPath).toString()
             samlProperties[certType] = cert;
         }
     }
