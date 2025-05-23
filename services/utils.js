@@ -1,5 +1,4 @@
 import properties from "../properties/properties.js";
-import path from 'path';
 
 export function isAuthenticated(req) {
     return Boolean(req.session.passport?.user);
@@ -19,12 +18,4 @@ export function getMessagesForRequest(req) {
         messages: properties["messages_" + lang],
         lang: lang,
     };
-}
-
-export function resolvePath(filePath) {
-    if (path.isAbsolute(filePath)) {
-        return filePath;
-    } else {
-        return path.resolve(filePath);
-    }
 }
