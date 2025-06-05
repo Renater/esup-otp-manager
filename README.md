@@ -69,6 +69,73 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 
+## Configuration
+
+### Authentication
+
+esup-otp-manager support either CAS or SAML authentication.
+
+#### CAS
+
+CAS authentication require the presence of a CAS object in the configuration file:
+```
+"CAS": {
+    "version": "CAS3.0",
+    "casBaseURL": "http://localhost/cas",
+    "serviceBaseURL": "http://localhost:4000/"
+},
+```
+
+This object has the following keys:
+- `version`: FIXME
+- 'casBaseURL`: FIXME
+- 'serviceBaseURL`: FIXME
+
+#### SAML
+
+SAML authentication require the presence of a SAML object in the configuration file:
+
+```
+"SAML": {
+    "sp": {
+        "callbackUrl": "http://localhost:4000/login",
+        "entityID": "esup-otp-manager",
+        "signatureKeyPath": "certs/key.pem",
+        "signatureCertPath": "certs/cert.pem",
+        "uidSamlAttribute": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6",
+        "nameSamlAttribute": "urn:oid:2.16.840.1.113730.3.1.241",
+        "metadataUrl": "saml2/metadata",
+    },
+    "idp": {
+        "metadataUrl": "https://example.com/idp/shibboleth",
+    }
+},
+```
+
+This object has the following keys:
+- `sp`: a single SP object, describing esup-otp-manager SAML behavior, with the following keys:
+    - `callbackUrl`: absolute URL to redirect the user, after login on IdP
+    - `logoutCallbackUrl`: absolute URL to redirect the user, after logout from IdP
+    - `entityID`: the SAML identifier (entityID) for this SP
+    - `signatureKeyPath`: path to the signature key
+    - `signatureCertPath`: path to the signature certificate
+    - `encryptionKeyPath`: path to the encryption key
+    - `encryptionCertPath`: path to the encryption certificate
+    - `uidAttribute`: OID of SAML attribute used as user identifier (default: urn:oid:1.3.6.1.4.1.5923.1.1.1.6)
+    - `nameAttribute`: OID of SAML attribute used as user name (default: urn:oid:2.16.840.1.113730.3.1.241)
+    - `metadataUrl`: if defined, relative URL where to expose metadata for this SP
+    - `initialAuthnContext`: if defined, AuthnContext to use in SAML request for a non-initialized user
+    - `normalAuthnContext`: if defined, AuthnContext to use in SAML request for an initialized user
+    - `identifierFormat`: identifier format to use in SAML request (default: urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified)
+- `idp`: either a single IdP object, or a list of IdP objects, describing trusted IdPs, with the following keys:
+    - `metadataURL`: if defined, URL from which to retrieve IdP metadata
+    - `cert`: IdP signature certificate
+    - `entryPoint`: IdP SSO endpoint
+    - `logoutUrl`: IdP SLO endpoint
+
+If a list of IdP objects is used, esup-otp-manager assume multi-tenants support
+is active on API side.
+
 ## License
 
 MIT
