@@ -101,12 +101,12 @@ export function routing(router, passport) {
         async function logOrReauthUser(req, res, next, user) {
             const methods = await getUserActiveMethods(user);
             if (methods.length) {
-                if (user.context == properties.esup.SAML.normalAuthnContext) {
+                if (user.context == properties.esup.SAML.sp.normalAuthnContext) {
                     return logUser(req, res, next, user);
                 } else {
                     console.log(`authentication context ${user.context} insufficient for user ${user.uid}, reauthentication required`);
                     let params = new URLSearchParams();
-                    params.set('authnContext', properties.esup.SAML.normalAuthnContext);
+                    params.set('authnContext', properties.esup.SAML.sp.normalAuthnContext);
                     return res.redirect('/login' + "?" + params);
                 }
             } else {
@@ -152,7 +152,7 @@ export function routing(router, passport) {
             });
         });
 
-        const spMetadataUrl = properties.esup.SAML.spMetadataUrl;
+        const spMetadataUrl = properties.esup.SAML.sp.metadataUrl;
         if (spMetadataUrl) {
             router.get("/" + spMetadataUrl, function(req, res, next) {
                 properties.strategy.generateMetadata(req, res, next);

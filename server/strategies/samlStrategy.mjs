@@ -6,42 +6,60 @@ import path from 'path';
 import * as fs from 'fs';
 
 /**
- * @param {import('@node-saml/passport-saml/lib/types').PassportSamlConfig & {printServiceProviderMetadata: boolean}} samlProperties
+ * @param {import('@node-saml/passport-saml/lib/types').PassportSamlConfig & {printServiceProviderMetadata: boolean}} properties
  */
-export default async function strategy(samlProperties) {
+export default async function strategy(properties) {
 
-    if (!samlProperties.identifierFormat) {
-        samlProperties.identifierFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
+    const passportProperties = {
+        issuer:             properties.sp.entityID,
+        callbackUrl:        properties.sp.callbackUrl        || "http://localhost/login",
+        logoutCallbackUrl:  properties.sp.logoutCallbackUrl  || "http://localhost/logout",
+        identifierFormat:   properties.sp.identifierFormat   || "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+        signatureAlgorithm: properties.sp.signatureAlgorithm || "sha256",
+        racComparison:      properties.sp.racComparison      || "exact",
+    };
+
+    const attributes = {
+        uid: properties.sp.uidAttribute   || "urn:oid:1.3.6.1.4.1.5923.1.1.1.6",
+        name: properties.sp.nameAttribute || "urn:oid:2.16.840.1.113730.3.1.241",
+    };
+
+    if (properties.sp.signatureCertPath) {
+        const value = fs.readFileSync(path.resolve(properties.sp.signatureCertPath)).toString();
+        passportProperties["publicCert"] = value;
     }
 
-    if (samlProperties.idpMetadataUrl) {
-        const reader = await fetch({ url: samlProperties.idpMetadataUrl, backupStore: new Cache({ basePath: os.tmpdir() }) });
+    if (properties.sp.signatureKeyPath) {
+        const value = fs.readFileSync(path.resolve(properties.sp.signatureKeyPath)).toString();
+        passportProperties["privateKey"] = value;
+    }
+
+    if (properties.sp.encryptionCertPath) {
+        const value = fs.readFileSync(path.resolve(properties.sp.encryptionCertPath)).toString();
+        passportProperties["decryptionPbc"] = value;
+    }
+
+    if (properties.sp.encryptionKeyPath) {
+        const value = fs.readFileSync(path.resolve(properties.sp.encryptionKeyPath)).toString();
+        passportProperties["decryptionPvk"] = value;
+    }
+
+    if (properties.idp.metadataUrl) {
+        const reader = await fetch({ url: properties.idp.metadataUrl, backupStore: new Cache({ basePath: os.tmpdir() }) });
 
         const config = toPassportConfig(reader);
         for (const conf in config) {
-            samlProperties[conf] ||= config[conf];
+            passportProperties[conf] ||= config[conf];
         }
+    } else {
+        // https://github.com/node-saml/node-saml/issues/361
+        passportProperties[idpCert]    = properties.idp.cert.replace(/\s/g, '');
+        passportProperties[entryPoint] = properties.idp.entryPoint;
+        passportProperties[logoutUrl]  = properties.idp.logoutUrl;
     }
 
-    // https://github.com/node-saml/node-saml/issues/361
-    if (samlProperties.idpCert) {
-        samlProperties.idpCert = samlProperties.idpCert.replace(/\s/g, '');
-    }
-
-    for (const certType of ["publicCert", "privateKey", "decryptionPvk", "decryptionPbc"]) {
-        const certPathPropertyName = certType + "Path";
-        const declaredPath = samlProperties[certPathPropertyName];
-        if (declaredPath) {
-            delete samlProperties[certPathPropertyName];
-            const certPath = path.resolve(declaredPath);
-
-            const cert = fs.readFileSync(certPath).toString()
-            samlProperties[certType] = cert;
-        }
-    }
-
-    samlProperties['passReqToCallback'] = true;
-    samlProperties['getSamlOptions'] = function (req, done) {
+    passportProperties['passReqToCallback'] = true;
+    passportProperties['getSamlOptions'] = function (req, done) {
         var options;
         if (req.query.authnContext) {
             options = { authnContext: [ req.query.authnContext ] };
@@ -57,13 +75,13 @@ export default async function strategy(samlProperties) {
          */
 
     const samlStrategy = new MultiSamlStrategy(
-        samlProperties,
+        passportProperties,
         function(req, profile, done) {
             console.log("profile: " + JSON.stringify(profile, null, 2));
             const context = profile.getAssertion().Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
             return done(null, {
-                uid:          profile.attributes[samlProperties.uidSamlAttribute],
-                name:         profile.attributes[samlProperties.nameSamlAttribute],
+                uid:          profile.attributes[attributes['uid']],
+                name:         profile.attributes[attributes['name']],
                 attributes:   profile.attributes,
                 issuer:       profile.issuer,
                 context:      context,
@@ -80,8 +98,8 @@ export default async function strategy(samlProperties) {
             res.send(
                 samlStrategy.generateServiceProviderMetadata(
                     req,
-                    samlProperties.decryptionPbc,
-                    samlProperties.publicCert,
+                    passportProperties.decryptionPbc,
+                    passportProperties.publicCert,
                     function (err, data) {
                         if (err) {
                             return next();
