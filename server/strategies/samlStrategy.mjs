@@ -65,7 +65,7 @@ export default async function strategy(properties) {
         }
     } else if (properties.idp.cert && properties.idp.entryPoint) {
         // https://github.com/node-saml/node-saml/issues/361
-        passportProperties[idpCert]    = properties.idp.cert.replace(/\s/g, '');
+        passportProperties[cert]       = properties.idp.cert.replace(/\s/g, '');
         passportProperties[entryPoint] = properties.idp.entryPoint;
         passportProperties[logoutUrl]  = properties.idp.logoutUrl;
     } else {
