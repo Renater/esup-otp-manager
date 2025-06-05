@@ -10,6 +10,14 @@ import * as fs from 'fs';
  */
 export default async function strategy(properties) {
 
+    if (!properties.sp) {
+        throw "SAML.sp must be defined in properties/esup.json";
+    }
+
+    if (!properties.sp.entityID) {
+        throw "SAML.sp.entityID must be defined in properties/esup.json";
+    }
+
     const passportProperties = {
         issuer:             properties.sp.entityID,
         callbackUrl:        properties.sp.callbackUrl        || "http://localhost/login",
@@ -44,6 +52,10 @@ export default async function strategy(properties) {
         passportProperties["decryptionPvk"] = value;
     }
 
+    if (!properties.idp) {
+        throw "SAML.idp must be defined in properties/esup.json";
+    }
+
     if (properties.idp.metadataUrl) {
         const reader = await fetch({ url: properties.idp.metadataUrl, backupStore: new Cache({ basePath: os.tmpdir() }) });
 
@@ -51,11 +63,13 @@ export default async function strategy(properties) {
         for (const conf in config) {
             passportProperties[conf] ||= config[conf];
         }
-    } else {
+    } else if (properties.idp.cert && properties.idp.entryPoint) {
         // https://github.com/node-saml/node-saml/issues/361
         passportProperties[idpCert]    = properties.idp.cert.replace(/\s/g, '');
         passportProperties[entryPoint] = properties.idp.entryPoint;
         passportProperties[logoutUrl]  = properties.idp.logoutUrl;
+    } else {
+        throw "either SAML.idp.metadataUrl or (SAML.idp.cert and SAML.idp.entryPoint) must be defined in properties/esup.json";
     }
 
     passportProperties['passReqToCallback'] = true;
