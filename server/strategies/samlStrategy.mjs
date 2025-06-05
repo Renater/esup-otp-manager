@@ -11,11 +11,11 @@ import * as fs from 'fs';
 export default async function strategy(properties) {
 
     if (!properties.sp) {
-        throw "SAML.sp must be defined in properties/esup.json";
+        throw new Error("SAML.sp must be defined in properties/esup.json");
     }
 
     if (!properties.sp.entityID) {
-        throw "SAML.sp.entityID must be defined in properties/esup.json";
+        throw new Error("SAML.sp.entityID must be defined in properties/esup.json");
     }
 
     const passportProperties = {
@@ -53,7 +53,7 @@ export default async function strategy(properties) {
     }
 
     if (!properties.idp) {
-        throw "SAML.idp must be defined in properties/esup.json";
+        throw new Error("SAML.idp must be defined in properties/esup.json");
     }
 
     if (properties.idp.metadataUrl) {
@@ -69,7 +69,7 @@ export default async function strategy(properties) {
         passportProperties[entryPoint] = properties.idp.entryPoint;
         passportProperties[logoutUrl]  = properties.idp.logoutUrl;
     } else {
-        throw "either SAML.idp.metadataUrl or (SAML.idp.cert and SAML.idp.entryPoint) must be defined in properties/esup.json";
+        throw new Error("either SAML.idp.metadataUrl or (SAML.idp.cert and SAML.idp.entryPoint) must be defined in properties/esup.json");
     }
 
     passportProperties['passReqToCallback'] = true;
