@@ -12,7 +12,7 @@ async function getTenantByName(name) {
 }
 
 async function getTenantById(id) {
-    const response = await fetch(properties.esup.api_url + '/admin/tenant/' + id, {headers: {
+    const response = await fetch(properties.esup.api_url + '/admin/tenants/' + id, {headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + properties.esup.api_password
     }});
