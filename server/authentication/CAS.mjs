@@ -7,7 +7,7 @@ import logger from '../../services/logger.js';
  * @param {String}  casProperties.casBaseURL
  * @param {String=} casProperties.serviceBaseURL
  */
-export default function strategy(casProperties) {
+export default function authentication(casProperties) {
     if (CAS.casBaseURL.endsWith('/')) {
         CAS.casBaseURL = CAS.casBaseURL.slice(0, -1);
     }

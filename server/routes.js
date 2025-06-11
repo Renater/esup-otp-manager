@@ -68,16 +68,16 @@ export default async function(_passport) {
     });
 
     if (properties.esup.CAS) {
-        const { default: casStrategy } = await import('./strategies/casStrategy.mjs');
-        properties.strategy = await casStrategy(properties.esup.CAS);
+        const { default: authentication } = await import('./authentication/CAS.mjs');
+        properties.authentication = await authentication(properties.esup.CAS);
     } else if (properties.esup.SAML) {
-        const { default: samlStrategy } = await import('./strategies/samlStrategy.mjs');
-        properties.strategy = await samlStrategy(properties.esup.SAML);
+        const { default: authentication } = await import('./authentication/SAML.mjs');
+        properties.authentication = await authentication(properties.esup.SAML);
     } else {
-        throw new Error("No strategy defined in esup.properties");
+        throw new Error("No authentication backend defined in esup.properties");
     }
 
-    passport.use(properties.strategy.strategy);
+    passport.use(properties.authentication.strategy);
 
     routing();
 

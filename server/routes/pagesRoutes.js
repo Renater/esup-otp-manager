@@ -50,7 +50,7 @@ export function routing(router, passport) {
         });
     };
 
-    if (properties.strategy.name == 'cas') {
+    if (properties.authentication.name == 'cas') {
         router.all('/login', function(req, res, next) {
             passport.authenticate('cas', function(err, user, info) {
                 if (err) {
@@ -73,7 +73,7 @@ export function routing(router, passport) {
                 res.redirect(properties.esup.CAS.casBaseURL + 'logout');
             });
         });
-    } else if (properties.strategy.name == 'saml') {
+    } else if (properties.authentication.name == 'saml') {
 
         async function getUserActiveMethods(user) {
             // TODO: do it on API-side
@@ -139,7 +139,7 @@ export function routing(router, passport) {
         router.get('/logout', function(req, res, next) {
             if (!req.user) { res.redirect('/') };
             console.log(`initiating logout for user ${req.user.uid}`);
-            return properties.strategy.strategy.logout(req, function(err, url) {
+            return properties.authentication.strategy.logout(req, function(err, url) {
                 return res.redirect(url);
             });
         });
@@ -156,10 +156,10 @@ export function routing(router, passport) {
         if (spMetadataUrl) {
             router.get("/" + spMetadataUrl, function(req, res, next) {
                 res.send(
-                    properties.strategy.strategy.generateServiceProviderMetadata(
+                    properties.authentication.strategy.generateServiceProviderMetadata(
                         req,
-                        properties.strategy.metadata.encryptionCert,
-                        properties.strategy.metadata.signatureCert,
+                        properties.authentication.metadata.encryptionCert,
+                        properties.authentication.metadata.signatureCert,
                         function (err, data) {
                             if (err) {
                                 return next();

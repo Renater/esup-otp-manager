@@ -9,7 +9,7 @@ import logger from '../../services/logger.js';
 /**
  * @param {import('@node-saml/passport-saml/lib/types').PassportSamlConfig & {printServiceProviderMetadata: boolean}} properties
  */
-export default async function strategy(properties) {
+export default async function authentication(properties) {
 
     if (!properties.sp) {
         throw new Error("SAML.sp must be defined in properties/esup.json");
@@ -89,7 +89,7 @@ export default async function strategy(properties) {
          * @param {import('@node-saml/passport-saml/lib/types').VerifiedCallback} done 
          */
 
-    const samlStrategy = new MultiSamlStrategy(
+    const strategy = new MultiSamlStrategy(
         passportProperties,
         function(req, profile, done) {
             logger.debug("profile: " + JSON.stringify(profile, null, 2));
@@ -108,7 +108,7 @@ export default async function strategy(properties) {
 
     return {
         name: "saml",
-        strategy: samlStrategy,
+        strategy: strategy,
         metadata: {
             signatureCert: passportProperties.publicCert,
             encryptionCert: passportProperties.decryptionPbc,
