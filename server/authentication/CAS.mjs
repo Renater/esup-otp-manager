@@ -7,20 +7,20 @@ import logger from '../../services/logger.js';
  * @param {String}  casProperties.casBaseURL
  * @param {String=} casProperties.serviceBaseURL
  */
-export default function authentication(casProperties) {
+export default function authentication(properties) {
     if (CAS.casBaseURL.endsWith('/')) {
         CAS.casBaseURL = CAS.casBaseURL.slice(0, -1);
     }
 
-    const passportCasOpts = {
-        version: casProperties.version,
-        ssoBaseURL: casProperties.casBaseURL,
-        serverBaseURL: casProperties.serviceBaseURL,
+    const options = {
+        version: properties.version,
+        ssoBaseURL: properties.casBaseURL,
+        serverBaseURL: properties.serviceBaseURL,
     };
 
     return {
         name: "cas",
-        strategy: new PassportCasStrategy(passportCasOpts, function(profile, done) {
+        strategy: new PassportCasStrategy(options, function(profile, done) {
             logger.debug("profile: " + JSON.stringify(profile, null, 2));
             return done(null, {
                 uid:        profile.user,

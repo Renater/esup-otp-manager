@@ -19,7 +19,7 @@ export default async function authentication(properties) {
         throw new Error("SAML.sp.entityID must be defined in properties/esup.json");
     }
 
-    const passportProperties = {
+    const options = {
         issuer:             properties.sp.entityID,
         callbackUrl:        properties.sp.callbackUrl        || "http://localhost/login",
         logoutCallbackUrl:  properties.sp.logoutCallbackUrl  || "http://localhost/logout",
@@ -35,22 +35,22 @@ export default async function authentication(properties) {
 
     if (properties.sp.signatureCertPath) {
         const value = fs.readFileSync(path.resolve(properties.sp.signatureCertPath)).toString();
-        passportProperties["publicCert"] = value;
+        options["publicCert"] = value;
     }
 
     if (properties.sp.signatureKeyPath) {
         const value = fs.readFileSync(path.resolve(properties.sp.signatureKeyPath)).toString();
-        passportProperties["privateKey"] = value;
+        options["privateKey"] = value;
     }
 
     if (properties.sp.encryptionCertPath) {
         const value = fs.readFileSync(path.resolve(properties.sp.encryptionCertPath)).toString();
-        passportProperties["decryptionPbc"] = value;
+        options["decryptionPbc"] = value;
     }
 
     if (properties.sp.encryptionKeyPath) {
         const value = fs.readFileSync(path.resolve(properties.sp.encryptionKeyPath)).toString();
-        passportProperties["decryptionPvk"] = value;
+        options["decryptionPvk"] = value;
     }
 
     if (!properties.idp) {
@@ -62,19 +62,19 @@ export default async function authentication(properties) {
 
         const config = toPassportConfig(reader);
         for (const conf in config) {
-            passportProperties[conf] ||= config[conf];
+            options[conf] ||= config[conf];
         }
     } else if (properties.idp.cert && properties.idp.entryPoint) {
         // https://github.com/node-saml/node-saml/issues/361
-        passportProperties[cert]       = properties.idp.cert.replace(/\s/g, '');
-        passportProperties[entryPoint] = properties.idp.entryPoint;
-        passportProperties[logoutUrl]  = properties.idp.logoutUrl;
+        options[cert]       = properties.idp.cert.replace(/\s/g, '');
+        options[entryPoint] = properties.idp.entryPoint;
+        options[logoutUrl]  = properties.idp.logoutUrl;
     } else {
         throw new Error("either SAML.idp.metadataUrl or (SAML.idp.cert and SAML.idp.entryPoint) must be defined in properties/esup.json");
     }
 
-    passportProperties['passReqToCallback'] = true;
-    passportProperties['getSamlOptions'] = function (req, done) {
+    options['passReqToCallback'] = true;
+    options['getSamlOptions'] = function (req, done) {
         var options;
         if (req.query.authnContext) {
             options = { authnContext: [ req.query.authnContext ] };
@@ -90,7 +90,7 @@ export default async function authentication(properties) {
          */
 
     const strategy = new MultiSamlStrategy(
-        passportProperties,
+        options,
         function(req, profile, done) {
             logger.debug("profile: " + JSON.stringify(profile, null, 2));
             const context = profile.getAssertion().Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
@@ -110,8 +110,8 @@ export default async function authentication(properties) {
         name: "saml",
         strategy: strategy,
         metadata: {
-            signatureCert: passportProperties.publicCert,
-            encryptionCert: passportProperties.decryptionPbc,
+            signatureCert: options.publicCert,
+            encryptionCert: options.decryptionPbc,
         }
     };
 }
