@@ -155,7 +155,20 @@ export function routing(router, passport) {
         const spMetadataUrl = properties.esup.SAML.sp.metadataUrl;
         if (spMetadataUrl) {
             router.get("/" + spMetadataUrl, function(req, res, next) {
-                properties.strategy.generateMetadata(req, res, next);
+                res.send(
+                    properties.strategy.strategy.generateServiceProviderMetadata(
+                        req,
+                        properties.strategy.metadata.encryptionCert,
+                        properties.strategy.metadata.signatureCert,
+                        function (err, data) {
+                            if (err) {
+                                return next();
+                            }
+                            res.type('xml');
+                            res.send(data);
+                        }
+                    )
+                );
             });
         }
     }

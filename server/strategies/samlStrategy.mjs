@@ -109,21 +109,9 @@ export default async function strategy(properties) {
     return {
         name: "saml",
         strategy: samlStrategy,
-        generateMetadata: function(req, res, next) {
-            res.send(
-                samlStrategy.generateServiceProviderMetadata(
-                    req,
-                    passportProperties.decryptionPbc,
-                    passportProperties.publicCert,
-                    function (err, data) {
-                        if (err) {
-                            return next();
-                        }
-                        res.type('xml');
-                        res.send(data);
-                    }
-                )
-            );
+        metadata: {
+            signatureCert: passportProperties.publicCert,
+            encryptionCert: passportProperties.decryptionPbc,
         }
     };
 }
