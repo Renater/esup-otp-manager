@@ -102,9 +102,9 @@ SAML authentication require the presence of a SAML object in the configuration f
         "entityID": "esup-otp-manager",
         "signatureKeyPath": "certs/key.pem",
         "signatureCertPath": "certs/cert.pem",
-        "uidSamlAttribute": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6",
-        "nameSamlAttribute": "urn:oid:2.16.840.1.113730.3.1.241",
-        "metadataUrl": "saml2/metadata",
+        "uidAttribute": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6",
+        "nameAttribute": "urn:oid:2.16.840.1.113730.3.1.241",
+        "metadataUrl": "Metadata",
     },
     "idp": {
         "metadataUrl": "https://example.com/idp/shibboleth",
@@ -127,14 +127,8 @@ This object has the following keys:
     - `initialAuthnContext`: if defined, AuthnContext to use in SAML request for a non-initialized user
     - `normalAuthnContext`: if defined, AuthnContext to use in SAML request for an initialized user
     - `identifierFormat`: identifier format to use in SAML request (default: urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified)
-- `idp`: either a single IdP object, or a list of IdP objects, describing trusted IdPs, with the following keys:
-    - `metadataURL`: if defined, URL from which to retrieve IdP metadata
-    - `cert`: IdP signature certificate
-    - `entryPoint`: IdP SSO endpoint
-    - `logoutUrl`: IdP SLO endpoint
-
-If a list of IdP objects is used, esup-otp-manager assume multi-tenants support
-is active on API side.
+- `idp`: a single IdP object
+    - `metadataURL`: URL from which to retrieve IdP metadata
 
 ## License
 
