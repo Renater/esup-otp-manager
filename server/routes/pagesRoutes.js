@@ -1,6 +1,5 @@
 import properties from '../../properties/properties.js';
 import * as utils from '../../services/utils.js';
-import * as tenants from '../tenants.js';
 import logger from '../../services/logger.js';
 
 function isUser(req, res, next) {
@@ -77,13 +76,9 @@ export function routing(router, passport) {
 
         async function getUserActiveMethods(user) {
             // TODO: do it on API-side
-            const tenant = user.issuer;
-            const password = await tenants.getApiPassword(tenant);
-
             const response = await fetch(properties.esup.api_url + '/protected/users/' + user.uid, {headers: {
                 'Content-Type': 'application/json',
-                'X-Tenant': tenant,
-                'Authorization':  'Bearer ' + password
+                'Authorization':  'Bearer ' + properties.esup.api_password
             }});
             const data = await response.json();
             const methods = data.user.methods;

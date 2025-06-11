@@ -2,7 +2,6 @@ import { request } from 'undici';
 import properties from '../../properties/properties.js';
 import * as utils from '../../services/utils.js';
 import * as aclUtils from '../../services/aclUtils.js';
-import * as tenants from '../tenants.js';
 import logger from '../../services/logger.js';
 
 function redirect(req, res, status, path) {
@@ -85,9 +84,7 @@ async function request_otp_api(req, res, opts_) {
     };
 
     if (opts_.bearerAuth) {
-        const tenant = req.session.passport.user.issuer;
-        opts.headers['X-Tenant'] = tenant;
-        opts.headers.Authorization = 'Bearer ' + await tenants.getApiPassword(tenant);
+        opts.headers.Authorization = 'Bearer ' + properties.esup.api_password;
     }
 
     logger.debug(opts.method + ':' + opts.url);
