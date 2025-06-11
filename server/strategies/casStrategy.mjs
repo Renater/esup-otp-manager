@@ -1,4 +1,5 @@
 import { Strategy as PassportCasStrategy } from "@coursetable/passport-cas";
+import logger from '../../services/logger.js';
 
 /**
  * @param {Object}  casProperties 
@@ -20,7 +21,7 @@ export default function strategy(casProperties) {
     return {
         name: "cas",
         strategy: new PassportCasStrategy(passportCasOpts, function(profile, done) {
-            console.log("profile: " + JSON.stringify(profile, null, 2));
+            logger.debug("profile: " + JSON.stringify(profile, null, 2));
             return done(null, {
                 uid:        profile.user,
                 attributes: profile.attributes,
