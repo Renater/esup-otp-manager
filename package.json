@@ -15,6 +15,8 @@
     "@coursetable/passport-cas": "0.1.4",
     "@node-saml/passport-saml": "5.x",
     "body-parser": "2.x",
+    "chart.js": "4.x",
+    "chartjs-plugin-datalabels": "2.x",
     "cookie-parser": "1.x",
     "express": "5.x",
     "express-session": "1.x",
