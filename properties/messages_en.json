@@ -55,6 +55,10 @@
             "post": "</strong>. <br />Please enter the code received to validate this email address"
           },
           "wrong": "Incorrect code."
+        },
+        "confirm_delete": {
+          "sms": "Do you really want to delete your %TRANSPORT% phone number?",
+          "mail": "Do you really want to delete your %TRANSPORT% email address?"
         }
       },
       "random_code_mail": {

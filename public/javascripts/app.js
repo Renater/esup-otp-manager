@@ -579,21 +579,24 @@ const RandomCodeMethod = Vue.extend({
             };
         },
         deleteTransport: function(transport) {
-            var oldTransport = this.user.transports[transport];
-            this.user.transports[transport] = null;
-
-            return fetchApi({
-                method: "DELETE",
-                uri: this.formatApiUri('/transport/' + transport),
-                onSuccess: res => {
-                    if (res.data.code != "Ok") {
-                        throw new Error(JSON.stringify({ code: res.data.code }));
-                    }
-                },
-            }).catch(err => {
-                this.user.transports[transport] = oldTransport;
-                toast({ message: err, className: 'red darken-1' });
-            });
+            const oldTransport = this.user.transports[transport];
+            const message = this.messages.api.methods.random_code?.confirm_delete?.[transport]?.replace("%TRANSPORT%", oldTransport);
+            if (window.confirm(message)) {
+                this.user.transports[transport] = null;
+    
+                return fetchApi({
+                    method: "DELETE",
+                    uri: this.formatApiUri('/transport/' + transport),
+                    onSuccess: res => {
+                        if (res.data.code != "Ok") {
+                            throw new Error(JSON.stringify({ code: res.data.code }));
+                        }
+                    },
+                }).catch(err => {
+                    this.user.transports[transport] = oldTransport;
+                    toast({ message: err, className: 'red darken-1' });
+                });
+            }
         },
     },
     template: '#random_code-method'
