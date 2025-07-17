@@ -156,8 +156,8 @@
       "admin": "Administration"
     },
     "transports":{
-      "sms": "Sms",
-      "mail": "Mail"
+      "sms": "Your mobile number",
+      "mail": "Your email address"
     },
     "label":{
       "user": "User"

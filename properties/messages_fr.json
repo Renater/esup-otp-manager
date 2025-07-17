@@ -158,7 +158,7 @@
     },
     "transports":{
       "sms": "Votre numéro portable",
-      "mail": "Email"
+      "mail": "Votre adresse email"
     },
     "label":{
       "user": "Utilisateur"
