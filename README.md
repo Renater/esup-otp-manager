@@ -71,5 +71,4 @@ WantedBy=multi-user.target
 
 ## License
 
-MIT
-   [EsupPortail]: <https://www.esup-portail.org/>
+Please see the file called `LICENSE`.
