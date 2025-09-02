@@ -81,7 +81,7 @@ export function routing(router, passport) {
                 relUrl: '/protected/users/' + user.uid,
                 bearerAuth: true,
             });
-            const data = await response.json();
+            const data = await response.body.json();
 
             // TODO: do it on API-side
             return Object.entries(data.user.methods)
