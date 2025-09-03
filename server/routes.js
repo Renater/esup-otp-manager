@@ -6,6 +6,7 @@ import * as aclUtils from '../services/aclUtils.js';
 import * as apiRoutes from './routes/apiRoutes.js';
 const isUser = apiRoutes.isUser;
 import * as pagesRoutes from './routes/pagesRoutes.js';
+import logger from '../services/logger.js';
 
 let passport;
 
@@ -83,6 +84,7 @@ export default async function(_passport) {
         if (aclUtils.is_admin(user)) _user.role = "admin";
         else if (aclUtils.is_manager(user)) _user.role = "manager";
         else _user.role = "user";
+        logger.debug("final user: " + JSON.stringify(_user, null, 2));
         done(null, _user);
     });
 

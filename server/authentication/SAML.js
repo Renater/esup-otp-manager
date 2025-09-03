@@ -92,7 +92,7 @@ export default async function authentication(properties) {
     const strategy = new MultiSamlStrategy(
         options,
         function(req, profile, done) {
-            logger.debug("profile: " + JSON.stringify(profile, null, 2));
+            logger.debug("raw profile: " + JSON.stringify(profile, null, 2));
             const context = profile.getAssertion().Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
             return done(null, {
                 uid:          profile.attributes[attributes['uid']],
