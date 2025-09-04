@@ -24,6 +24,9 @@ export default function authentication(properties) {
             logger.debug("raw profile: " + JSON.stringify(profile, null, 2));
             return done(null, {
                 uid:        profile.user,
+                name:       properties.nameAttribute ?
+                    profile.attributes[properties.nameAttribute] :
+                    profile.user,
                 attributes: profile.attributes,
                 profile:    profile,
             });
