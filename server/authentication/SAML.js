@@ -6,6 +6,43 @@ import path from 'path';
 import * as fs from 'fs';
 import logger from '../../services/logger.js';
 
+/*
+ * maps of SAML attribute name/identifiers
+ * source: https://registry.federation.renater.fr/attributes
+ */
+const mappings = {
+    "urn:oid:0.9.2342.19200300.100.1.1":             "uid",
+    "urn:oid:0.9.2342.19200300.100.1.3":             "mail",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.1":              "eduPersonAffiliation",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.2":              "eduPersonNickname",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.3":              "eduPersonOrgDN",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.4":              "eduPersonOrgUnitDN",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.5":              "eduPersonPrimaryAffiliation",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.6":              "eduPersonPrincipalName",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.7":              "eduPersonEntitlement",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.8":              "eduPersonPrimaryOrgUnitDN",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.9":              "eduPersonScopedAffiliation",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.10":             "eduPersonTargetedID",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.11":             "eduPersonAssurance",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.12":             "eduPersonPrincipalNamePrior",
+    "urn:oid:1.3.6.1.4.1.5923.1.1.1.13":             "eduPersonUniqueId",
+    "urn:oid:2.5.4.3":                               "cn",
+    "urn:oid:2.5.4.4":                               "sn",
+    "urn:oid:2.5.4.7":                               "l",
+    "urn:oid:2.5.4.10":                              "o",
+    "urn:oid:2.5.4.11":                              "ou",
+    "urn:oid:2.5.4.12":                              "title",
+    "urn:oid:2.5.4.13":                              "description",
+    "urn:oid:2.5.4.16":                              "postalAddress",
+    "urn:oid:2.5.4.20":                              "telephoneNumber",
+    "urn:oid:2.5.4.23":                              "facsimileTelephoneNumber",
+    "urn:oid:2.5.4.42":                              "givenName",
+    "urn:oid:2.16.840.1.113730.3.1.39":              "preferredLanguage",
+    "urn:oid:2.16.840.1.113730.3.1.241":             "displayName",
+    "urn:oasis:names:tc:SAML:attribute:subject-id":  "subject-id",
+    "urn:oasis:names:tc:SAML:attribute:pairwise-id": "pairwise-id"
+};
+
 /**
  * @param {import('@node-saml/passport-saml/lib/types').PassportSamlConfig & {printServiceProviderMetadata: boolean}} properties
  */
@@ -26,11 +63,6 @@ export default async function authentication(properties) {
         identifierFormat:   properties.sp.identifierFormat   || "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
         signatureAlgorithm: properties.sp.signatureAlgorithm || "sha256",
         racComparison:      properties.sp.racComparison      || "exact",
-    };
-
-    const attributes = {
-        uid: properties.sp.uidAttribute   || "urn:oid:1.3.6.1.4.1.5923.1.1.1.6",
-        name: properties.sp.nameAttribute || "urn:oid:2.16.840.1.113730.3.1.241",
     };
 
     if (properties.sp.signatureCertPath) {
@@ -94,10 +126,15 @@ export default async function authentication(properties) {
         function(req, profile, done) {
             logger.debug("raw profile: " + JSON.stringify(profile, null, 2));
             const context = profile.getAssertion().Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
+            // reindex SAML attributes by name, instead of identifiers, for ACL usage
+            attributes = {};
+            for (const [key, value] of Object.entries(profile.attributes)) {
+                attributes[mappings[key]] = value;
+            };
             return done(null, {
                 uid:          profile.attributes[attributes['uid']],
                 name:         profile.attributes[attributes['name']],
-                attributes:   profile.attributes,
+                attributes:   attributes,
                 issuer:       profile.issuer,
                 context:      context,
                 nameID:       profile.nameID,
