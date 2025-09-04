@@ -131,9 +131,11 @@ export default async function authentication(properties) {
             for (const [key, value] of Object.entries(profile.attributes)) {
                 attributes[mappings[key]] = value;
             };
+            const uidAttribute = properties.sp.uidAttribute   || 'eduPersonPrincipalName';
+            const nameAttribute = properties.sp.nameAttribute || 'displayName';
             return done(null, {
-                uid:          profile.attributes[attributes['uid']],
-                name:         profile.attributes[attributes['name']],
+                uid:          attributes[uidAttribute],
+                name:         attributes[nameAttribute],
                 attributes:   attributes,
                 issuer:       profile.issuer,
                 context:      context,
