@@ -6,7 +6,7 @@
     "type": "git",
     "url": "git://github.com/EsupPortail/esup-otp-manager.git"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "start": "node run"
