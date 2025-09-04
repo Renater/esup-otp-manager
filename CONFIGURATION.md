@@ -20,6 +20,7 @@ This object has the following keys:
 - `version`: "CAS1.0" | "CAS2.0" | "CAS3.0"
 - `casBaseURL`: CAS server public URL
 - `serviceBaseURL`: esup-otp-manager public URL
+- `nameAttribute`: if defined, CAS attribute used as user name (if not defined, user name will be equal to user identifier)
 
 ### SAML
 
