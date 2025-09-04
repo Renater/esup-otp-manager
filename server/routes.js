@@ -40,20 +40,14 @@ function routing() {
     apiRoutes.routing(router);
 }
 
-const attributesToSave = ["displayName"];
-
 function updateApiUser(user) {
-    if (!user.attributes) {
+    if (!user.name) {
         return;
     }
 
-    const values = attributesToSave
-        .map(attr => [attr, user.attributes[attr.toLowerCase()]])
-        .filter(([attr, value]) => value);
-
-    if (!values) {
-        return;
-    }
+    const values = [
+        [ "displayName", user.name ]
+    ];
 
     return apiRoutes.fetch_otp_api({
         method: 'PUT',
