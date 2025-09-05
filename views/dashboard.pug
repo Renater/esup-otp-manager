@@ -30,7 +30,7 @@ block content
                     .flex
                     #hide.flex()
                         i.material-icons.medium(aria-hidden="true") account_circle
-                        p {{user.uid}}
+                        p {{user.name || user.uid}}
                         button#closebtn(onclick="hide('slide-out');", class="btn-flat", :title="messages.api.action.hide_menu")
                             i.material-icons(aria-hidden="true") close
                 li.bold

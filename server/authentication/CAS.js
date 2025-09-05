@@ -21,9 +21,10 @@ export default function authentication(properties) {
     return {
         name: "cas",
         strategy: new PassportCasStrategy(options, function(profile, done) {
-            logger.debug("profile: " + JSON.stringify(profile, null, 2));
+            logger.debug("raw profile: " + JSON.stringify(profile, null, 2));
             return done(null, {
                 uid:        profile.user,
+                name:       profile.attributes[properties.nameAttribute || 'displayname'],
                 attributes: profile.attributes,
                 profile:    profile,
             });

@@ -20,6 +20,7 @@ This object has the following keys:
 - `version`: "CAS1.0" | "CAS2.0" | "CAS3.0"
 - `casBaseURL`: CAS server public URL
 - `serviceBaseURL`: esup-otp-manager public URL
+- `nameAttribute`: name of CAS attribute used as user name (default: displayname)
 
 ### SAML
 
@@ -33,8 +34,6 @@ SAML authentication require the presence of a SAML object in the configuration f
         "entityID": "esup-otp-manager",
         "signatureKeyPath": "certs/key.pem",
         "signatureCertPath": "certs/cert.pem",
-        "uidAttribute": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6",
-        "nameAttribute": "urn:oid:2.16.840.1.113730.3.1.241",
         "metadataUrl": "Metadata",
     },
     "idp": {
@@ -52,8 +51,8 @@ This object has the following keys:
     - `signatureCertPath`: path to the signature certificate
     - `encryptionKeyPath`: path to the encryption key
     - `encryptionCertPath`: path to the encryption certificate
-    - `uidAttribute`: OID of SAML attribute used as user identifier (default: urn:oid:1.3.6.1.4.1.5923.1.1.1.6)
-    - `nameAttribute`: OID of SAML attribute used as user name (default: urn:oid:2.16.840.1.113730.3.1.241)
+    - `uidAttribute`: name of SAML attribute used as user identifier (default: eduPersonPrincipalName)
+    - `nameAttribute`: name of SAML attribute used as user name (default: displayName)
     - `metadataUrl`: if defined, relative URL where to expose metadata for this SP
     - `initialAuthnContext`: if defined, AuthnContext to use in SAML request for a non-initialized user
     - `normalAuthnContext`: if defined, AuthnContext to use in SAML request for an initialized user
