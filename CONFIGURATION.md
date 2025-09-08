@@ -6,15 +6,15 @@ esup-otp-manager support either CAS or SAML authentication.
 
 ### User mapping
 
-An user in esup-otp-manager is defined by two mandatory  attributes, an
-identifier, for identification, and a name, for display and research purpose.
-Both attributes are populated from attributes returned by the authentication
-backend, with suitable defaults (ie: uid and displayname for CAS,
-eduPersonPrincipalName and DisplayName for SAML), and may be eventually
-remapped if needed.
+An user in esup-otp-manager is defined by two attributes, an identifier, for
+identification, and a name, for display and research purpose.  Both of them
+are populated from attributes returned by the authentication server, with
+suitable defaults (ie: uid and displayname for CAS, eduPersonPrincipalName and
+DisplayName for SAML), and may be eventually remapped if needed.
 
-Additional arbitrary attributes may be provided by the backend, in order to
-evaluate ACLs, such as authentication methods restrictions, for instance:
+Additional arbitrary attributes may be provided by the authentication server,
+in order to evaluate ACLs, such as authentication methods restrictions, for
+instance:
 ```
 "users_methods": {
     "random_code": { "deny": { "edupersonaffiliation" : ["student","alum"] } },
@@ -22,8 +22,9 @@ evaluate ACLs, such as authentication methods restrictions, for instance:
 ```
 
 Unless a userDB is configured in esup-otp-api, only users which successfully
-authenticated on the manager at least once will be known from the API, and
-available for research operations.
+authenticated on the manager at least once will be known from the API,
+and be searched either by name or identifier. Other users can be searched by
+identifier only.
 
 ### Backend configuration
 
