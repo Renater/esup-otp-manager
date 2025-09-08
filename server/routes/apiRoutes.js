@@ -297,6 +297,13 @@ export function routing(router) {
         });
     });
 
+    router.get('/api/admin/user/:uid/exists', isManager, function(req, res) {
+        request_otp_api(req, res, {
+            relUrl: '/protected/users/' + req.params.uid + "/exists",
+            bearerAuth: true,
+        });
+    });
+
     router.get('/api/admin/users', isManager, function(req, res) {
         request_otp_api(req, res, {
             relUrl: '/protected/users/',

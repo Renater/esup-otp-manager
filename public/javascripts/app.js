@@ -1060,13 +1060,23 @@ var ManagerDashboard = Vue.extend({
                 toast(err, 3000, 'red darken-1');
             });
         },
-        search: function () {
+        search: async function() {
             if (this.requestedUid) {
-                this.getUser(this.requestedUid);
-                this.requestedUid = '';
+                if (await this.user_exists(this.requestedUid) || window.confirm("Aucun utilisateur avec pour identifiant '" + this.requestedUid + "' n'existe en base de données. Souhaitez-vous le créer ?")) {
+                    this.getUser(this.requestedUid);
+                    this.requestedUid = '';
+                }
             }
         },
-
+        user_exists: async function(uid) {
+            if (this.users.some(user => user.uid == uid)) {
+                return true;
+            }
+            return (await fetchApi({
+                method: "GET",
+                uri: `/api/admin/user/${uid}/exists`,
+            })).data.user_exists;
+        },
         getUser: function(uid) {
             return fetchApi({
                 method: "GET",
