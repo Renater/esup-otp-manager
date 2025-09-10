@@ -127,7 +127,7 @@ export default async function authentication(properties) {
             logger.debug("raw profile: " + JSON.stringify(profile, null, 2));
             const context = profile.getAssertion().Assertion.AuthnStatement[0].AuthnContext[0].AuthnContextClassRef[0]._;
             // reindex SAML attributes by name, instead of identifiers, for ACL usage
-            attributes = {};
+            const attributes = {};
             for (const [key, value] of Object.entries(profile.attributes)) {
                 attributes[mappings[key]] = value;
             };
