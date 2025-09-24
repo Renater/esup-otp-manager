@@ -111,6 +111,7 @@ async function request_otp_api(req, res, opts_) {
     opts_.headers = {
         'X-Client-IP': clientIP,
         'Client-User-Agent': userAgent,
+        'User-Agent': 'esup-otp-manager',
     };
 
     logger.debug(req.session.passport)
