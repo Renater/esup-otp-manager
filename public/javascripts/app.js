@@ -555,28 +555,27 @@ const RandomCodeMethod = Vue.extend({
                             }
                         },
                         showLoaderOnConfirm: true,
-                        preConfirm: async () => {
-                            const res = await fetchApi({
-                                method: "PUT",
-                                uri: this.formatApiUri('/transport/' + transport + '/' + new_transport),
-                            });
-                            const data = res.data;
-                            if (data.code != "Ok") {
-                                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
-                            } else {
-                                // equivalent to "this.user.transports[transport] = new_transport;", but allows new reactive property to be added dynamically
-                                Vue.set(this.user.transports, transport, new_transport);
-                                document.getElementById(transport + '-input').value = '';
-                                toast({ message: 'Transport vérifié', className: 'green contrasted' });
-                            }
-                        }
+                        preConfirm: () => this.saveTransport(transport, new_transport),
                     });
                 }
-
-
             } catch (err) {
                 toast({ message: err, className: 'red darken-1' });
             };
+        },
+        saveTransport: async function(transport, new_transport) {
+            const res = await fetchApi({
+                method: "PUT",
+                uri: this.formatApiUri('/transport/' + transport + '/' + new_transport),
+            });
+            const data = res.data;
+            if (data.code != "Ok") {
+                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+            } else {
+                // equivalent to "this.user.transports[transport] = new_transport;", but allows new reactive property to be added dynamically
+                Vue.set(this.user.transports, transport, new_transport);
+                document.getElementById(transport + '-input').value = '';
+                toast({ message: 'Transport vérifié', className: 'green contrasted' });
+            }
         },
         deleteTransport: function(transport) {
             const oldTransport = this.user.transports[transport];
