@@ -503,7 +503,9 @@ Vue.component('transport-form', {
         'transport': String,
         'inputType': String,
         'testAndSaveTransport': Function,
+        'saveTransport': Function,
         'deleteTransport': Function,
+        'isManager': Boolean,
     },
     template: '#transport_form'
 });
@@ -516,6 +518,7 @@ const RandomCodeMethod = Vue.extend({
         'activate': Function,
         'deactivate': Function,
         'formatApiUri': Function,
+        'isManager': Boolean,
     },
     methods: {
         testAndSaveTransport: async function(transport) {
@@ -555,14 +558,15 @@ const RandomCodeMethod = Vue.extend({
                             }
                         },
                         showLoaderOnConfirm: true,
-                        preConfirm: () => this.saveTransport(transport, new_transport),
+                        preConfirm: () => this.saveTransport(transport),
                     });
                 }
             } catch (err) {
                 toast({ message: err, className: 'red darken-1' });
             };
         },
-        saveTransport: async function(transport, new_transport) {
+        saveTransport: async function(transport) {
+            const new_transport = document.getElementById(transport + '-input').value.trim();
             const res = await fetchApi({
                 method: "PUT",
                 uri: this.formatApiUri('/transport/' + transport + '/' + new_transport),

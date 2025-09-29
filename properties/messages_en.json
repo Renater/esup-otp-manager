@@ -56,6 +56,14 @@
           },
           "wrong": "Incorrect code."
         },
+        "testAndSaveTransport": {
+          "sms": "You will receive a code via SMS to confirm the phone number change.",
+          "mail": "You will receive a code via email to confirm the email address change."
+        },
+        "saveTransport": {
+          "sms": "Save the phone number without confirming the code received via SMS.",
+          "mail": "Save the email address without confirming the code received via email."
+        },
         "confirm_delete": {
           "sms": "Do you really want to delete your %TRANSPORT% phone number?",
           "mail": "Do you really want to delete your %TRANSPORT% email address?"

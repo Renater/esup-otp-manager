@@ -56,6 +56,14 @@
           },
           "wrong": "Code incorrect."
         },
+        "testAndSaveTransport": {
+          "sms": "Vous recevrez un code par SMS pour valider le changement de numéro.",
+          "mail": "Vous recevrez un code par courriel pour valider le changement d’adresse email."
+        },
+        "saveTransport": {
+          "sms": "Enregistrer le numéro sans avoir à valider de code reçu par SMS.",
+          "mail": "Enregistrer l’adresse email sans avoir à valider de code reçu par courriel."
+        },
         "confirm_delete": {
           "sms": "Voulez vous vraiment supprimer votre numéro de téléphone %TRANSPORT% ?",
           "mail": "Voulez vous vraiment supprimer votre adresse email %TRANSPORT% ?"
