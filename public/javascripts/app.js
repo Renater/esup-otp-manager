@@ -502,7 +502,7 @@ Vue.component('transport-form', {
         'infos': Object,
         'transport': String,
         'inputType': String,
-        'saveTransport': Function,
+        'testAndSaveTransport': Function,
         'deleteTransport': Function,
     },
     template: '#transport_form'
@@ -518,7 +518,7 @@ const RandomCodeMethod = Vue.extend({
         'formatApiUri': Function,
     },
     methods: {
-        saveTransport: async function(transport) {
+        testAndSaveTransport: async function(transport) {
             const new_transport = document.getElementById(transport + '-input').value.trim();
             try {
                 const res = await fetchApi({

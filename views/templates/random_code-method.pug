@@ -1,10 +1,10 @@
 script#random_code-method(type='text/x-template').
    <div class="section">
     <div class="card" v-if="user.methods.random_code.transports.indexOf('sms')>-1" style="max-width: 500px;margin: auto;margin-bottom: 15px;">
-     <transport-form :user=user :messages=messages :infos=infos transport="sms" inputType="tel" :saveTransport=saveTransport :deleteTransport=deleteTransport />
+     <transport-form :user=user :messages=messages :infos=infos transport="sms" inputType="tel" :testAndSaveTransport=testAndSaveTransport :deleteTransport=deleteTransport />
     </div>
 
     <div class="card" v-if="user.methods.random_code.transports.indexOf('mail')>-1" style="max-width: 500px;margin: auto;margin-bottom: 15px;">
-     <transport-form :user=user :messages=messages :infos=infos transport="mail" inputType="email" :saveTransport=saveTransport :deleteTransport=deleteTransport />
+     <transport-form :user=user :messages=messages :infos=infos transport="mail" inputType="email" :testAndSaveTransport=testAndSaveTransport :deleteTransport=deleteTransport />
     </div>
    </div>
