@@ -578,7 +578,7 @@ const RandomCodeMethod = Vue.extend({
                 // equivalent to "this.user.transports[transport] = new_transport;", but allows new reactive property to be added dynamically
                 Vue.set(this.user.transports, transport, new_transport);
                 document.getElementById(transport + '-input').value = '';
-                toast({ message: 'Transport vérifié', className: 'green contrasted' });
+                toast({ message: this.messages.success.update, className: 'green contrasted' });
             }
         },
         deleteTransport: function(transport) {
