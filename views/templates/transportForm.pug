@@ -17,7 +17,7 @@ script#transport_form(type='text/x-template').
             <span v-if="user.transports[transport]">{{ messages.api.action.modify }}<i class="material-icons right" aria-hidden="true">mode_edit</i></span>
             <span v-else>{{ messages.api.action.save }}<i class="material-icons right" aria-hidden="true">save</i></span>
           </button>
-          <button v-if="isManager" @click="saveTransport(transport)" :title="messages.api.methods.random_code.saveTransport[transport]" type="button" class="waves-effect waves-light btn col s12 m5 green">
+          <button v-if="isManager" @click="($event.target.closest('form').reportValidity() && saveTransport(transport))" :title="messages.api.methods.random_code.saveTransport[transport]" type="button" class="waves-effect waves-light btn col s12 m5 green">
             <span v-if="user.transports[transport]">{{ messages.api.action.modify_now }}<i class="material-icons right" aria-hidden="true">mode_edit</i></span>
             <span v-else>{{ messages.api.action.save_now }}<i class="material-icons right" aria-hidden="true">save</i></span>
           </button>
