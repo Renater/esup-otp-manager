@@ -1,25 +1,25 @@
 script#transport_form(type='text/x-template').
   <div class="card-content">
     <div class="row" style="margin-bottom: 0;">
-      <div class="col s2 m3">
+      <div class="col s2">
         <img :src="`images/${transport}.svg`" alt="">
       </div>
-      <div class="col s10 m9">
+      <div class="col s10">
         <div class="row" v-if="user.transports[transport]">
           <p class="col s7">{{ user.transports[transport] }}</p>
         </div>
         <form @submit.prevent="testAndSaveTransport(transport)" class="row" style="margin-bottom: 0;">
-          <div class="input-field col s7">
+          <div class="input-field col s12 m7">
             <input :type="inputType" :id="`${transport}-input`" required :pattern="infos.transport_regexes[transport] || null"/>
             <label :for="`${transport}-input`">{{ messages.api.transports[transport] }}</label>
           </div>
-          <button type="submit" :title="messages.api.methods.random_code.testAndSaveTransport[transport]" class="waves-effect waves-light btn col s5">
+          <button type="submit" :title="messages.api.methods.random_code.testAndSaveTransport[transport]" class="waves-effect waves-light btn col s12 m5">
             <span v-if="user.transports[transport]">{{ messages.api.action.modify }}<i class="material-icons right" aria-hidden="true">mode_edit</i></span>
             <span v-else>{{ messages.api.action.save }}<i class="material-icons right" aria-hidden="true">save</i></span>
           </button>
-          <button v-if="isManager" @click="saveTransport(transport)" :title="messages.api.methods.random_code.saveTransport[transport]" type="button" class="waves-effect waves-light btn col s5 green">
-            <span v-if="user.transports[transport]">{{ messages.api.action.modify }}<i class="material-icons right" aria-hidden="true">mode_edit</i></span>
-            <span v-else>{{ messages.api.action.save }}<i class="material-icons right" aria-hidden="true">save</i></span>
+          <button v-if="isManager" @click="saveTransport(transport)" :title="messages.api.methods.random_code.saveTransport[transport]" type="button" class="waves-effect waves-light btn col s12 m5 green">
+            <span v-if="user.transports[transport]">{{ messages.api.action.modify_now }}<i class="material-icons right" aria-hidden="true">mode_edit</i></span>
+            <span v-else>{{ messages.api.action.save_now }}<i class="material-icons right" aria-hidden="true">save</i></span>
           </button>
         </form>
         <div class="row" style="margin-bottom: 0;" v-if="user.transports[transport]">

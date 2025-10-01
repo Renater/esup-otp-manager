@@ -1,10 +1,26 @@
 script#random_code-method(type='text/x-template').
    <div class="section">
-    <div class="card" v-if="user.methods.random_code.transports.indexOf('sms')>-1" style="max-width: 500px;margin: auto;margin-bottom: 15px;">
-     <transport-form :user=user :messages=messages :infos=infos transport="sms" inputType="tel" :testAndSaveTransport=testAndSaveTransport :saveTransport=saveTransport :deleteTransport=deleteTransport :isManager=isManager />
+
+    <div class="row" v-if="user.methods.random_code.transports.includes('sms')">
+     <div class="col s1 m2">
+      <span class="white-text"></span>
+     </div>
+     <div class="col s12 m8">
+      <div class="card" style="margin: auto;margin-bottom: 15px;">
+       <transport-form :user=user :messages=messages :infos=infos transport="sms" inputType="tel" :testAndSaveTransport=testAndSaveTransport :saveTransport=saveTransport :deleteTransport=deleteTransport :isManager=isManager />
+      </div>
+     </div>
     </div>
 
-    <div class="card" v-if="user.methods.random_code.transports.indexOf('mail')>-1" style="max-width: 500px;margin: auto;margin-bottom: 15px;">
-     <transport-form :user=user :messages=messages :infos=infos transport="mail" inputType="email" :testAndSaveTransport=testAndSaveTransport :saveTransport=saveTransport :deleteTransport=deleteTransport :isManager=isManager />
+    <div class="row" v-if="user.methods.random_code.transports.includes('mail')">
+     <div class="col s1 m2">
+      <span class="white-text"></span>
+     </div>
+     <div class="col s12 m8">
+      <div class="card" style="margin: auto;margin-bottom: 15px;">
+       <transport-form :user=user :messages=messages :infos=infos transport="mail" inputType="email" :testAndSaveTransport=testAndSaveTransport :saveTransport=saveTransport :deleteTransport=deleteTransport :isManager=isManager />
+      </div>
+     </div>
     </div>
+
    </div>
