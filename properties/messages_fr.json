@@ -95,12 +95,16 @@
       "push": {
         "name": "Notification (Esup Auth)",
         "description": "Méthode permettant de se connecter via les notifications de son smartphone avec l’application Esup Auth.",
-        "push_confirmation1": "Veuillez scannez ce code dans l’application smartphone Esup Auth",
-        "push_confirmation2": "Si votre smartphone ne dispose pas d’un appareil photo fonctionnel ou que vous éprouvez des difficultés à scanner le code précédent. Allez dans le menu « Paramètres » puis cliquer sur « Activation manuelle ».",
-        "push_confirmation3": "Entrez votre nom de compte :",
-        "push_confirmation4": "Entrez le code d’activation :",
-        "push_confirmation5": "Entrez l’adresse :",
-        "push_confirmation6": "Puis cliquez sur « Ok »"
+        "qrcode_instructions": "Veuillez scannez ce code dans l’application Esup Auth (pour <a href='https://play.google.com/store/apps/details?id=org.esupportail.esupAuth'>Android</a> ou <a href='https://apps.apple.com/fr/app/esup-auth/id1563904941'>IOS</a>)",
+        "manual_activation_instructions": [
+          "En cas de difficultés pour scanner le code précédent. Cliquez sur « + » puis sur « Saisie manuelle », sélectionnez « PUSH », et renseignez les informations suivantes :",
+          "<ul>",
+          "  <li>« Nom de compte » : %UID%</li>",
+          "  <li>« Code d’activation » : %ACTIVATION_CODE%</li>",
+          "  <li>« Adresse » : %API_URL%</li>",
+          "</ul>",
+          "Puis cliquez sur « Activer »."
+        ]
       },
       "esupnfc": {
           "name": "EsupNFC",

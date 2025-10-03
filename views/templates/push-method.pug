@@ -4,7 +4,7 @@ script#push-method(type='text/x-template').
     <div class="card-image">
     <div class="row" style="margin-bottom: 0;">
     <div class="col s1 m2"><span class="white-text"></span></div>
-    <p class="col s10 m8" style="text-align: center;">{{messages.api.methods.push.push_confirmation1}}</p>
+    <p class="col s10 m8" style="text-align: center;" v-html="messages.api.methods.push.qrcode_instructions"></p>
     </div>
     </div>
     <div class="card-content">
@@ -19,11 +19,13 @@ script#push-method(type='text/x-template').
     <div class="row" style="margin-bottom: 0;">
     <div class="col s1 m2"><span class="white-text"></span></div>
     <div class="col s10 m8">
-    <p>{{messages.api.methods.push.push_confirmation2}}</p>
-    <p>{{messages.api.methods.push.push_confirmation3}} {{user.uid}}</p>
-    <p>{{messages.api.methods.push.push_confirmation4}} {{user.methods.push.activationCode}}</p>
-    <p>{{messages.api.methods.push.push_confirmation5}} {{user.methods.push.api_url}}</p>
-    <p>{{messages.api.methods.push.push_confirmation6}}</p>
+    <p v-html='
+        messages.api.methods.push.manual_activation_instructions
+            .join("\n")
+            .replace("%UID%", user.uid)
+            .replace("%ACTIVATION_CODE%", user.methods.push.activationCode)
+            .replace("%API_URL%", user.methods.push.api_url)
+    '></p>
     </div>
     </div>
     </div>

@@ -95,12 +95,16 @@
       "push": {
         "name": "Notification (Esup Auth)",
         "description": "Method for connecting via smartphone notifications with Esup Auth",
-        "push_confirmation1": "Please scan this code in the smartphone application",
-        "push_confirmation2": "If your smartphone does not have a functional picture appreil or you are having difficulties to scan the code above. Go to the menu \"Settings \" then click \"Activate without scan \".",
-        "push_confirmation3": "Enter your login:",
-        "push_confirmation4": "Enter your activation code:",
-        "push_confirmation5": "Enter this hostname:",
-        "push_confirmation6": "Then press 'Ok'"
+        "qrcode_instructions": "Scan this code in the Esup Auth app (for <a href='https://play.google.com/store/apps/details?id=org.esupportail.esupAuth'>Android</a> or <a href='https://apps.apple.com/fr/app/esup-auth/id1563904941'>IOS</a>)",
+        "manual_activation_instructions": [
+          "If you have trouble scanning the code, click '+' then '<span lang='fr'>Saisie manuelle</span>', select 'PUSH', and enter the following information:",
+          "<ul>",
+          "  <li>'<span lang='fr'>Nom de compte</span>': %UID%</li>",
+          "  <li>'<span lang='fr'>Code d’activation</span>': %ACTIVATION_CODE%</li>",
+          "  <li>'<span lang='fr'>Adresse</span>': %API_URL%</li>",
+          "</ul>",
+          "Then click on '<span lang='fr'>Activer</span>'."
+        ]
       },
       "esupnfc": {
           "name": "EsupNFC",
