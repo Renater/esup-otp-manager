@@ -1,6 +1,7 @@
 script#user-dashboard(type='text/x-template').
    <div>
-      <div class="section method-section" v-for="method in methods" v-if="method.activate && currentmethod==method.name" autofocus aria-live="assertive">
+     <template v-for="method in methods">
+      <div class="section method-section" v-if="method.activate && currentmethod==method.name" autofocus aria-live="assertive">
          <div class="method-header">
             <h2 class="h3">{{method.label || method.name}}</h2>
             <p>
@@ -20,4 +21,5 @@ script#user-dashboard(type='text/x-template').
             <component :is=currentmethod :methods=methods :generate_totp=generateTotpConfirm :generate_bypass=generateBypassConfirm :generate_passcode_grid=generatePasscodeGridConfirm :get_user=get_user :messages=messages :infos=infos :user=user :formatApiUri=formatApiUri :isManager=false></component>
          </div>
       </div>
+     </template>
    </div>

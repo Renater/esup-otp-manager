@@ -126,7 +126,7 @@ function toast({ message, displayLength = 9000, className }) {
 /** Vue.JS **/
 
 /** User **/
-var PushMethod = Vue.extend({
+var PushMethod = {
     props: {
         'user': Object,
         'get_user': Function,
@@ -165,9 +165,9 @@ var PushMethod = Vue.extend({
         }
     },
     template: '#push-method'
-});
+};
 
-var BypassMethod = Vue.extend({
+var BypassMethod = {
     props: {
         'user': Object,
         'generate_bypass': Function,
@@ -183,7 +183,7 @@ var BypassMethod = Vue.extend({
         },
     },
     template: '#bypass-method'
-});
+};
 
 const dateTimeFormatOptions = {
     year: 'numeric',
@@ -191,7 +191,7 @@ const dateTimeFormatOptions = {
     day: 'numeric',
 };
 
-const PasscodeGridMethod = Vue.extend({
+const PasscodeGridMethod = {
     props: {
         'user': Object,
         'generate_passcode_grid': Function,
@@ -207,9 +207,9 @@ const PasscodeGridMethod = Vue.extend({
         },
     },
     template: '#passcode_grid-method'
-});
+};
 
-const TotpMethod = Vue.extend({
+const TotpMethod = {
     props: {
         'user': Object,
         'generate_totp': Function,
@@ -245,9 +245,9 @@ const TotpMethod = Vue.extend({
         }
     },
     template: '#totp-method'
-});
+};
 
-const WebAuthnMethod = Vue.extend({
+const WebAuthnMethod = {
     props: {
         'user': Object,
         'activate': Function,
@@ -493,9 +493,9 @@ const WebAuthnMethod = Vue.extend({
         },
     },
     template: '#webauthn-method',
-});
+};
 
-Vue.component('transport-form', {
+const TransportForm = {
     props: {
         'user': Object,
         'messages': Object,
@@ -508,9 +508,9 @@ Vue.component('transport-form', {
         'isManager': Boolean,
     },
     template: '#transport_form'
-});
+};
 
-const RandomCodeMethod = Vue.extend({
+const RandomCodeMethod = {
     props: {
         'user': Object,
         'messages': Object,
@@ -519,6 +519,9 @@ const RandomCodeMethod = Vue.extend({
         'deactivate': Function,
         'formatApiUri': Function,
         'isManager': Boolean,
+    },
+    components: {
+        'transport-form': TransportForm,
     },
     methods: {
         testAndSaveTransport: async function(transport) {
@@ -603,17 +606,18 @@ const RandomCodeMethod = Vue.extend({
         },
     },
     template: '#random_code-method'
-});
+};
 
-const RandomCodeMailMethod = RandomCodeMethod.extend({
+const RandomCodeMailMethod = { 
+    ...RandomCodeMethod,
     template: '#random_code_mail-method'
-});
+};
 
-var Esupnfc = Vue.extend({
+var Esupnfc = {
 template:'#esupnfc-method'
-});
+};
 
-var UserDashboard = Vue.extend({
+var UserDashboard = {
     props: {
         'messages': Object,
         'infos': Object,
@@ -807,10 +811,10 @@ var UserDashboard = Vue.extend({
             });
         }
     }
-});
+};
 
 /** Manager **/
-var UserView = Vue.extend({
+var UserView = {
     props: {
         'user': Object,
         'methods': Object,
@@ -1003,9 +1007,9 @@ var UserView = Vue.extend({
             });
         },
     }
-});
+};
 
-var ManagerDashboard = Vue.extend({
+var ManagerDashboard = {
     props: {
         'methods': Object,
         'messages': Object,
@@ -1102,10 +1106,10 @@ var ManagerDashboard = Vue.extend({
         }
     },
     template: '#manager-dashboard'
-});
+};
 
 /** Admin **/
-var AdminDashboard = Vue.extend({
+var AdminDashboard = {
     props: {
         'messages': Object,
         'infos': Object,
@@ -1187,10 +1191,10 @@ var AdminDashboard = Vue.extend({
             });
         },
     }
-});
+};
 
 /** Stats  **/
-var StatsDashboard = Vue.extend({
+var StatsDashboard = {
     props: {
         messages: Object,
     },
@@ -1375,11 +1379,11 @@ var StatsDashboard = Vue.extend({
         this.fetchStats();
     },
     template: '#stats-dashboard',
-});
+};
 
 
 /** Admin **/
-var Home = Vue.extend({
+var Home = {
     props: {
         messages: Object,
         'infos': Object,
@@ -1392,7 +1396,7 @@ var Home = Vue.extend({
         },
     },
     template: '#home-dashboard'
-});
+};
 
 /** Main **/
 var app = new Vue({
@@ -1404,7 +1408,8 @@ var app = new Vue({
         "admin": AdminDashboard,
         "stats": StatsDashboard
     },
-    data: {
+    data() { 
+      return {
         pageTitle: 'Accueil',
         currentView: 'home',
         currentMethod: '',
@@ -1417,6 +1422,7 @@ var app = new Vue({
         users_methods:{},
         messages: {},
         infos: {},
+      } 
     },
     created: async function() {
         const messagesPromise = this.getMessages();

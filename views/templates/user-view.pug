@@ -2,7 +2,8 @@ script#user-view(type='text/x-template').
     <div>
     <ul>
     <h2 class="h3" v-if="user.uid && typeof(user.uid)!== 'function'">{{user.uid}}</h2>
-    <li v-for="method in methods" v-if="user.methods[method.name] && methods[method.name].activate">
+    <template v-for="method in methods">
+    <li v-if="user.methods[method.name] && methods[method.name].activate">
     <h3 class="h4">{{method.label}}</h3> 
     <div class='switch'>
     <label>
@@ -17,5 +18,6 @@ script#user-view(type='text/x-template').
     </div>
     <div class="divider"></div>
     </li>
+    </template>
     </ul>
     </div>
