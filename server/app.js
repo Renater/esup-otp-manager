@@ -35,7 +35,7 @@ app.use('/js/jquery.min.js', express.static(path.join(__dirname + '/..', '/node_
 app.use('/js/socket.io.min.js', express.static(path.join(__dirname + '/..', '/node_modules/socket.io-client/dist/socket.io.min.js')));
 app.use('/js/socket.io.min.js.map', express.static(path.join(__dirname + '/..', '/node_modules/socket.io-client/dist/socket.io.min.js.map')));
 app.use('/js/materialize.min.js', express.static(path.join(__dirname + '/..', '/node_modules/materialize-css/dist/js/materialize.min.js')));
-app.use('/js/vue.js', express.static(path.join(__dirname + '/..', '/node_modules/vue/dist/vue.js')));
+app.use('/js/vue.js', express.static(path.join(__dirname + '/..', '/node_modules/vue/dist/vue.global.prod.js')));
 app.use('/js/sweetalert2.all.min.js', express.static(path.join(__dirname + '/..', '/node_modules/sweetalert2/dist/sweetalert2.all.min.js')));
 app.use('/js/chart.js', express.static(path.join(__dirname + '/..', '/node_modules/chart.js/dist/chart.umd.min.js')));
 app.use('/js/chartjs-plugin-datalabels.min.js', express.static(path.join(__dirname + '/..', '/node_modules/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.min.js')));

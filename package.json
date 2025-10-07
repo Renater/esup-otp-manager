@@ -33,7 +33,7 @@
     "socket.io-client": "4.x",
     "sweetalert2": "11.x",
     "undici": "6.x",
-    "vue": "2.x",
+    "vue": "3.x",
     "winston": "3.x"
   },
   "overrides": {

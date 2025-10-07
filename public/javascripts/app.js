@@ -160,7 +160,7 @@ var PushMethod = {
         },
         setActivePush: async function(active) {
             // Temporarily set the opposite value, to help VueJs detect the change #33
-            this.$set(this.user.methods.push, "active", !active);
+            this.user.methods.push.active = !active;
             this.get_user(this.user.uid);
         }
     },
@@ -578,8 +578,7 @@ const RandomCodeMethod = {
             if (data.code != "Ok") {
                 toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
             } else {
-                // equivalent to "this.user.transports[transport] = new_transport;", but allows new reactive property to be added dynamically
-                Vue.set(this.user.transports, transport, new_transport);
+                this.user.transports[transport] = new_transport;
                 document.getElementById(transport + '-input').value = '';
                 toast({ message: this.messages.success.update, className: 'green contrasted' });
             }
@@ -787,8 +786,8 @@ var UserDashboard = {
             });
         },
         setPasscodeGrid: function(data) {
-            this.$set(this.user.methods.passcode_grid, "grid", data.grid);
-            this.$set(this.user.methods.passcode_grid, "generation_date", data.generation_date);
+            this.user.methods.passcode_grid.grid = data.grid;
+            this.user.methods.passcode_grid.generation_date = data.generation_date;
         },
         generateTotp: function() {
             return fetchApi({
@@ -983,8 +982,8 @@ var UserView = {
             });
         },
         setPasscodeGrid: function(data) {
-            this.$set(this.user.methods.passcode_grid, "grid", data.grid);
-            this.$set(this.user.methods.passcode_grid, "generation_date", data.generation_date);
+            this.user.methods.passcode_grid.grid = data.grid;
+            this.user.methods.passcode_grid.generation_date = data.generation_date;
         },
         generateTotp: function() {
             return fetchApi({
@@ -1399,8 +1398,7 @@ var Home = {
 };
 
 /** Main **/
-var app = new Vue({
-    el: '#app',
+Vue.createApp({
     components: {
         "home": Home,
         "preferences": UserDashboard,
@@ -1534,7 +1532,7 @@ var app = new Vue({
                     method: "GET",
                     uri: "/manager/infos",
                 })).data;
-                this.$set(this.infos, "lang", localStorage.getItem("lang") || "en");
+                this.infos.lang = localStorage.getItem("lang") || "en";
             } catch (err) {
                 toast({ message: err, className: 'red darken-1' });
             }
@@ -1567,4 +1565,4 @@ var app = new Vue({
         return !this.users_methods?.unauthorized.includes(method);
     }
   }
-})
+}).mount('#app')
