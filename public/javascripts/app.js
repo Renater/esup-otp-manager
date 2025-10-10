@@ -15,9 +15,9 @@ function hide(id) {
 }
 
 /** WebSockets init**/
-var arr = window.location.href.split('/');
-var urlSockets = arr[0] + "//" + arr[2];
-var socket;
+const arr = window.location.href.split('/');
+const urlSockets = arr[0] + "//" + arr[2];
+let socket;
 
 async function fetchApi({
     uri,
@@ -126,7 +126,7 @@ function toast({ message, displayLength = 9000, className }) {
 /** Vue.JS **/
 
 /** User **/
-var PushMethod = {
+const PushMethod = {
     props: {
         'user': Object,
         'get_user': Function,
@@ -167,7 +167,7 @@ var PushMethod = {
     template: '#push-method'
 };
 
-var BypassMethod = {
+const BypassMethod = {
     props: {
         'user': Object,
         'generate_bypass': Function,
@@ -612,11 +612,11 @@ const RandomCodeMailMethod = {
     template: '#random_code_mail-method'
 };
 
-var Esupnfc = {
+const Esupnfc = {
 template:'#esupnfc-method'
 };
 
-var UserDashboard = {
+const UserDashboard = {
     props: {
         'messages': Object,
         'infos': Object,
@@ -813,7 +813,7 @@ var UserDashboard = {
 };
 
 /** Manager **/
-var UserView = {
+const UserView = {
     props: {
         'user': Object,
         'methods': Object,
@@ -1008,7 +1008,7 @@ var UserView = {
     }
 };
 
-var ManagerDashboard = {
+const ManagerDashboard = {
     props: {
         'methods': Object,
         'messages': Object,
@@ -1108,7 +1108,7 @@ var ManagerDashboard = {
 };
 
 /** Admin **/
-var AdminDashboard = {
+const AdminDashboard = {
     props: {
         'messages': Object,
         'infos': Object,
@@ -1193,7 +1193,7 @@ var AdminDashboard = {
 };
 
 /** Stats  **/
-var StatsDashboard = {
+const StatsDashboard = {
     props: {
         messages: Object,
     },
@@ -1382,7 +1382,7 @@ var StatsDashboard = {
 
 
 /** Admin **/
-var Home = {
+const Home = {
     props: {
         messages: Object,
         'infos': Object,

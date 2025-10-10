@@ -107,7 +107,7 @@ export default async function authentication(properties) {
 
     options['passReqToCallback'] = true;
     options['getSamlOptions'] = function (req, done) {
-        var options;
+        let options;
         if (req.query.authnContext) {
             options = { authnContext: [ req.query.authnContext ] };
         } else {
