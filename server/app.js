@@ -1,15 +1,20 @@
 import properties from '../properties/properties.js';
 import express from 'express';
 import session from 'express-session';
+import memorystore from 'memorystore';
+const MemoryStore = memorystore(session);
 import { fileURLToPath } from 'node:url';
 const expressSession = session({
     secret: properties.esup.session_secret_key,
-    resave: true,
+    resave: false,
     saveUninitialized: true,
     cookie: {
         secure: "auto", // secure if httpS connection
         sameSite: "lax",
     },
+    store: new MemoryStore({
+        checkPeriod: 86400000, // prune expired entries every 24h
+    }),
 });
 import fs from 'fs';
 import path from 'path';

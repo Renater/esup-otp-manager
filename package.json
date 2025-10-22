@@ -24,6 +24,7 @@
     "file-system-cache": "2.x",
     "jquery": "3.x",
     "materialize-css": "0.97.x",
+    "memorystore": "1.x",
     "morgan": "1.x",
     "passport": "0.7.x",
     "passport-saml-metadata": "4.x",
