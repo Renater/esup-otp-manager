@@ -298,6 +298,14 @@ export function routing(router) {
         });
     });
 
+    router.post('/api/delete_method_secret/:method', canAccessUserMethod, function(req, res) {
+        request_otp_api(req, res, {
+            method: 'DELETE',
+            relUrl: '/protected/users/' + req.session.passport.user.uid + '/methods/' + req.params.method + '/secret',
+            bearerAuth: true,
+        });
+    });
+
     router.get('/api/admin/user/:uid/exists', isManager, function(req, res) {
         request_otp_api(req, res, {
             relUrl: '/protected/users/' + req.params.uid + "/exists",
@@ -385,7 +393,7 @@ export function routing(router) {
     router.delete('/api/admin/delete_method_secret/:method/:uid', isManager, function(req, res) {
         request_otp_api(req, res, {
             method: 'DELETE',
-            relUrl: '/admin/users/'+req.params.uid +'/methods/' + req.params.method+ '/secret/',
+            relUrl: '/protected/users/' + req.params.uid + '/methods/' + req.params.method + '/secret/',
             bearerAuth: true,
         });
     });
