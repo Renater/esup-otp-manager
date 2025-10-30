@@ -1,21 +1,21 @@
 script#manager-dashboard(type='text/x-template').
     <div>
-    <div class="row input-field">
-    <div class="col s8">
-    <i class="material-icons prefix" aria-hidden="true">account_box</i>
-    <input @keyup.enter="search" v-model.trim="requestedUid" type="text" id="autocomplete-input" list="usersId">
-    <label for="autocomplete-input">{{messages.api.label.user}}</label>
-    </div>
+      <div class="row input-field">
+        <div class="col s8">
+          <i class="material-icons prefix" aria-hidden="true">account_box</i>
+          <input @keyup.enter="search" v-model.trim="requestedUid" type="text" id="autocomplete-input" list="usersId">
+          <label for="autocomplete-input">{{messages.api.label.user}}</label>
+        </div>
     
-    <a v-if="requestedUid" class="waves-effect waves-light btn col s4" @click="search">
-        {{messages.api.action.select}}
-        <i class="material-icons right" aria-hidden="true">search</i>
-    </a>
-    <datalist id="usersId">
-    <option v-for="user in users" :value="user.uid" :label="user.displayName ? `${user.displayName} (${user.uid})` : user.uid"/>
-    </datalist>
-    </div>
-    <div v-show="user.uid">
-    <user-view :methods=methods :user.sync=user :messages=messages :infos=infos :get_user=getUser></user-view>
-    </div>
+        <a v-if="requestedUid" class="waves-effect waves-light btn col s4" @click="search">
+          {{messages.api.action.select}}
+          <i class="material-icons right" aria-hidden="true">search</i>
+        </a>
+        <datalist id="usersId">
+          <option v-for="user in users" :value="user.uid" :label="user.displayName ? `${user.displayName} (${user.uid})` : user.uid"/>
+        </datalist>
+      </div>
+      <div v-if="user.uid">
+        <user-view :methods=methods :user.sync=user :messages=messages :infos=infos :get_user=getUser></user-view>
+      </div>
     </div>

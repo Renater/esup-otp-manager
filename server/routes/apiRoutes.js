@@ -172,7 +172,7 @@ export function routing(router) {
         });
     });
     
-    router.post('/api/admin/:method/activate/confirm/:activation_code/:uid', isManager, function(req, res) {
+    router.post('/api/admin/:uid/:method/activate/confirm/:activation_code', isManager, function(req, res) {
         request_otp_api(req, res, {
             method: 'POST',
             relUrl: '/protected/users/' + req.params.uid + '/methods/' + req.params.method + '/activate/' + req.params.activation_code,
@@ -204,7 +204,7 @@ export function routing(router) {
         });
     });
     
-    router.post('/api/admin/:method/confirm_activate/:uid', isManager, function(req, res) {
+    router.post('/api/admin/:uid/:method/confirm_activate', isManager, function(req, res) {
         request_otp_api(req, res, {
             method: 'POST',
             relUrl: '/protected/users/' + req.params.uid + '/methods/' + req.params.method + '/confirm_activate/',
@@ -212,7 +212,7 @@ export function routing(router) {
         });
     });
 
-    router.post('/api/admin/:method/auth/:authenticator_id/:uid', isManager, function(req, res) {
+    router.post('/api/admin/:uid/:method/auth/:authenticator_id', isManager, function(req, res) {
         request_otp_api(req, res, {
             method: 'POST',
             relUrl: `/protected/users/${req.params.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}/`,
@@ -220,7 +220,7 @@ export function routing(router) {
         });
     });
 
-    router.delete('/api/admin/:method/auth/:authenticator_id/:uid', isManager, function(req, res) {
+    router.delete('/api/admin/:uid/:method/auth/:authenticator_id', isManager, function(req, res) {
         request_otp_api(req, res, {
             method: 'DELETE',
             relUrl: `/protected/users/${req.params.uid}/methods/${req.params.method}/auth/${req.params.authenticator_id}/`,
@@ -244,7 +244,7 @@ export function routing(router) {
         });
     });
 
-    router.put('/api/admin/transport/:transport/:new_transport/:uid', isManager, function(req, res) {
+    router.put('/api/admin/:uid/transport/:transport/:new_transport', isManager, function(req, res) {
         request_otp_api(req, res, {
             method: 'PUT',
             relUrl: '/protected/users/'+ req.params.uid +'/transports/'+req.params.transport+'/'+req.params.new_transport+'/',
@@ -260,7 +260,7 @@ export function routing(router) {
         });
     });
 
-    router.get('/api/admin/transport/:transport/:new_transport/test/:uid', isManager, function(req, res) {
+    router.get('/api/admin/:uid/transport/:transport/:new_transport/test', isManager, function(req, res) {
         request_otp_api(req, res, {
             method: 'GET',
             relUrl: '/protected/users/' + req.params.uid + '/transports/' + req.params.transport + '/' + req.params.new_transport + '/test',
@@ -276,7 +276,7 @@ export function routing(router) {
         });
     });
 
-    router.delete('/api/admin/transport/:transport/:uid', isManager, function(req, res) {
+    router.delete('/api/admin/:uid/transport/:transport', isManager, function(req, res) {
         request_otp_api(req, res, {
             method: 'DELETE',
             relUrl: '/protected/users/'+ req.params.uid +'/transports/'+req.params.transport+'/',
@@ -376,7 +376,7 @@ export function routing(router) {
         });
     });
 
-    router.post('/api/admin/generate/:method/:uid', isManager, function(req, res) {
+    router.post('/api/admin/:uid/generate/:method', isManager, function(req, res) {
         const uri = '/protected/users/'+ req.params.uid + '/methods/' + req.params.method + '/secret/';
         const queryParams = {};
         if (req.query.require_method_validation === 'true') {
@@ -390,7 +390,7 @@ export function routing(router) {
         });
     });
 
-    router.delete('/api/admin/delete_method_secret/:method/:uid', isManager, function(req, res) {
+    router.delete('/api/admin/:uid/delete_method_secret/:method', isManager, function(req, res) {
         request_otp_api(req, res, {
             method: 'DELETE',
             relUrl: '/protected/users/' + req.params.uid + '/methods/' + req.params.method + '/secret/',

@@ -134,7 +134,6 @@ const PushMethod = {
         'infos': Object,
         'activate': Function,
         'deactivate': Function,
-        'switch_push_event': {}
     },
     created: function() {
         socket = io.connect(urlSockets, { reconnect: true, path: "/sockets" });
@@ -269,6 +268,10 @@ const WebAuthnMethod = {
         }
     },
     async mounted() {
+        Vue.watchEffect(() => {
+            this.user.methods.webauthn.active = this.user.methods.webauthn.askActivation && Boolean(this.realData.auths.length);
+        });
+
         await this.fetchAuthData();
 
         if(this.realData.auths.length === 0) {
@@ -292,7 +295,8 @@ const WebAuthnMethod = {
             if (newUid !== oldUid) {
                 this.fetchAuthData();
             }
-        }
+        },
+        
     },
     methods: {
         fetchAuthData: async function() {
@@ -519,9 +523,27 @@ const RandomCodeMethod = {
         'deactivate': Function,
         'formatApiUri': Function,
         'isManager': Boolean,
+        'method': String,
     },
     components: {
         'transport-form': TransportForm,
+    },
+    computed: {
+        currentRandomCodeMethod() {
+            return this.user.methods[this.method];
+        },
+        active() {
+            return this.currentRandomCodeMethod.askActivation
+                && this.currentRandomCodeMethod.transports.some(transport => this.user.transports[transport]);
+        },
+    },
+    watch: {
+        active: {
+            immediate: true,
+            handler(active) {
+                this.currentRandomCodeMethod.active = active;
+            },
+        }
     },
     methods: {
         testAndSaveTransport: async function(transport) {
@@ -613,17 +635,17 @@ const RandomCodeMailMethod = {
 };
 
 const Esupnfc = {
-template:'#esupnfc-method'
+    template:'#esupnfc-method'
 };
 
 const UserDashboard = {
     props: {
+        'user': Object,
+        'methods': Object,
         'messages': Object,
         'infos': Object,
-        'methods': Object,
-        'user': Object,
+        'get_user': Function,
         'currentmethod': String,
-        'get_user': Function
     },
     components: {
         "push": PushMethod,
@@ -633,60 +655,37 @@ const UserDashboard = {
         "webauthn": WebAuthnMethod,
         "random_code": RandomCodeMethod,
         "random_code_mail": RandomCodeMailMethod,
-    "esupnfc":Esupnfc
+        "esupnfc":Esupnfc
     },
     template: "#user-dashboard",
-    created: function () {
-    },
     methods: {
-        formatApiUri: function(url) {
-            return '/api' + url;
+        formatApiUri: function(uri) {
+            return '/api' + uri;
         },
-        activate: function (method) {
+        activate: async function(method) {
             switch (method) {
                 case 'push':
-                    this.askPushActivation();
-                    break;
+                    return this.askPushActivation();
                 case 'bypass':
-                    this.standardActivate(method);
-                    this.generateBypass()
-                        .catch(err => {
-                            this.user.methods.bypass.active = false;
-                        });
-                    break;
+                    await this.standardActivate(method);
+                    return this.generateBypass();
                 case 'passcode_grid':
-                    this.standardActivate(method).then(res => this.setPasscodeGrid(res.data));
-                    break;
-                case 'random_code':
-                    this.standardActivate(method);
-                    break;
-                case 'random_code_mail':
-                    this.standardActivate(method);
-                    break;
+                    const { data } = await this.standardActivate(method);
+                    return this.setPasscodeGrid(data);
                 case 'totp':
-                    this.generateTotp();
-                    break;
-                case 'webauthn':
-                    this.standardActivate(method);
-                    break;
-                case 'esupnfc':
-                    this.standardActivate(method);
-                    break;
+                    return this.generateTotp();
                 default:
-                    this.user.methods[method].active = true;
-                    break;
+                    return this.standardActivate(method);
             }
         },
         askPushActivation: function() {
-            this.user.methods.push.askActivation = true;
-            this.user.methods.push.active = true;
-
             return fetchApi({
                 method: "PUT",
-                uri: "/api/push/activate",
+                uri: this.formatApiUri("/push/activate"),
                 onSuccess: res => {
                     const data = res.data;
                     if (data.code == "Ok") {
+                        this.user.methods.push.askActivation = true;
                         this.user.methods.push.activationCode = data.activationCode;
                         this.user.methods.push.qrCode = getImgWithAltText({ qrCodeImg: data.qrCode, qrCodeSrc: data.qrCodeSrc });
                         this.user.methods.push.api_url = this.infos.api_url;
@@ -701,31 +700,30 @@ const UserDashboard = {
         standardActivate: function(method) {
             return fetchApi({
                 method: "PUT",
-                uri: "/api/" + method + "/activate",
+                uri: this.formatApiUri("/" + method + "/activate"),
                 onSuccess: res => {
                     const data = res.data;
                     if (data.code == "Ok") {
                         this.user.methods[method].active = true;
+                        this.user.methods[method].askActivation = true;
                     } else {
                         throw new Error(JSON.stringify({ code: data.code }));
                     }
                 },
             }).catch(err => {
                 toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+                throw err;
             });
         },
         deactivate: function(method) {
             if (window.confirm(this.messages.api.action.confirm_deactivate)) {
-                if (this.user.methods[method].askActivation) {
-                    this.user.methods[method].askActivation = false;
-                }
-
                 return fetchApi({
                     method: "PUT",
-                    uri: "/api/" + method + "/deactivate",
+                    uri: this.formatApiUri("/" + method + "/deactivate"),
                     onSuccess: res => {
                         const data = res.data;
                         if (data.code == "Ok") {
+                            this.user.methods[method].askActivation = false;
                             this.user.methods[method].active = false;
                         } else {
                             console.error(JSON.stringify({ code: data.code }));
@@ -733,7 +731,6 @@ const UserDashboard = {
                         }
                     },
                 }).catch(err => {
-                    this.user.methods[method].active = true;
                     toast({ message: err, className: 'red darken-1' });
                 });
             }
@@ -753,7 +750,7 @@ const UserDashboard = {
         generateBypass: function() {
             return fetchApi({
                 method: "POST",
-                uri: "/api/generate/bypass",
+                uri: this.formatApiUri("/generate/bypass"),
                 onSuccess: res => {
                     const data = res.data;
                     if (data.code == "Ok") {
@@ -765,13 +762,14 @@ const UserDashboard = {
                 },
             }).catch(err => {
                 toast({ message: err, className: 'red darken-1' });
+                this.user.methods.bypass.active = false;
                 throw err;
             });
         },
         generatePasscodeGrid: function() {
             return fetchApi({
                 method: "POST",
-                uri: "/api/generate/passcode_grid",
+                uri: this.formatApiUri("/generate/passcode_grid"),
                 onSuccess: res => {
                     const data = res.data;
                     if (data.code == "Ok") {
@@ -792,11 +790,12 @@ const UserDashboard = {
         generateTotp: function() {
             return fetchApi({
                 method: "POST",
-                uri: "/api/generate/totp?require_method_validation=true",
+                uri: this.formatApiUri("/generate/totp?require_method_validation=true"),
                 onSuccess: res => {
                     const data = res.data;
                     if (data.code == "Ok") {
-                        this.user.methods.totp.active = true;
+                        this.user.methods.totp.active = false;
+                        this.user.methods.totp.askActivation = true;
                         this.user.methods.totp.message = data.message;
                         this.user.methods.totp.qrCode = getImgWithAltText({ qrCodeImg: data.qrCode, qrCodeSrc: data.qrCodeSrc });
                         this.user.methods.totp.uid = this.user.uid;
@@ -808,204 +807,20 @@ const UserDashboard = {
                 toast({ message: err, className: 'red darken-1' });
                 throw err;
             });
-        }
-    }
+        },
+    },
 };
 
 /** Manager **/
 const UserView = {
-    props: {
-        'user': Object,
-        'methods': Object,
-        'messages': Object,
-        'infos': Object,
-        "get_user": Function
-    },
-    components: {
-        "push": PushMethod,
-        "totp": TotpMethod,
-        "bypass": BypassMethod,
-        "passcode_grid": PasscodeGridMethod,
-        "webauthn": WebAuthnMethod,
-        "random_code": RandomCodeMethod,
-        "random_code_mail": RandomCodeMailMethod,
-    "esupnfc":Esupnfc
-    },
-    data: function () {
-        return {
-            "switchPushEvent": MouseEvent
-        }
-    },
+    ...UserDashboard,
     template: '#user-view',
     methods: {
-        formatApiUri: function(url) {
-            return '/api/admin' + url + '/' + this.user.uid;
+        ...UserDashboard.methods,
+        formatApiUri: function(uri) {
+            return '/api/admin/' + this.user.uid + uri;
         },
-        activate: function (method) {
-            switch (method) {
-                case 'push':
-                    this.askPushActivation();
-                    break;
-                case 'bypass':
-                    this.standardActivate(method);
-                    this.generateBypass()
-                        .catch(err => {
-                            this.user.methods.bypass.active = false;
-                        });
-                    break;
-                case 'passcode_grid':
-                    this.standardActivate(method).then(res => this.setPasscodeGrid(res.data));
-                    break;
-                case 'webauthn':
-                    this.standardActivate(method);
-                    break;
-                case 'random_code':
-                    this.standardActivate(method);
-                    break;
-                case 'random_code_mail':
-                    this.standardActivate(method);
-                    break;
-                case 'totp':
-                    this.generateTotp();
-                    break;
-                case 'esupnfc':
-                    this.standardActivate(method);
-                    break;
-                default:
-                    /** **/
-                    this.user.methods[method].active = true;
-                    break;
-            }
-        },
-        askPushActivation: function () {
-            this.user.methods.push.askActivation = true;
-            this.user.methods.push.active = true;
-
-            return fetchApi({
-                method: "PUT",
-                uri: "/api/admin/" + this.user.uid + "/push/activate",
-                onSuccess: res => {
-                    const data = res.data;
-                    if (data.code == "Ok") {
-                        this.user.methods.push.activationCode = data.activationCode;
-                        this.user.methods.push.qrCode = getImgWithAltText({ qrCodeImg: data.qrCode, qrCodeSrc: data.qrCodeSrc });
-                        this.user.methods.push.api_url = this.infos.api_url;
-                    } else {
-                        throw new Error(JSON.stringify({ code: data.code }));
-                    }
-                },
-            }).catch(err => {
-                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
-            });
-        },
-        standardActivate: function(method) {
-            return fetchApi({
-                method: "PUT",
-                uri: "/api/admin/" + this.user.uid + "/" + method + "/activate",
-                onSuccess: res => {
-                    const data = res.data;
-                    if (data.code == "Ok") {
-                        this.user.methods[method].active = true;
-                    } else {
-                        throw new Error(JSON.stringify({ code: data.code }));
-                    }
-                },
-            }).catch(err => {
-                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
-            });
-        },
-        deactivate: function(method) {
-            if (window.confirm(this.messages.api.action.confirm_deactivate)) {
-                if (this.user.methods[method].askActivation)
-                    this.user.methods[method].askActivation = false;
-
-                return fetchApi({
-                    method: "PUT",
-                    uri: "/api/admin/" + this.user.uid + "/" + method + "/deactivate",
-                    onSuccess: res => {
-                        const data = res.data;
-                        if (data.code == "Ok") {
-                            this.user.methods[method].active = false;
-                        } else {
-                            console.error(JSON.stringify({ code: data.code }));
-                            throw new Error("Erreur interne, veuillez réessayer plus tard.");
-                        }
-                    },
-                }).catch(err => {
-                    this.user.methods[method].active = true;
-                    toast({ message: err, className: 'red darken-1' });
-                });
-            }
-        },
-        generateBypassConfirm : function(){
-            if (window.confirm(this.messages.api.action.confirm_generate)) this.generateBypass();
-        },
-        generatePasscodeGridConfirm : function(){
-            if (window.confirm(this.messages.api.action.confirm_generate)) this.generatePasscodeGrid();
-        },
-        generateTotpConfirm : function(){
-            if (window.confirm(this.messages.api.action.confirm_generate)) this.generateTotp();
-        },
-        generateBypass: function() {
-            return fetchApi({
-                method: "POST",
-                uri: "/api/admin/generate/bypass/" + this.user.uid,
-                onSuccess: res => {
-                    const data = res.data;
-                    if (data.code == "Ok") {
-                        this.user.methods.bypass.codes = data.codes;
-                        this.user.methods.bypass.generation_date = data.generation_date;
-                    } else {
-                        throw new Error(JSON.stringify({ code: data.code }));
-                    }
-                },
-            }).catch(err => {
-                toast({ message: err, className: 'red darken-1' });
-                throw err;
-            });
-        },
-        generatePasscodeGrid: function() {
-            return fetchApi({
-                method: "POST",
-                uri: "/api/admin/generate/passcode_grid/" + this.user.uid,
-                onSuccess: res => {
-                    const data = res.data;
-                    if (data.code == "Ok") {
-                        this.setPasscodeGrid(data);
-                    } else {
-                        throw new Error(JSON.stringify({ code: data.code }));
-                    }
-                },
-            }).catch(err => {
-                toast({ message: err, className: 'red darken-1' });
-                throw err;
-            });
-        },
-        setPasscodeGrid: function(data) {
-            this.user.methods.passcode_grid.grid = data.grid;
-            this.user.methods.passcode_grid.generation_date = data.generation_date;
-        },
-        generateTotp: function() {
-            return fetchApi({
-                method: "POST",
-                uri: "/api/admin/generate/totp/" + this.user.uid + "?require_method_validation=true",
-                onSuccess: res => {
-                    const data = res.data;
-                    if (data.code == "Ok") {
-                        this.user.methods.totp.active = true;
-                        this.user.methods.totp.message = data.message;
-                        this.user.methods.totp.qrCode = getImgWithAltText({ qrCodeImg: data.qrCode, qrCodeSrc: data.qrCodeSrc });
-                        this.user.methods.totp.uid = this.user.uid;
-                    } else {
-                        throw new Error(JSON.stringify({ code: data.code }));
-                    }
-                },
-            }).catch(err => {
-                toast({ message: err, className: 'red darken-1' });
-                throw err;
-            });
-        },
-    }
+    },
 };
 
 const ManagerDashboard = {
@@ -1406,7 +1221,7 @@ Vue.createApp({
         "admin": AdminDashboard,
         "stats": StatsDashboard
     },
-    data() { 
+    data() {
       return {
         pageTitle: 'Accueil',
         currentView: 'home',
@@ -1442,6 +1257,13 @@ Vue.createApp({
                 managerButton.click(); // switch to manager dashboard
             };
         }
+    },
+    watch: {
+        'user.methods': function(methods) {
+            for(const method of Object.values(methods)) {
+                method.askActivation = method.active;
+            }
+        },
     },
     methods: {
         cleanMethods: function () {
