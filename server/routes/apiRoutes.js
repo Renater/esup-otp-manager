@@ -298,7 +298,7 @@ export function routing(router) {
         });
     });
 
-    router.post('/api/delete_method_secret/:method', canAccessUserMethod, function(req, res) {
+    router.delete('/api/delete_method_secret/:method', canAccessUserMethod, function(req, res) {
         request_otp_api(req, res, {
             method: 'DELETE',
             relUrl: '/protected/users/' + req.session.passport.user.uid + '/methods/' + req.params.method + '/secret',
