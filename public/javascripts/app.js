@@ -158,8 +158,6 @@ const PushMethod = {
             this.setActivePush(false);
         },
         setActivePush: async function(active) {
-            // Temporarily set the opposite value, to help VueJs detect the change #33
-            this.user.methods.push.active = !active;
             this.get_user(this.user.uid);
         }
     },
@@ -229,7 +227,7 @@ const TotpMethod = {
                     if (res.data.code != "Ok") {
                         toast({ message: 'Erreur, veuillez réessayer.', className: 'red darken-1' });
                     } else {
-                        this.user.methods.totp.active = true;
+                        this.user.methods.totp.askActivation = false;
                         this.user.methods.totp.qrCode = '';
                         this.user.methods.totp.message = '';
                         toast({ message: 'Code validé', className: 'green contrasted' });
@@ -268,10 +266,6 @@ const WebAuthnMethod = {
         }
     },
     async mounted() {
-        Vue.watchEffect(() => {
-            this.user.methods.webauthn.active = this.user.methods.webauthn.askActivation && Boolean(this.realData.auths.length);
-        });
-
         await this.fetchAuthData();
 
         if(this.realData.auths.length === 0) {
@@ -296,7 +290,12 @@ const WebAuthnMethod = {
                 this.fetchAuthData();
             }
         },
-        
+        'realData.auths.length': {
+            handler(lenght) {
+                this.user.methods.webauthn.askActivation = !lenght
+            },
+            immediate: true,
+        },
     },
     methods: {
         fetchAuthData: async function() {
@@ -528,22 +527,15 @@ const RandomCodeMethod = {
     components: {
         'transport-form': TransportForm,
     },
-    computed: {
-        currentRandomCodeMethod() {
-            return this.user.methods[this.method];
-        },
-        active() {
-            return this.currentRandomCodeMethod.askActivation
-                && this.currentRandomCodeMethod.transports.some(transport => this.user.transports[transport]);
-        },
-    },
     watch: {
-        active: {
-            immediate: true,
-            handler(active) {
-                this.currentRandomCodeMethod.active = active;
+        "user.transports": {
+            handler(transports) {
+                const method = this.user.methods[this.method];
+                method.askActivation = !method.transports.some(transport => transports[transport]);
             },
-        }
+            deep: true,
+            immediate: true,
+        },
     },
     methods: {
         testAndSaveTransport: async function(transport) {
@@ -685,6 +677,7 @@ const UserDashboard = {
                 onSuccess: res => {
                     const data = res.data;
                     if (data.code == "Ok") {
+                        this.user.methods.push.active = true;
                         this.user.methods.push.askActivation = true;
                         this.user.methods.push.activationCode = data.activationCode;
                         this.user.methods.push.qrCode = getImgWithAltText({ qrCodeImg: data.qrCode, qrCodeSrc: data.qrCodeSrc });
@@ -705,7 +698,6 @@ const UserDashboard = {
                     const data = res.data;
                     if (data.code == "Ok") {
                         this.user.methods[method].active = true;
-                        this.user.methods[method].askActivation = true;
                     } else {
                         throw new Error(JSON.stringify({ code: data.code }));
                     }
@@ -794,7 +786,7 @@ const UserDashboard = {
                 onSuccess: res => {
                     const data = res.data;
                     if (data.code == "Ok") {
-                        this.user.methods.totp.active = false;
+                        this.user.methods.totp.active = true;
                         this.user.methods.totp.askActivation = true;
                         this.user.methods.totp.message = data.message;
                         this.user.methods.totp.qrCode = getImgWithAltText({ qrCodeImg: data.qrCode, qrCodeSrc: data.qrCodeSrc });
@@ -1257,13 +1249,6 @@ Vue.createApp({
                 managerButton.click(); // switch to manager dashboard
             };
         }
-    },
-    watch: {
-        'user.methods': function(methods) {
-            for(const method of Object.values(methods)) {
-                method.askActivation = method.active;
-            }
-        },
     },
     methods: {
         cleanMethods: function () {

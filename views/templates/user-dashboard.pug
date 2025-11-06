@@ -11,13 +11,13 @@ script#user-dashboard(type='text/x-template').
         <div class='switch'>
           <label>
             {{messages.api.action.deactivate}}
-            <input type='checkbox' :id="method.name+'_switch'" @click.prevent="(user.methods[method.name].active || user.methods[method.name].askActivation) ? deactivate(method.name) : activate(method.name)" :name="method.name" role="switch" :aria-label="method.label" :checked="user.methods[method.name].active"/>
+            <input type='checkbox' :id="method.name+'_switch'" @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)" :name="method.name" role="switch" :aria-label="method.label" :checked="user.methods[method.name].active && !user.methods[method.name].askActivation"/>
             <span class='lever'></span>
             {{messages.api.action.activate}}
           </label>
         </div>
          <div class="divider"></div>
-         <div class="method-component-wrapper" v-if="user.methods[method.name].active || user.methods[method.name].askActivation">
+         <div class="method-component-wrapper" v-if="user.methods[method.name].active">
             <component :is=currentmethod :method=currentmethod :methods=methods :generate_totp=generateTotpConfirm :generate_bypass=generateBypassConfirm :generate_passcode_grid=generatePasscodeGridConfirm :get_user=get_user :messages=messages :infos=infos :user=user :formatApiUri=formatApiUri :isManager=false></component>
          </div>
       </div>
