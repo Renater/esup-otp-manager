@@ -28,7 +28,7 @@ export function isUser(req, res, next) {
 
 function isManager(req, res, next) {
     isUser(req, res, () => {
-        if (["admin", "manager"].includes(req.session.passport.user.role)) {
+        if (req.session.passport.user.isManager) {
             return next();
         } else {
             redirectForbidden(req, res);

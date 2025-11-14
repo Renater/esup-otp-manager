@@ -43,7 +43,7 @@ block content
                                     ul.collapsible-body
                                         li.bold(v-for='method in methods', v-show='method.activate && method.authorize')
                                             a(href='#', @click='navigate', :id='method.name', :name='method.name') {{method.label || method.name}}
-                    if right == "manager" || right == "admin"
+                    if isManager
                         li.bold
                             a#manager(href='#', @click='navigate', name='manager').collapsible-header {{messages.api.menu.manager}}
                     if right == "admin"

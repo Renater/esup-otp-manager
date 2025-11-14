@@ -14,11 +14,6 @@ function hide(id) {
     e.classList.add('may-be-hidden');
 }
 
-/** WebSockets init**/
-const arr = window.location.href.split('/');
-const urlSockets = arr[0] + "//" + arr[2];
-let socket;
-
 async function fetchApi({
     uri,
     method = "GET",
@@ -135,30 +130,36 @@ const PushMethod = {
         'activate': Function,
         'deactivate': Function,
     },
-    created: function() {
-        socket = io.connect(urlSockets, { reconnect: true, path: "/sockets" });
+    data() {
+        return {
+            'socket': Object,
+        };
+    },
+    watch: {
+        'user.uid': {
+            handler(uid, old, onCleanup) {
+                this.cleanupSocket();
 
-        socket.on('userPushActivate', () => {
-            this.activatePush();
-        });
+                this.socket = io.connect({ reconnect: true, path: "/sockets", query: 'uid=' + uid });
+                this.socket.on('userPushActivate', () => {
+                    this.get_user(uid);
+                });
 
-        socket.on('userPushActivateManager', () => {
-            this.activatePush();
-        });
+                this.socket.on('userPushDeactivate', () => {
+                    this.get_user(uid);
+                });
 
-        socket.on('userPushDeactivate', () => {
-            this.deActivatePush();
-        });
+                onCleanup(() => {
+                    this.cleanupSocket();
+                })
+            },
+            immediate: true,
+        },
     },
     methods: {
-        activatePush: function() {
-            this.setActivePush(true);
-        },
-        deActivatePush: function() {
-            this.setActivePush(false);
-        },
-        setActivePush: async function(active) {
-            this.get_user(this.user.uid);
+        cleanupSocket: function() {
+            this.socket?.disconnect?.();
+            delete this.socket;
         }
     },
     template: '#push-method'

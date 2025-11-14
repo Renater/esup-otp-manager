@@ -75,9 +75,16 @@ export default async function(_passport) {
             nameIDFormat: user.nameIDFormat
         };
         aclUtils.prepareUserForAcl(_user);
-        if (aclUtils.is_admin(user)) _user.role = "admin";
-        else if (aclUtils.is_manager(user)) _user.role = "manager";
-        else _user.role = "user";
+        if (aclUtils.is_admin(user)) {
+            _user.role = "admin";
+            _user.isManager = true;
+        } else if (aclUtils.is_manager(user)) {
+            _user.role = "manager";
+            _user.isManager = true;
+        } else {
+            _user.role = "user";
+        }
+
         logger.debug("final user: " + JSON.stringify(_user, null, 2));
         done(null, _user);
     });

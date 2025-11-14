@@ -1,51 +1,26 @@
+/**
+ * socket.io client connected to esup-otp-api.
+ */
+
 import properties from '../properties/properties.js';
 import logger from '../services/logger.js'
 
 import io from 'socket.io-client';
 
-const apiSockets = io.connect(properties.esup.api_url, {reconnect: true, path: "/sockets", query: 'app=manager', extraHeaders: {
+const apiSockets = io(properties.esup.api_url, {reconnect: true, path: "/sockets", query: 'app=manager', extraHeaders: {
     Authorization: "Bearer " + properties.esup.api_password,
+    // x-tenant: "",
 }});
-import * as sockets from '../server/sockets.js';
-const users = {};
+import * as managerSockets from '../server/sockets.js';
 
 apiSockets.on('connect', function () {
     logger.info("Api Sockets connected");
-    apiSockets.emit('managers',properties.esup.admins.concat(properties.esup.managers));
 });
 
-apiSockets.on('userUpdate', function (data) {
-    if(users[data.uid])sockets.emit(users[data.uid], 'userUpdate');
-});
+const EVENTS_TO_FORWARD = ['userPushActivate', 'userPushDeactivate'];
 
-apiSockets.on('userPushActivate', function (data) {
-    if(users[data.uid])sockets.emit(users[data.uid], 'userPushActivate');
-});
-
-apiSockets.on('userPushDeactivate', function (data) {
-    if(users[data.uid])sockets.emit(users[data.uid], 'userPushDeactivate');
-});
-
-apiSockets.on('userPushActivateManager', function (data) {
-    if(users[data.uid])sockets.emit(users[data.uid], 'userPushActivateManager', {uid : data.target});
-});
-
-apiSockets.on('userPushDeactivateManager', function (data) {
-    if(users[data.uid])sockets.emit(users[data.uid], 'userPushDectivateManager', {uid : data.target});
-});
-
-export function userConnection(uid, idSocket) {
-    users[uid] = idSocket;
-}
-
-export function userDisconnection(idSocket) {
-    for (const user in users) {
-        if (users[user] == idSocket) {
-            delete users[user];
-        }
-    }
-}
-
-export function emit(emit, data) {
-    apiSockets.emit(emit, data);
+for(const event of EVENTS_TO_FORWARD) {
+    apiSockets.on(event, function(data) {
+        managerSockets.emitUser(data.uid, event);
+    });
 }

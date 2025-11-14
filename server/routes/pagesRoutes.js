@@ -30,7 +30,8 @@ export function routing(router, passport) {
         res.render('dashboard', {
             title: 'Esup Otp Manager : Test',
             user: req.session.passport.user,
-            right: req.session.passport.user.role
+            right: req.session.passport.user.role,
+            isManager: req.session.passport.user.isManager,
         });
     });
 
