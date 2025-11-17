@@ -8,7 +8,6 @@ let io;
 let sharedSession;
 import SharedSession from 'express-socket.io-session';
 import '../client/sockets.js';
-import * as userSockets from '../services/userSockets.js';
 
 export function attach(server) {
     io = new SocketServer(server, {path: "/sockets"});
@@ -30,19 +29,13 @@ function initialize() {
         if (loggedInUser && requestedUser &&
             (loggedInUser === requestedUser || socket.handshake.session.passport.user.isManager)
         ) {
-            userSockets.add(requestedUser, socket.id);
-            socket.on('disconnect', function() {
-                userSockets.del(requestedUser, socket.id);
-            })
-            return;
+            socket.join(requestedUser);
+        } else {
+            socket.disconnect('Forbidden');
         }
-        socket.disconnect('Forbidden');
     });
 }
 
 export function emitUser(uid, event) {
-    const sockets = userSockets.get(uid);
-    if (sockets) {
-        io.to(Array.from(sockets)).emit(event);
-    }
+    io.to(uid).emit(event);
 }
