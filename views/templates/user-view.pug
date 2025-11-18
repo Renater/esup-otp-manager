@@ -8,12 +8,12 @@ script#user-view(type='text/x-template').
     <div class='switch'>
     <label>
     {{messages.api.action.deactivate}}
-    <input type='checkbox' :id="method.name+'_switch'" @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)" :name="method.name" role="switch" :aria-label="method.label" v-model="user.methods[method.name].active"/>
+    <input type='checkbox' :id="method.name+'_switch'" @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)" :name="method.name" role="switch" :aria-label="method.label" :checked="user.methods[method.name].active && !user.methods[method.name].askActivation"/>
     <span class='lever'></span> 
     {{messages.api.action.activate}}
     </label>
     </div>
-    <div v-if="user.methods[method.name].active || user.methods[method.name].activationCode">
+    <div v-if="user.methods[method.name].active">
     <component :is=method.name :method=method.name :methods=methods :generate_totp=generateTotpConfirm :generate_bypass=generateBypassConfirm :generate_passcode_grid=generatePasscodeGridConfirm :get_user=get_user :messages=messages :infos=infos :user.sync=user :formatApiUri=formatApiUri :isManager=true></component>
     </div>
     <div class="divider"></div>
