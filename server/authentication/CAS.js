@@ -16,6 +16,7 @@ export default function authentication(properties) {
         version: properties.version,
         ssoBaseURL: properties.casBaseURL,
         serverBaseURL: properties.serviceBaseURL,
+        performBackChannelSLO: true,
     };
 
     return {
