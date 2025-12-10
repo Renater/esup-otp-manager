@@ -1,27 +1,19 @@
 script#totp-method(type='text/x-template').
     <div>
       <div class="card">
-        <div class="row">
+        <ol class="row" style="padding: 0; margin: 0; list-style-position: inside;">
           <!-- generate -->
-          <div class="col s12 m6">
-            <div class="card-image" style="padding: 0 1em">
-              <div class="row" style="margin-bottom: 0;">
-                <p class="col s12 no-margin">{{messages.api.methods.totp.howTo}}</p>
-              </div>
-            </div>
-            <div class="card-content" style="text-align: center;">
+          <li class="col s12 m6" style="list-style-type: revert;">
+            {{messages.api.methods.totp.howTo}}
+            <div style="text-align: center;">
               <p class="totp-qrcode" v-html="user.methods.totp.qrCode"/>
               <p>{{user.methods.totp.message}}</p>
             </div>
-          </div>
+          </li>
+          <div class="row hide-on-med-and-up divider grey lighten-2" style="margin-bottom: 1em;"></div>
           <!-- verify -->
-          <div class="col s12 m6" v-if="user.methods.totp.qrCode">
-            <div class="hide-on-med-and-up divider grey lighten-2" style="margin-bottom: 1em;"></div>
-            <div class="card-image" style="padding: 0 1em">
-              <div class="row" style="margin-bottom: 0;">
-                <p class="col s12 no-margin">{{messages.api.methods.totp.howToActivate}}</p>
-              </div>
-            </div>
+          <li class="col s12 m6" v-if="user.methods.totp.qrCode" style="list-style-type: revert;">
+            {{messages.api.methods.totp.howToActivate}}</p>
             <div class="card-content">
               <div style="margin-bottom: 0;" class="row"><div class="col s1 m3"><span class="white-text"></span></div></div>
               <form @submit.prevent="validate" class="col s12 m9">
@@ -34,8 +26,8 @@ script#totp-method(type='text/x-template').
                 </button>
               </form>
             </div>
-          </div>
-        </div>
+          </li>
+        </ol>
         <div class="card-action" v-if="!user.methods.totp.qrCode">
           <div class="row" style="margin-bottom: 0;text-align: center;">
             <button class="waves-effect waves-light btn" @click=generate_totp>{{messages.api.action.generate_qrcode}}<i class="material-icons right" aria-hidden="true">sync</i></button>
