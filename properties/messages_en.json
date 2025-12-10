@@ -36,8 +36,15 @@
       "totp": {
         "name": "Timed password (TOTP)",
         "description": "This method generate 6 numerals codes",
-        "howTo": "Scan the code using your Esup Auth app or Google Authenticator app or enter the code directly into your TOTP application",
-        "howToActivate": "Then, to validate the TOTP activation, enter below the 6-digit code displayed on your application",
+        "apple_passwords_app": "Apple Passwords app",
+        "registration_instructions": {
+          "deeplink": "<strong><a href='%DEEPLINK%'>Click here</a></strong> to register your key in the %ESUP_AUTH% app (after installing the app).",
+          "otpauth_uri": "<strong><a href='%URI%'>Click here</a></strong> to register your key in your favorite TOTP app (%AUTHENTICATORS%).",
+          "qrcode": "<strong>Scan</strong> the QR code below to save your key in your favorite TOTP app (%AUTHENTICATORS%)",
+          "apple_otpauth_uri": "<strong><a href='%URI%'>Click here</a></strong> to save your key in your Apple Passwords app.",
+          "manual": "<strong>Manually register</strong> the key <code>%SECRET%</code> in your favorite TOTP app (%AUTHENTICATORS%)."
+        },
+        "howToActivate": "<strong>Then</strong>, to validate the TOTP activation, enter below the 6-digit code displayed on your application",
         "enter_code": "Enter the 6-digit code"
       },
       "random_code": {
@@ -95,9 +102,13 @@
       "push": {
         "name": "Notification (Esup Auth)",
         "description": "Method for connecting via smartphone notifications with Esup Auth",
-        "qrcode_instructions": "Scan this code in the Esup Auth app (for <a href='https://play.google.com/store/apps/details?id=org.esupportail.esupAuth'>Android</a> or <a href='https://apps.apple.com/fr/app/esup-auth/id1563904941'>IOS</a>)",
+        "esup_auth_download_link": "Esup Auth on <a href='%ANDROID_URL%' target='_blank'>Android</a> or <a href='%IOS_URL%' target='_blank'>IOS</a>",
+        "esup_Auth_installation_instructions": "After installing the %ESUP_AUTH% app",
+        "deeplink_instructions": "<strong><a href='%DEEP_LINK%'>Click here</a></strong>,",
+        "qrcode_instructions": "Scan the QR code below using the Esup Auth app.",
         "manual_activation_instructions": [
-          "If you have trouble scanning the code, click '+' then '<span lang='fr'>Saisie manuelle</span>', select 'PUSH', and enter the following information:",
+          "If you encounter any difficulties,<br />",
+          "In the Esup Auth app, click '+' then '<span lang='fr'>Saisie manuelle</span>', select 'PUSH', and enter the following information:",
           "<ul>",
           "  <li>'<span lang='fr'>Nom de compte</span>': %UID%</li>",
           "  <li>'<span lang='fr'>Code d’activation</span>': %ACTIVATION_CODE%</li>",
@@ -187,6 +198,6 @@
     "methods_activated": "Activated methods",
     "methods_deactivated": "Deactivated methods",
     "chart_title": "%NB_USERS_MFA% users with MFA on %NB_USERS% (%PERCENT_USERS_MFA%%)",
-    "chart_platforms_title" : "%NB_USERS_MFA_PUSH% users with push method enabled on %NB_USERS_MFA%"
+    "chart_platforms_title": "%NB_USERS_MFA_PUSH% users with push method enabled on %NB_USERS_MFA%"
   }
 }

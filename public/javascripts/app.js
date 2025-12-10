@@ -217,6 +217,33 @@ const TotpMethod = {
         'infos': Object,
         'formatApiUri': Function,
     },
+    computed: {
+        EsupAuth() {
+            if (!this.infos.mobile) {
+                return this.infos.esup_auth_download_link;
+            }
+            return `<a href="${this.infos.EsupAuth[this.infos.mobile]}" target="_blank">Esup Auth</a>`;
+        },
+        authentificators() {
+            const authenticatorApps = [
+                { name: "Google Authenticator", android: "https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2", ios: "https://apps.apple.com/fr/app/google-authenticator/id388497605" },
+                { name: "Microsoft Authenticator", android: "https://play.google.com/store/apps/details?id=com.azure.authenticator", ios: "https://apps.apple.com/fr/app/microsoft-authenticator/id983156458" },
+                { name: this.messages.api.methods.totp.apple_passwords_app, ios: "apple-otpauth://totp/" },
+                { name: "FreeOTP", android: "https://play.google.com/store/apps/details?id=org.fedorahosted.freeotp", ios: "https://apps.apple.com/us/app/freeotp-authenticator/id872559395" },
+                { name: "Aegis Authenticator", android: "https://play.google.com/store/apps/details?id=com.beemdevelopment.aegis" },
+            ];
+            if(!this.infos.mobile) {
+                return `${this.infos.esup_auth_download_link}, ${authenticatorApps.map(app => app.name).join(", ")}, ...`;
+            }
+            authenticatorApps.unshift(this.infos.EsupAuth);
+            return authenticatorApps
+                .map(app => ({ name: app.name, url: app[this.infos.mobile] }))
+                .filter(app => app.url)
+                .map(app => `<a href="${app.url}" target="_blank">${app.name}</a>`)
+                .join(", ")
+                .concat(", ...");
+        }
+    },
     methods: {
         validate: function() {
             const totpCode = this.user.methods.totp.validation_code;
@@ -682,6 +709,7 @@ const UserDashboard = {
                         this.user.methods.push.askActivation = true;
                         this.user.methods.push.activationCode = data.activationCode;
                         this.user.methods.push.qrCode = getImgWithAltText({ qrCodeImg: data.qrCode, qrCodeSrc: data.qrCodeSrc });
+                        this.user.methods.push.deepLink = data.deepLink;
                         this.user.methods.push.api_url = this.infos.api_url;
                     } else {
                         throw new Error(JSON.stringify({ code: data.code }));
@@ -789,8 +817,10 @@ const UserDashboard = {
                     if (data.code == "Ok") {
                         this.user.methods.totp.active = true;
                         this.user.methods.totp.askActivation = true;
-                        this.user.methods.totp.message = data.message;
+                        this.user.methods.totp.secret = data.message;
                         this.user.methods.totp.qrCode = getImgWithAltText({ qrCodeImg: data.qrCode, qrCodeSrc: data.qrCodeSrc });
+                        this.user.methods.totp.deepLink = data.deepLink;
+                        this.user.methods.totp.uri = data.uri;
                         this.user.methods.totp.uid = this.user.uid;
                     } else {
                         throw new Error(JSON.stringify({ code: data.code }));
@@ -1227,8 +1257,36 @@ Vue.createApp({
         },
         users_methods:{},
         messages: {},
-        infos: {},
-      } 
+        infos: {
+            api_url: "",
+            uid: "",
+            name: "",
+            transport_regexes: {
+                sms: "",
+                mail: "",
+            },
+            lang: localStorage.getItem("lang") || "en",
+            isMacOs: navigator.platform.startsWith("Mac"),
+            mobile: /Android/i.test(navigator.userAgent) ? "android" :
+                    /iPhone|iPad|iPod/i.test(navigator.userAgent) ? "ios" :
+                    false,
+            EsupAuth: { name: "Esup Auth", android: "https://play.google.com/store/apps/details?id=org.esupportail.esupAuth", ios: "https://apps.apple.com/fr/app/esup-auth/id1563904941" },
+        },
+      };
+    },
+    watch: {
+        messages: {
+            handler(messages) {
+                if (!this.infos.mobile) {
+                    this.infos.esup_auth_download_link = messages?.api?.methods.push.esup_auth_download_link
+                        .replace("%ANDROID_URL%", this.infos.EsupAuth.android)
+                        .replace("%IOS_URL%", this.infos.EsupAuth.ios);
+                } else {
+                    this.infos.esup_auth_download_link = `<a href="${this.infos.EsupAuth[this.infos.mobile]}" target="_blank">Esup Auth</a>`;
+                }
+            },
+            immediate: true,
+        }
     },
     created: async function() {
         const messagesPromise = this.getMessages();
@@ -1336,11 +1394,11 @@ Vue.createApp({
         },
         getInfos: async function() {
             try {
-                 this.infos = (await fetchApi({
+                const infos = await fetchApi({
                     method: "GET",
                     uri: "/manager/infos",
-                })).data;
-                this.infos.lang = localStorage.getItem("lang") || "en";
+                });
+                Object.assign(this.infos, infos.data);
             } catch (err) {
                 toast({ message: err, className: 'red darken-1' });
             }

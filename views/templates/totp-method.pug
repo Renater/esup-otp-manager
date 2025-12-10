@@ -1,19 +1,25 @@
 script#totp-method(type='text/x-template').
     <div>
-      <div class="card">
-        <ol v-if="user.methods.totp.askActivation" class="row" style="padding: 0; margin: 0; list-style-position: inside;">
+      <div class="card" style="margin: 25px 0;">
+        <ol v-if="user.methods.totp.askActivation" class="row no-padding" style="margin: 0; list-style-position: inside;">
           <!-- generate -->
-          <li class="col s12 m6" style="list-style-type: revert;">
-            {{messages.api.methods.totp.howTo}}
-            <div style="text-align: center;">
-              <p class="totp-qrcode" v-html="user.methods.totp.qrCode"/>
-              <p>{{user.methods.totp.message}}</p>
-            </div>
+          <li class="col s12 m6" style="list-style-type: revert; padding-bottom: 1em;">
+            <strong>Enregistrez</strong> votre clé TOTP, pour cela vous avez <em>plusieurs possibilités</em> :
+            <ul class="browser-default totp-registration-ways">
+              <li v-if="user.methods.totp.deepLink && infos.mobile" v-html="messages.api.methods.totp.registration_instructions.deeplink.replace('%DEEPLINK%', user.methods.totp.deepLink).replace('%ESUP_AUTH%', infos.esup_auth_download_link)" />
+              <li v-if="user.methods.totp.uri && infos.mobile" v-html="messages.api.methods.totp.registration_instructions.otpauth_uri.replace('%URI%', user.methods.totp.uri).replace('%AUTHENTICATORS%', authentificators)" />
+              <li v-if="!infos.mobile || !user.methods.totp.deepLink">
+                <span v-html="messages.api.methods.totp.registration_instructions.qrcode.replace('%AUTHENTICATORS%', authentificators)" />
+                <p class="totp-qrcode center-align" v-html="user.methods.totp.qrCode" />
+              </li>
+              <li v-if="user.methods.totp.uri && (infos.isMacOs || infos.mobile == 'ios')" v-html="messages.api.methods.totp.registration_instructions.apple_otpauth_uri.replace('%URI%', 'apple-' + user.methods.totp.uri)" />
+              <li v-html="messages.api.methods.totp.registration_instructions.manual.replace('%SECRET%', user.methods.totp.secret).replace('%AUTHENTICATORS%', authentificators)" />
+            </ul>
           </li>
-          <div class="row hide-on-med-and-up divider grey lighten-2" style="margin-bottom: 1em;"></div>
+          <div class="row hide-on-med-and-up divider grey lighten-2" style="margin: 1em -0.1em;"></div>
           <!-- verify -->
           <li class="col s12 m6" v-if="user.methods.totp.qrCode" style="list-style-type: revert;">
-            {{messages.api.methods.totp.howToActivate}}</p>
+            <span v-html="messages.api.methods.totp.howToActivate" />
             <div class="card-content">
               <div style="margin-bottom: 0;" class="row"><div class="col s1 m3"><span class="white-text"></span></div></div>
               <form @submit.prevent="validate" class="col s12 m9">

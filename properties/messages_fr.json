@@ -36,8 +36,15 @@
       "totp": {
         "name": "Code temporel (TOTP)",
         "description": "Méthode permettant de générer des codes uniques de 6 chiffres.",
-        "howTo": "Scannez le code à l’aide de votre application mobile Esup Auth ou Google Authentificator ou entrez le code directement dans votre application TOTP favorite",
-        "howToActivate": "Ensuite, pour valider l’activation du TOTP, saisissez ci-dessous le code à 6 chiffres affiché sur votre application",
+        "apple_passwords_app": "l’application Apple « Mots de passe »",
+        "registration_instructions": {
+          "deeplink": "<strong><a href='%DEEPLINK%'>Cliquez ici</a></strong> pour enregistrer votre clé dans l'application %ESUP_AUTH% (après avoir installé l'application).",
+          "otpauth_uri": "<strong><a href='%URI%'>Cliquez ici</a></strong> pour enregistrer votre clé dans votre application TOTP favorite (%AUTHENTICATORS%).",
+          "qrcode": "<strong>Scannez</strong> le qrcode ci-dessous pour enregistrer votre clé dans votre application TOTP favorite (%AUTHENTICATORS%)",
+          "apple_otpauth_uri": "<strong><a href='%URI%'>Cliquez ici</a></strong> pour enregistrer votre clé dans votre application Apple « Mots de passe ».",
+          "manual": "<strong>Enregistrez manuellement</strong> la clé <code>%SECRET%</code> dans votre application TOTP favorite (%AUTHENTICATORS%)."
+        },
+        "howToActivate": "<strong>Puis</strong>, pour valider l’activation du TOTP, saisissez ci-dessous le code à 6 chiffres affiché sur votre application",
         "enter_code": "Saisissez le code de 6 chiffres"
       },
       "random_code": {
@@ -65,8 +72,8 @@
           "mail": "Enregistrer l’adresse email sans avoir à valider de code reçu par courriel."
         },
         "confirm_delete": {
-          "sms": "Voulez vous vraiment supprimer votre numéro de téléphone %TRANSPORT% ?",
-          "mail": "Voulez vous vraiment supprimer votre adresse email %TRANSPORT% ?"
+          "sms": "Voulez vous vraiment supprimer votre numéro de téléphone %TRANSPORT% ?",
+          "mail": "Voulez vous vraiment supprimer votre adresse email %TRANSPORT% ?"
         }
       },
       "random_code_mail": {
@@ -95,12 +102,16 @@
       "push": {
         "name": "Notification (Esup Auth)",
         "description": "Méthode permettant de se connecter via les notifications de son smartphone avec l’application Esup Auth.",
-        "qrcode_instructions": "Veuillez scannez ce code dans l’application Esup Auth (pour <a href='https://play.google.com/store/apps/details?id=org.esupportail.esupAuth'>Android</a> ou <a href='https://apps.apple.com/fr/app/esup-auth/id1563904941'>IOS</a>)",
+        "esup_auth_download_link": "Esup Auth sur <a href='%ANDROID_URL%' target='_blank'>Android</a> ou <a href='%IOS_URL%' target='_blank'>IOS</a>",
+        "esup_Auth_installation_instructions": "Une fois l'application %ESUP_AUTH% installée,",
+        "deeplink_instructions": "<a href='%DEEPLINK%'>Cliquez ici</a>.",
+        "qrcode_instructions": "Scannez le qrcode ci-dessous depuis l'application Esup Auth",
         "manual_activation_instructions": [
-          "En cas de difficultés pour scanner le code précédent. Cliquez sur « + » puis sur « Saisie manuelle », sélectionnez « PUSH », et renseignez les informations suivantes :",
+          "En cas de difficultés,<br />",
+          "Sur l'application Esup Auth, cliquez sur « + » puis sur « Saisie manuelle », sélectionnez « PUSH », et renseignez les informations suivantes :",
           "<ul>",
           "  <li>« Nom de compte » : %UID%</li>",
-          "  <li>« Code d’activation » : %ACTIVATION_CODE%</li>",
+          "  <li>« Code d’activation » : %ACTIVATION_CODE%</li>",
           "  <li>« Adresse » : %API_URL%</li>",
           "</ul>",
           "Puis cliquez sur « Activer »."
@@ -188,6 +199,6 @@
     "methods_activated": "Méthodes activées",
     "methods_deactivated": "Méthodes désactivées",
     "chart_title": "%NB_USERS_MFA% utilisateurs avec MFA sur %NB_USERS% (%PERCENT_USERS_MFA%%)",
-    "chart_platforms_title" : "%NB_USERS_MFA_PUSH% utilisateurs avec la méthode par notification d'activée sur %NB_USERS_MFA%"
+    "chart_platforms_title": "%NB_USERS_MFA_PUSH% utilisateurs avec la méthode par notification d'activée sur %NB_USERS_MFA%"
   }
 }

@@ -296,6 +296,15 @@ summary.collapsible-header{
 
 label { color: #555; font-size: 1.2rem; }
 
+.totp-registration-ways {
+    padding-left: 1em;
+}
+
+ul.totp-registration-ways>li {
+    margin-top: 0.5em;
+    list-style-type: circle;
+}
+
 #totpCode-input {
     height: 4rem;
 }
