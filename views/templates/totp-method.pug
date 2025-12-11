@@ -1,7 +1,7 @@
 script#totp-method(type='text/x-template').
     <div>
       <div class="card">
-        <ol class="row" style="padding: 0; margin: 0; list-style-position: inside;">
+        <ol v-if="user.methods.totp.askActivation" class="row" style="padding: 0; margin: 0; list-style-position: inside;">
           <!-- generate -->
           <li class="col s12 m6" style="list-style-type: revert;">
             {{messages.api.methods.totp.howTo}}
@@ -28,7 +28,7 @@ script#totp-method(type='text/x-template').
             </div>
           </li>
         </ol>
-        <div class="card-action" v-if="!user.methods.totp.qrCode">
+        <div class="card-action" v-else>
           <div class="row" style="margin-bottom: 0;text-align: center;">
             <button class="waves-effect waves-light btn" @click=generate_totp>{{messages.api.action.generate_qrcode}}<i class="material-icons right" aria-hidden="true">sync</i></button>
           </div>
