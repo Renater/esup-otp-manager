@@ -398,7 +398,7 @@ export function routing(router) {
         });
     });
 
-    router.get('/api/admin/stats', isAdmin, function(req, res) {
+    router.get('/api/admin/stats', isManager, function(req, res) {
         request_otp_api(req, res, {
             relUrl: '/admin/stats',
             bearerAuth: true,
