@@ -45,12 +45,12 @@ block content
                                             a(href='#', @click='navigate', :id='method.name', :name='method.name') {{method.label || method.name}}
                     if isManager
                         li.bold
+                            a#stats(href='#', @click='navigate', name='stats').collapsible-header {{messages.api.menu.stats}}
+                        li.bold
                             a#manager(href='#', @click='navigate', name='manager').collapsible-header {{messages.api.menu.manager}}
                     if right == "admin"
                         li.bold
                             a#admin(href='#', @click='navigate', name='admin').collapsible-header {{messages.api.menu.admin}}
-                        li.bold
-                            a#stats(href='#', @click='navigate', name='stats').collapsible-header {{messages.api.menu.stats}}
                     .divider
                     li.bold.flex.waves-effect(style='display: flex !important;')
                         i.material-icons.prefix(aria-hidden="true") exit_to_app
