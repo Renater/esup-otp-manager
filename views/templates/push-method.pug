@@ -1,60 +1,60 @@
 script#push-method(type='text/x-template').
     <div>
-    <div class="card" v-if="user.methods.push.askActivation">
-    <div class="card-image">
-    <div class="row" style="margin-bottom: 0;">
-    <div class="col s1 m2"><span class="white-text"></span></div>
-    <p class="col s10 m8" style="text-align: center;" v-html="messages.api.methods.push.qrcode_instructions"></p>
-    </div>
-    </div>
-    <div class="card-content">
-    <div class="row" style="margin-bottom: 0;">
-    <div class="col s1 m3"><span class="white-text"></span></div>
-    <div class="col s10 m6" style="text-align: center;">
-    <p class="push-qrcode" v-html="user.methods.push.qrCode"></p>
-    </div>
-    </div>
-    </div>
-    <div class="card-action">
-    <div class="row" style="margin-bottom: 0;">
-    <div class="col s1 m2"><span class="white-text"></span></div>
-    <div class="col s10 m8">
-    <p v-html='
-        messages.api.methods.push.manual_activation_instructions
-            .join("\n")
-            .replace("%UID%", user.uid)
-            .replace("%ACTIVATION_CODE%", user.methods.push.activationCode)
-            .replace("%API_URL%", user.methods.push.api_url)
-    '></p>
-    </div>
-    </div>
-    </div>
-    </div>
-    <div class="row" style="margin-bottom: 0;" v-else>
-    <div class="col s1 m2">
-    <span class="white-text"></span>
-    </div>
-    <div class="col s10 m8">
-    <div class="card-panel grey lighten-3">
-    <div class="row" style="margin-bottom: 0;">
-    <div class="col s3">
-    <img src="images/icon-smartphone.svg" alt="">
-    </div>
-    <p class="col s9 no-margin">
-    {{user.methods.push.device.platform}}<br>
-    {{user.methods.push.device.manufacturer}}<br>
-    {{user.methods.push.device.model}}
-    </p>
-    </div>
-    </div>
-    </div>
-    </div>
-    <div role="list" lang="fr">
-      <a role="listitem" target="_blank" title="Esup Auth - Disponible sur Google Play pour Android" href="https://play.google.com/store/apps/details?id=org.esupportail.esupAuth">
-        <img width="150px" src="images/play-store.png" alt="Disponible sur Google Play"/>
-      </a>
-      <a role="listitem" target="_blank" title="Esup Auth - Télécharger dans l'App Store pour IOS" href="https://apps.apple.com/fr/app/esup-auth/id1563904941">
-        <img width="150px" src="images/app-store.png" alt="Télécharger dans l'App Store"/>
-      </a>
-    </div>
+      <div class="card" v-if="user.methods.push.askActivation">
+        <div class="card-image">
+          <div class="row" style="margin-bottom: 0;">
+            <div class="col s1 m2"><span class="white-text"></span></div>
+            <p class="col s10 m8" style="text-align: center;" v-html="messages.api.methods.push.qrcode_instructions"></p>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="row" style="margin-bottom: 0;">
+            <div class="col s1 m3"><span class="white-text"></span></div>
+            <div class="col s10 m6" style="text-align: center;">
+              <p class="push-qrcode" v-html="user.methods.push.qrCode"></p>
+            </div>
+          </div>
+        </div>
+        <div class="card-action">
+          <div class="row" style="margin-bottom: 0;">
+            <div class="col s1 m2"><span class="white-text"></span></div>
+            <div class="col s10 m8">
+              <p v-html='
+                messages.api.methods.push.manual_activation_instructions
+                    .join("\n")
+                    .replace("%UID%", user.uid)
+                    .replace("%ACTIVATION_CODE%", user.methods.push.activationCode)
+                    .replace("%API_URL%", user.methods.push.api_url)
+              '></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom: 0;" v-else>
+        <div class="col s1 m2">
+          <span class="white-text"></span>
+        </div>
+        <div class="col s10 m8">
+          <div class="card-panel grey lighten-3">
+            <div class="row" style="margin-bottom: 0;">
+              <div class="col s3">
+                <img src="images/icon-smartphone.svg" alt="">
+              </div>
+              <p class="col s9 no-margin">
+                {{user.methods.push.device.platform}}<br>
+                {{user.methods.push.device.manufacturer}}<br>
+                {{user.methods.push.device.model}}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div role="list" lang="fr">
+        <a role="listitem" target="_blank" title="Esup Auth - Disponible sur Google Play pour Android" href="https://play.google.com/store/apps/details?id=org.esupportail.esupAuth">
+          <img width="150px" src="images/play-store.png" alt="Disponible sur Google Play"/>
+        </a>
+        <a role="listitem" target="_blank" title="Esup Auth - Télécharger dans l'App Store pour IOS" href="https://apps.apple.com/fr/app/esup-auth/id1563904941">
+          <img width="150px" src="images/app-store.png" alt="Télécharger dans l'App Store"/>
+        </a>
+      </div>
     </div>
