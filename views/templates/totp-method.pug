@@ -1,53 +1,53 @@
 script#totp-method(type='text/x-template').
     <div>
-    <div class="card">
-    <div class="row">
-    <!-- generate -->
-    <div class="col s12 m6">
-    <div class="card-image" style="padding: 0 1em">
-    <div class="row" style="margin-bottom: 0;">
-    <p class="col s12 no-margin">{{messages.api.methods.totp.howTo}}</p>
-    </div>
-    </div>
-    <div class="card-content" style="text-align: center;">
-    <p class="totp-qrcode" v-html="user.methods.totp.qrCode"/>
-    <p>{{user.methods.totp.message}}</p>
-    </div>
-    </div>
-    <!-- verify -->
-    <div class="col s12 m6" v-if="user.methods.totp.qrCode">
-    <div class="hide-on-med-and-up divider grey lighten-2" style="margin-bottom: 1em;" ></div>
-    <div class="card-image" style="padding: 0 1em">
-    <div class="row" style="margin-bottom: 0;">
-    <p class="col s12 no-margin">{{messages.api.methods.totp.howToActivate}}</p>
-    </div>
-    </div>
-    <div class="card-content">
-    <div style="margin-bottom: 0;" class="row"><div class="col s1 m3"><span class="white-text"></span></div></div>
-    <form @submit.prevent="validate" class="col s12 m9">
-    <div class="input-field">
-    <input type="text" inputmode="numeric" v-model="user.methods.totp.validation_code" id="totpCode-input" required />
-    <label for="totpCode-input" style="left: 0;">{{messages.api.methods.totp.enter_code}}</label>
-    </div>
-    <button type="submit" class="waves-effect waves-light btn green contrasted" style="margin-bottom: 1em;">
-    {{messages.api.action.validate}}<i class="material-icons right" aria-hidden="true">check</i>
-    </button>
-    </form>
-    </div>
-    </div>
-    </div>
-    <div class="card-action" v-if="!user.methods.totp.qrCode">
-    <div class="row" style="margin-bottom: 0;text-align: center;">
-    <button class="waves-effect waves-light btn" @click=generate_totp>{{messages.api.action.generate_qrcode}}<i class="material-icons right" aria-hidden="true">sync</i></button>
-    </div>
-    </div>
-    </div>
-    <div role="list" lang="fr">
-      <a role="listitem" target="_blank" title="Esup Auth - Disponible sur Google Play pour Android" href="https://play.google.com/store/apps/details?id=org.esupportail.esupAuth">
-        <img width="150px" src="images/play-store.png" alt="Disponible sur Google Play"/>
-      </a>
-      <a role="listitem" target="_blank" title="Esup Auth - Télécharger dans l'App Store pour IOS" href="https://apps.apple.com/fr/app/esup-auth/id1563904941">
-        <img width="150px" src="images/app-store.png" alt="Télécharger dans l'App Store"/>
-      </a>
-    </div>
+      <div class="card">
+        <div class="row">
+          <!-- generate -->
+          <div class="col s12 m6">
+            <div class="card-image" style="padding: 0 1em">
+              <div class="row" style="margin-bottom: 0;">
+                <p class="col s12 no-margin">{{messages.api.methods.totp.howTo}}</p>
+              </div>
+            </div>
+            <div class="card-content" style="text-align: center;">
+              <p class="totp-qrcode" v-html="user.methods.totp.qrCode"/>
+              <p>{{user.methods.totp.message}}</p>
+            </div>
+          </div>
+          <!-- verify -->
+          <div class="col s12 m6" v-if="user.methods.totp.qrCode">
+            <div class="hide-on-med-and-up divider grey lighten-2" style="margin-bottom: 1em;"></div>
+            <div class="card-image" style="padding: 0 1em">
+              <div class="row" style="margin-bottom: 0;">
+                <p class="col s12 no-margin">{{messages.api.methods.totp.howToActivate}}</p>
+              </div>
+            </div>
+            <div class="card-content">
+              <div style="margin-bottom: 0;" class="row"><div class="col s1 m3"><span class="white-text"></span></div></div>
+              <form @submit.prevent="validate" class="col s12 m9">
+                <div class="input-field">
+                  <input type="text" inputmode="numeric" v-model="user.methods.totp.validation_code" id="totpCode-input" required/>
+                  <label for="totpCode-input" style="left: 0;">{{messages.api.methods.totp.enter_code}}</label>
+                </div>
+                <button type="submit" class="waves-effect waves-light btn green contrasted" style="margin-bottom: 1em;">
+                  {{messages.api.action.validate}}<i class="material-icons right" aria-hidden="true">check</i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="card-action" v-if="!user.methods.totp.qrCode">
+          <div class="row" style="margin-bottom: 0;text-align: center;">
+            <button class="waves-effect waves-light btn" @click=generate_totp>{{messages.api.action.generate_qrcode}}<i class="material-icons right" aria-hidden="true">sync</i></button>
+          </div>
+        </div>
+      </div>
+      <div role="list" lang="fr">
+        <a role="listitem" target="_blank" title="Esup Auth - Disponible sur Google Play pour Android" href="https://play.google.com/store/apps/details?id=org.esupportail.esupAuth">
+          <img width="150px" src="images/play-store.png" alt="Disponible sur Google Play"/>
+        </a>
+        <a role="listitem" target="_blank" title="Esup Auth - Télécharger dans l'App Store pour IOS" href="https://apps.apple.com/fr/app/esup-auth/id1563904941">
+          <img width="150px" src="images/app-store.png" alt="Télécharger dans l'App Store"/>
+        </a>
+      </div>
     </div>
