@@ -5,13 +5,12 @@
     "methods_found": "Methods found",
     "update": "Succesful update",
 
-
     "webauthn": {
       "generic": "Operation was successful.",
       "registered": "Registered authentificator successfully.",
       "renamed": "Renamed authenticator successfully",
       "deleted": "Deleted authentificator successfully."
-  }
+    }
   },
   "error": {
     "invalid_credentials": "Invalids login infos",
@@ -118,34 +117,34 @@
         ]
       },
       "esupnfc": {
-          "name": "EsupNFC",
-          "description": "Method for connecting via NFC swipe"
+        "name": "EsupNFC",
+        "description": "Method for connecting via NFC swipe"
       },
       "webauthn": {
-          "name": "Hardware authenticator (WebAuthn)",
-          "description": "WebAuthn hardware authentication factor (Smartphone, Windows Hello, TouchID, ...).",
-          "no_authentificators": "You have no authentificators registered. Register one?",
-          "single_auth": "You have 1 authentification method registered.",
-          "nb_of_auths": "You have %NB% authentification methods registered.",
-          "new_name": "New name"
+        "name": "Hardware authenticator (WebAuthn)",
+        "description": "WebAuthn hardware authentication factor (Smartphone, Windows Hello, TouchID, ...).",
+        "no_authentificators": "You have no authentificators registered. Register one?",
+        "single_auth": "You have 1 authentification method registered.",
+        "nb_of_auths": "You have %NB% authentification methods registered.",
+        "new_name": "New name"
       }
     },
-    "home":{
+    "home": {
       "description": "ESUP-OTP permits you to add a second level of protection to your account. You can, for example, set a single-use code sent to you by SMS in addition to your username and password. Thus, a third can not access your account with the same password.",
-      "push":"Notification to Esup Auth (Android, iOS).",
-      "totp":"TOTP code into an application (Esup Auth, Authenticator...).",
-      "bypass":"Display random Codes (Backup codes).",
-      "passcode_grid":"Display Passcode Grid.",
-      "esupnfc":"Connection with student card or business card",
-      "random_code":"Send random code by SMS.",
-      "random_code_mail":"Send random code by mail.",
-      "webauthn":"WebAuthn hardware authentication factor (Smartphone, Windows Hello, TouchID, ...).",
+      "push": "Notification to Esup Auth (Android, iOS).",
+      "totp": "TOTP code into an application (Esup Auth, Authenticator...).",
+      "bypass": "Display random Codes (Backup codes).",
+      "passcode_grid": "Display Passcode Grid.",
+      "esupnfc": "Connection with student card or business card",
+      "random_code": "Send random code by SMS.",
+      "random_code_mail": "Send random code by mail.",
+      "webauthn": "WebAuthn hardware authentication factor (Smartphone, Windows Hello, TouchID, ...).",
       "activated": "Activated",
       "deactivated": "Deactivated",
-      "note":"Set up at least 2 methods among:"
+      "note": "Set up at least 2 methods among:"
     },
     "index": "Multi-Factor Authentication Management Interface",
-    "action":{
+    "action": {
       "connection": "Login",
       "activate": "Activate",
       "validate": "Validate",
@@ -166,7 +165,7 @@
       "language": "Language",
       "logout": "Logout",
       "confirm_deactivate": "Do you want to deactivate?",
-      "confirm_generate":"Old codes will be erased. Continue?",
+      "confirm_generate": "Old codes will be erased. Continue?",
       "hide_menu": "Hide menu",
       "show_menu": "Show menu",
 
@@ -177,23 +176,23 @@
     "key": {
       "escape": "escape"
     },
-    "title":"ESUP OTP Manager",
-    "menu":{
+    "title": "ESUP OTP Manager",
+    "menu": {
       "home": "Home",
       "preferences": "Preferences",
       "manager": "Manager",
       "admin": "Administration",
       "stats": "Statistics"
     },
-    "transports":{
+    "transports": {
       "sms": "Your mobile number",
       "mail": "Your email address"
     },
-    "label":{
+    "label": {
       "user": "User"
     }
   },
-  "stats":{
+  "stats": {
     "loading": "Loading statistics...",
     "methods_activated": "Activated methods",
     "methods_deactivated": "Deactivated methods",

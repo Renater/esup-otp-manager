@@ -5,7 +5,6 @@
     "methods_found": "Méthodes trouvées",
     "update": "Mise à jour réussie",
 
-
     "webauthn": {
       "generic": "Opération réussie.",
       "registered": "Facteur ajouté.",
@@ -118,8 +117,8 @@
         ]
       },
       "esupnfc": {
-          "name": "EsupNFC",
-          "description": "Méthode permettant de récupérer un code en badgeant la carte"
+        "name": "EsupNFC",
+        "description": "Méthode permettant de récupérer un code en badgeant la carte"
       },
       "webauthn": {
         "name": "Facteur physique (WebAuthn)",
@@ -145,8 +144,8 @@
       "deactivated": "Désactivé",
       "note": "Dans vos préférences, nous vous conseillons fortement de paramétrer au moins 2 méthodes afin de pouvoir assurer la continuité d’utilisation des services numériques."
     },
-      "index": "Interface de gestion de l’authentification renforcée (multifacteur)",
-    "action":{
+    "index": "Interface de gestion de l’authentification renforcée (multifacteur)",
+    "action": {
       "connection": "Se connecter",
       "activate": "Activer",
       "validate": "Valider",
@@ -179,22 +178,22 @@
       "escape": "echap"
     },
     "title": "ESUP OTP Manager",
-    "menu":{
+    "menu": {
       "home": "Accueil",
       "preferences": "Préférences",
       "manager": "Manager",
       "admin": "Administrateur",
       "stats": "Statistiques"
     },
-    "transports":{
+    "transports": {
       "sms": "Votre numéro portable",
       "mail": "Votre adresse email"
     },
-    "label":{
+    "label": {
       "user": "Utilisateur"
     }
   },
-  "stats":{
+  "stats": {
     "loading": "Chargement des statistiques...",
     "methods_activated": "Méthodes activées",
     "methods_deactivated": "Méthodes désactivées",
