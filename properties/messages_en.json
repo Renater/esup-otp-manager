@@ -1,33 +1,18 @@
 {
   "success": {
-    "valid_credentials": "Invalids login infos",
-    "transports_found": "Transports not found",
-    "methods_found": "Methods found",
-    "update": "Succesful update",
-
     "webauthn": {
-      "generic": "Operation was successful.",
-      "registered": "Registered authentificator successfully.",
       "renamed": "Renamed authenticator successfully",
       "deleted": "Deleted authentificator successfully."
     }
   },
   "error": {
-    "invalid_credentials": "Invalids login infos",
-    "user_not_found": "User not found",
-    "transport_not_found": "Transport not found",
-    "method_not_found": "Method not found",
-    "unvailable_method_operation": "Unvailable operation for this method",
-    "unvailable_method_transport": "Invalid transport for this method",
-
     "webauthn": {
       "generic": "There was an error processing your request. Please try again later",
       "timeout": "Registration timed out. Please try again.",
       "registration_failed": "Could not register because of a server error. Please try again.",
       "already_registered": "You already registered this authentificator.",
       "user_declined": "You aborted the registration.",
-      "delete_failed": "Could not delete the authentificator. Please try again.",
-      "empty_name": "The name cannot be blank"
+      "delete_failed": "Could not delete the authentificator. Please try again."
     }
   },
   "api": {
@@ -93,10 +78,6 @@
         "description": "Method for generating a grid of random codes",
         "note": "Do not photograph. Do not share.<br>In case of loss, contact the DSIUN.",
         "generation_date": "Codes generated on %DATE%"
-      },
-      "matrix": {
-        "name": "Authentication Grid",
-        "description": "Method to connect via a grid"
       },
       "push": {
         "name": "Notification (Esup Auth)",
@@ -173,9 +154,6 @@
       "webauthn": {
         "confirm_delete": "Do you really want to delete %NAME%?"
       }
-    },
-    "key": {
-      "escape": "escape"
     },
     "title": "ESUP OTP Manager",
     "menu": {

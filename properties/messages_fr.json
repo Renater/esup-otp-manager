@@ -1,33 +1,18 @@
 {
   "success": {
-    "valid_credentials": "Identifiants valides",
-    "transports_found": "Liste de transports trouvés",
-    "methods_found": "Méthodes trouvées",
-    "update": "Mise à jour réussie",
-
     "webauthn": {
-      "generic": "Opération réussie.",
-      "registered": "Facteur ajouté.",
       "renamed": "Facteur renommé",
       "deleted": "Facteur supprimé."
     }
   },
   "error": {
-    "invalid_credentials": "Identifiants invalides",
-    "user_not_found": "Utilisateur non trouvé",
-    "transport_not_found": "Transport non trouvé",
-    "method_not_found": "Méthode non trouvée",
-    "unvailable_method_operation": "Cette opération est invalide pour la méthode sélectionnée",
-    "unvailable_method_transport": "Ce transport est invalide pour la méthode sélectionnée",
-
     "webauthn": {
       "generic": "Une erreur est survenue. Veuillez réessayer.",
       "timeout": "Vous avez dépassé le temps maximal autorisé pour l’ajout du facteur. Veuillez réessayer.",
       "registration_failed": "Une erreur est survenue pendant l’ajout du facteur. Veuillez réessayer.",
       "already_registered": "Vous avez déjà ajouté ce facteur d’authentification.",
       "user_declined": "Vous avez annulé l’ajout du facteur.",
-      "delete_failed": "Une erreur est survenue pendant la suppression du facteur. Veuillez réessayer.",
-      "empty_name": "Le nom ne peut pas être vide"
+      "delete_failed": "Une erreur est survenue pendant la suppression du facteur. Veuillez réessayer."
     }
   },
   "api": {
@@ -93,10 +78,6 @@
         "description": "Méthode permettant de générer une grille de codes aléatoires.",
         "note": "Ne pas photographier. Ne pas montrer cette grille à qui que ce soit.<br>En cas de perte ou divulgation, contacter la DSIUN.",
         "generation_date": "Codes générés le %DATE%"
-      },
-      "matrix": {
-        "name": "Grille d’authentification",
-        "description": "Méthode permettant de se connecter via une grille."
       },
       "push": {
         "name": "Notification (Esup Auth)",
@@ -173,9 +154,6 @@
       "webauthn": {
         "confirm_delete": "Voulez vous vraiment supprimer %NAME% ?"
       }
-    },
-    "key": {
-      "escape": "echap"
     },
     "title": "ESUP OTP Manager",
     "menu": {
