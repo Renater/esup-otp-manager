@@ -131,6 +131,7 @@
     },
     "home": {
       "description": "ESUP-OTP permits you to add a second level of protection to your account. You can, for example, set a single-use code sent to you by SMS in addition to your username and password. Thus, a third can not access your account with the same password.",
+      "methods": "You can set up:",
       "push": "Notification to Esup Auth (Android, iOS).",
       "totp": "TOTP code into an application (Esup Auth, Authenticator...).",
       "bypass": "Display random Codes (Backup codes).",
