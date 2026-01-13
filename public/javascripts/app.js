@@ -1210,6 +1210,61 @@ const StatsDashboard = {
                     plugins: [ChartDataLabels]
                 });
             }
+
+            const methodsCount = this.data.users?.methodsCount
+            const statsChartMfaMethodsCount = document.getElementById('statsChartMfaMethodsCount');
+            if (statsChartMfaMethodsCount && methodsCount) {
+                this.chartMethodsCount?.destroy();
+
+                const methodsCountArray = Object.entries(methodsCount)
+
+                const ctx = statsChartMfaMethodsCount.getContext('2d');
+                this.chartMethodsCount = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: methodsCountArray.map(([count, _nb_users]) => this.messages.stats.methodsCount.label.replace("%NB_METHODS%", count)),
+                        datasets: [{
+                            data: methodsCountArray.map(([_count, nb_users]) => nb_users),
+                            backgroundColor: '#66BB6A',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: this.messages.stats.methodsCount.title,
+                            },
+                            legend: {
+                                display: false,
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: context => this.messages.stats.methodsCount.context.replace("%NB_USERS%", context.raw),
+                                }
+                            },
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'top',
+                                font: {
+                                    weight: 'bold',
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0,
+                                }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels],
+                });
+            }
+
         }
     },
     mounted() {

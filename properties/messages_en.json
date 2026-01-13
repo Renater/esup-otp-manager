@@ -176,6 +176,11 @@
     "methods_activated": "Activated methods",
     "methods_deactivated": "Deactivated methods",
     "chart_title": "%NB_USERS_MFA% users with MFA on %NB_USERS% (%PERCENT_USERS_MFA%%)",
-    "chart_platforms_title": "%NB_USERS_MFA_PUSH% users with push method enabled on %NB_USERS_MFA%"
+    "chart_platforms_title": "%NB_USERS_MFA_PUSH% users with push method enabled on %NB_USERS_MFA%",
+    "methodsCount": {
+        "title": "Number of users with n methods enabled",
+        "label": "%NB_METHODS% method(s)",
+        "context": "%NB_USERS% user(s)"
+    }
   }
 }
