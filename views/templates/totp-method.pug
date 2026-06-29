@@ -36,7 +36,7 @@ script#totp-method(type='text/x-template').
         </ol>
         <div class="card-action" v-else>
           <div class="row" style="margin-bottom: 0;text-align: center;">
-            <button class="waves-effect waves-light btn" @click=generate_totp>{{messages.api.action.generate_qrcode}}<i class="material-icons right" aria-hidden="true">sync</i></button>
+            <button class="waves-effect waves-light btn" @click=reset_totp>{{messages.api.action.reset_qrcode}}<i class="material-icons right" aria-hidden="true">sync</i></button>
           </div>
         </div>
       </div>

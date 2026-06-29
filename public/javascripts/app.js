@@ -126,6 +126,7 @@ function toast({ message, displayLength = 9 /*seconds*/ * 1000, className }) {
 const PushMethod = {
     props: {
         'user': Object,
+        'reset_push': Function,
         'getAndSetUser': Function,
         'messages': Object,
         'infos': Object,
@@ -170,7 +171,7 @@ const PushMethod = {
 const BypassMethod = {
     props: {
         'user': Object,
-        'generate_bypass': Function,
+        'reset_bypass': Function,
         'activate': Function,
         'deactivate': Function,
         'messages': Object,
@@ -194,7 +195,7 @@ const dateTimeFormatOptions = {
 const PasscodeGridMethod = {
     props: {
         'user': Object,
-        'generate_passcode_grid': Function,
+        'reset_passcode_grid': Function,
         'activate': Function,
         'deactivate': Function,
         'messages': Object,
@@ -212,7 +213,7 @@ const PasscodeGridMethod = {
 const TotpMethod = {
     props: {
         'user': Object,
-        'generate_totp': Function,
+        'reset_totp': Function,
         'activate': Function,
         'deactivate': Function,
         'messages': Object,
@@ -720,12 +721,12 @@ const UserDashboard = {
                     return this.askPushActivation();
                 case 'bypass':
                     await this.standardActivate(method);
-                    return this.generateBypass();
+                    return this.resetBypass();
                 case 'passcode_grid':
                     const { data } = await this.standardActivate(method);
                     return this.setPasscodeGrid(data);
                 case 'totp':
-                    return this.generateTotp();
+                    return this.resetTotp();
                 default:
                     return this.standardActivate(method);
             }
@@ -768,8 +769,8 @@ const UserDashboard = {
                 throw err;
             });
         },
-        deactivate: function(method) {
-            if (this.user.methods[method].askActivation || window.confirm(this.messages.api.action.confirm_deactivate)) {
+        deactivate: function(method, skipConfirmation) {
+            if (skipConfirmation || this.user.methods[method].askActivation || window.confirm(this.messages.api.methods[method].confirm_deactivate || this.messages.api.action.confirm_deactivate)) {
                 return fetchApi({
                     method: "PUT",
                     uri: this.formatApiUri("/" + method + "/deactivate"),
@@ -788,19 +789,26 @@ const UserDashboard = {
                 });
             }
         },
-        generateBypassConfirm : function(){
-            if (window.confirm(this.messages.api.action.confirm_generate))
-                this.generateBypass();
+        confirmReset: function(method) {
+            return window.confirm(this.messages.api.methods[method].confirm_reset || this.messages.api.action.confirm_reset)
         },
-        generatePasscodeGridConfirm : function(){
-            if (window.confirm(this.messages.api.action.confirm_generate))
-                this.generatePasscodeGrid();
+        confirmResetBypass: function() {
+            if (this.confirmReset("bypass"))
+                this.resetBypass();
         },
-        generateTotpConfirm : function(){
-            if (window.confirm(this.messages.api.action.confirm_generate))
-                this.generateTotp();
+        confirmResetPasscodeGrid: function() {
+            if (this.confirmReset("passcode_grid"))
+                this.resetPasscodeGrid();
         },
-        generateBypass: function() {
+        confirmResetTotp: function() {
+            if (this.confirmReset("totp"))
+                this.resetTotp();
+        },
+        confirmResetPush: function() {
+            if (this.confirmReset("push"))
+                this.resetPush();
+        },
+        resetBypass: function() {
             return fetchApi({
                 method: "POST",
                 uri: this.formatApiUri("/generate/bypass"),
@@ -819,7 +827,7 @@ const UserDashboard = {
                 throw err;
             });
         },
-        generatePasscodeGrid: function() {
+        resetPasscodeGrid: function() {
             return fetchApi({
                 method: "POST",
                 uri: this.formatApiUri("/generate/passcode_grid"),
@@ -840,7 +848,7 @@ const UserDashboard = {
             this.user.methods.passcode_grid.grid = data.grid;
             this.user.methods.passcode_grid.generation_date = data.generation_date;
         },
-        generateTotp: function() {
+        resetTotp: function() {
             return fetchApi({
                 method: "POST",
                 uri: this.formatApiUri("/generate/totp?require_method_validation=true"),
@@ -862,6 +870,10 @@ const UserDashboard = {
                 toast({ message: err, className: 'red darken-1' });
                 throw err;
             });
+        },
+        resetPush: async function() {
+            await this.deactivate("push", true);
+            return this.askPushActivation();
         },
         hasValidTransportForRandom_codeMethod: function(method) {
             return this.user

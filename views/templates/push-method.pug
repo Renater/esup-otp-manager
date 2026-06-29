@@ -37,11 +37,18 @@ script#push-method(type='text/x-template').
               <div class="col s3">
                 <img src="images/icon-smartphone.svg" alt="">
               </div>
-              <p class="col s9 no-margin">
-                {{user.methods.push.device.platform}}<br>
-                {{user.methods.push.device.manufacturer}}<br>
-                {{user.methods.push.device.model}}
-              </p>
+              <div class="col s9 no-margin">
+                <p v-html='
+                  messages.api.methods.push.device.description
+                    .replace("%PLATFORM%", user.methods.push.device.platform)
+                    .replace("%MANUFACTURER%", user.methods.push.device.manufacturer)
+                    .replace("%MODEL%", user.methods.push.device.model)
+                '></p>
+                <p>
+                  <span style="margin-right: 0.5em;">{{messages.api.methods.push.device.reset}}</span>
+                  <button class="waves-effect waves-light btn" @click=reset_push>{{messages.api.action.reset_method}}<i class="material-icons right" aria-hidden="true">sync</i></button>
+                </p>
+              </div>
             </div>
           </div>
         </div>

@@ -15,17 +15,13 @@ script#user-dashboard(type='text/x-template').
             <span class='lever' :class="{ askActivation: user.methods[method.name].askActivation }"></span>
             {{ messages.api.home.activated }}
           </label>
-          <p v-if="user.methods[method.name].askActivation" class="grey-text text-darken-1" style="margin-top: 0">{{ messages.api.home.activating }}</p>
+          <p v-if="user.methods[method.name].askActivation" class="grey-text text-darken-1" style="margin-top: 0">{{ messages.api.home.help_if_activating }}</p>
+          <p v-else-if="user.methods[method.name].active"   class="grey-text text-darken-1" style="margin-top: 0">{{ messages.api.home.help_if_active     }}</p>
+          <p v-else                                         class="grey-text text-darken-1" style="margin-top: 0">{{ messages.api.home.help_if_inactive   }}</p>
         </div>
-         <div v-if="user.methods[method.name].active && user.methods[method.name].askActivation==false">
-            <p>{{messages.api.methods[method.name].help_is_active}}</p>
-         </div>
-         <div v-else>
-            <p>{{messages.api.methods[method.name].help_is_inactive}}</p>
-         </div>       
          <div class="divider"></div>
          <div class="method-component-wrapper" v-if="user.methods[method.name].active">
-            <component :is=currentmethod :method=currentmethod :methods=methods :generate_totp=generateTotpConfirm :generate_bypass=generateBypassConfirm :generate_passcode_grid=generatePasscodeGridConfirm :hasValidTransportForRandom_codeMethod=hasValidTransportForRandom_codeMethod :fetchWebauthnData=fetchWebauthnData :get-and-set-user=getAndSetUser :messages=messages :infos=infos :user=user :formatApiUri=formatApiUri :isManager=false></component>
+            <component :is=currentmethod :method=currentmethod :methods=methods :reset_push=confirmResetPush :reset_totp=confirmResetTotp :reset_bypass=confirmResetBypass :reset_passcode_grid=confirmResetPasscodeGrid :hasValidTransportForRandom_codeMethod=hasValidTransportForRandom_codeMethod :fetchWebauthnData=fetchWebauthnData :get-and-set-user=getAndSetUser :messages=messages :infos=infos :user=user :formatApiUri=formatApiUri :isManager=false></component>
          </div>
       </div>
      </template>
