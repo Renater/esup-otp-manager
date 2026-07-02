@@ -12,7 +12,7 @@ script#admin-dashboard(type='text/x-template').
             </label>
           </div>
         <div class="divider"></div>
-          <div class="section" v-show="method.name=='random_code' ">
+          <div class="section" v-if="method.name=='random_code' ">
             <h5>Transports</h5> {{messages.api.transports.sms}} :
             <div class='switch'>
               <label>
