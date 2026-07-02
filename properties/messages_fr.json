@@ -92,7 +92,7 @@
         "confirm_reset": "Voulez-vous continuer ? Vous ne recevrez plus de notifications pour vous authentifier sur votre ancien smartphone. Pour activer la méthode sur votre nouveau smartphone, vous devrez re-suivre les instructions.",
         "esup_auth_download_link": "Esup Auth sur <a href='%ANDROID_URL%' target='_blank'>Android</a> ou <a href='%IOS_URL%' target='_blank'>IOS</a>",
         "esup_Auth_installation_instructions": "Une fois l’application %ESUP_AUTH% installée,",
-        "deeplink_instructions": "<a href='%DEEPLINK%'>Cliquez ici</a>.",
+        "deeplink_instructions": "<strong><a href='%DEEPLINK%'>Cliquez ici</a><strong> pour configuration l’authentification via votre application Esup Auth.",
         "qrcode_instructions": "Scannez le qrcode ci-dessous depuis l’application Esup Auth",
         "manual_activation_instructions": [
           "En cas de difficultés,<br />",
