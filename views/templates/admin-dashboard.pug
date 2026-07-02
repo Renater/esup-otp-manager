@@ -1,38 +1,38 @@
 script#admin-dashboard(type='text/x-template').
     <div>
-    <div>
-    <div class="section" v-for="method in methods">
-    <h4>{{method.label || method.name}}</h4>
-    <div class='switch'>
-    <label>
-    {{messages.api.action.deactivate}}
-    <input type='checkbox' v-if="methods[method.name].activate" @click="deactivate" :name=method.name checked>
-    <input type='checkbox' @click="activate" :name=method.name v-else>
-    <span class='lever'></span> {{messages.api.action.activate}}
-    </label>
-    </div>
-    <div class="divider"></div>
-    <div class="section" v-show="method.name=='random_code' ">
-    <h5>Transports</h5> {{messages.api.transports.sms}} :
-    <div class='switch'>
-    <label>
-    {{messages.api.action.deactivate}}
-    <input type='checkbox' v-if="methods[method.name].transports.includes('sms')" @click="deactivateTransport(method.name,'sms')" :name=method.name checked>
-    <input type='checkbox' @click="activateTransport(method.name,'sms')" :name=method.name v-else>
-    <span class='lever'></span> {{messages.api.action.activate}}
-    </label>
-    </div>
-    {{messages.api.transports.mail}} :
-    <div class='switch'>
-    <label>
-    {{messages.api.action.deactivate}}
-    <input type='checkbox' v-if="methods[method.name].transports.includes('mail')" @click="deactivateTransport(method.name,'mail')" :name=method.name checked>
-    <input type='checkbox' @click="activateTransport(method.name,'mail')" :name=method.name v-else>
-    <span class='lever'></span> {{messages.api.action.activate}}
-    </label>
-    </div>
-    </div>
-    <div class="divider"></div>
-    </div>
-    </div>
+      <div>
+        <div class="section" v-for="method in methods">
+          <h4>{{method.label || method.name}}</h4>
+          <div class='switch'>
+            <label>
+              {{messages.api.action.deactivate}}
+              <input type='checkbox' v-if="methods[method.name].activate" @click="deactivate" :name=method.name checked>
+              <input type='checkbox' @click="activate" :name=method.name v-else>
+              <span class='lever'></span> {{messages.api.action.activate}}
+            </label>
+          </div>
+        <div class="divider"></div>
+          <div class="section" v-show="method.name=='random_code' ">
+            <h5>Transports</h5> {{messages.api.transports.sms}} :
+            <div class='switch'>
+              <label>
+                {{messages.api.action.deactivate}}
+                <input type='checkbox' v-if="methods[method.name].transports.includes('sms')" @click="deactivateTransport(method.name,'sms')" :name=method.name checked>
+                <input type='checkbox' @click="activateTransport(method.name,'sms')" :name=method.name v-else>
+                <span class='lever'></span> {{messages.api.action.activate}}
+              </label>
+            </div>
+            {{messages.api.transports.mail}} :
+            <div class='switch'>
+              <label>
+                {{messages.api.action.deactivate}}
+                <input type='checkbox' v-if="methods[method.name].transports.includes('mail')" @click="deactivateTransport(method.name,'mail')" :name=method.name checked>
+                <input type='checkbox' @click="activateTransport(method.name,'mail')" :name=method.name v-else>
+                <span class='lever'></span> {{messages.api.action.activate}}
+              </label>
+            </div>
+          </div>
+          <div class="divider"></div>
+        </div>
+      </div>
     </div>
