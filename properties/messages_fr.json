@@ -61,6 +61,10 @@
         "confirm_delete": {
           "sms": "Voulez vous vraiment supprimer votre numéro de téléphone %TRANSPORT% ?",
           "mail": "Voulez vous vraiment supprimer votre adresse email %TRANSPORT% ?"
+        },
+        "transport_regexes_infos": {
+          "sms": "Numéro de téléphone portable français (commençant par « 06 » ou « 07 ») ou international (commençant par « + », par exemple « +33 6 66 66 66 66 »)",
+          "mail": "Adresse email"
         }
       },
       "random_code_mail": {

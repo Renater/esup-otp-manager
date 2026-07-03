@@ -61,6 +61,10 @@
         "confirm_delete": {
           "sms": "Do you really want to delete your %TRANSPORT% phone number?",
           "mail": "Do you really want to delete your %TRANSPORT% email address?"
+        },
+        "transport_regexes_infos": {
+          "sms": "French mobile phone number (starting with '06' or '07') or international mobile phone number (starting with '+', e.g., '+33 6 66 66 66 66')",
+          "mail": "Email address"
         }
       },
       "random_code_mail": {
