@@ -539,7 +539,21 @@ const TransportForm = {
             new_transport: "",
         }
     },
-     watch: {
+    computed: {
+        input_id() {
+            return `${this.method}-${this.transport}-input`;
+        },
+        regExp() {
+            const transport_regex = this.infos.transport_regexes?.[this.transport];
+            if (transport_regex) {
+                return new RegExp(transport_regex.regex, transport_regex.ignore_case ? "i" : undefined);
+            }
+        },
+        transport_regex_infos() {
+            return this.messages.api.methods.random_code.transport_regexes_infos?.[this.transport];
+        }
+    },
+    watch: {
         "user.transports": {
             handler() {
                 this.user.methods[this.method].askActivation = !this.hasValidTransportForRandom_codeMethod(this.method);
@@ -547,6 +561,14 @@ const TransportForm = {
             deep: true,
             immediate: true,
         },
+        new_transport: function(new_transport) {
+            const input = document.getElementById(this.input_id);
+            if (this.regExp && !this.regExp.test(new_transport)) {
+                input.setCustomValidity(this.transport_regex_infos);
+            } else {
+                input.setCustomValidity("");
+            }
+        }
     },
     methods: {
         testAndSaveTransport: async function(transport) {

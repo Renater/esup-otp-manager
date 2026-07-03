@@ -58,10 +58,18 @@ function canAccessUserMethod(req, res, next) {
 }
 
 if (properties.esup.transport_regexes) {
+    const transport_regexes = properties.esup.transport_regexes;
+    for (const transport in transport_regexes) {
+        const old = transport_regexes[transport];
+        if (!old.regex) {
+            transport_regexes[transport] = { regex: old }
+        }
+    }
+
     properties.esup.transport_regExps = Object.fromEntries(
-        Object.entries(properties.esup.transport_regexes)
-            .filter(([transport, _regex]) => !transport.startsWith("#"))
-            .map(([transport, regex]) => [transport, new RegExp(regex)])
+        Object.entries(transport_regexes)
+            .filter(([transport, _transport_regex]) => !transport.startsWith("#"))
+            .map(([transport, transport_regex]) => [transport, new RegExp(transport_regex.regex, transport_regex.ignore_case ? "i" : undefined)])
     )
 }
 
