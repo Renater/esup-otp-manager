@@ -534,6 +534,11 @@ const TransportForm = {
         'hasValidTransportForRandom_codeMethod': Function,
         'formatApiUri': Function,
     },
+    data: function () {
+        return {
+            new_transport: "",
+        }
+    },
      watch: {
         "user.transports": {
             handler() {
@@ -545,11 +550,10 @@ const TransportForm = {
     },
     methods: {
         testAndSaveTransport: async function(transport) {
-            const new_transport = document.getElementById(transport + '-input').value.trim();
             try {
                 const res = await fetchApi({
                     method: "GET",
-                    uri: this.formatApiUri('/transport/' + transport + '/' + new_transport + "/test"),
+                    uri: this.formatApiUri('/transport/' + transport + '/' + this.new_transport + "/test"),
                 });
                 const data = res.data;
                 if (data.code != "Ok") {
@@ -561,7 +565,7 @@ const TransportForm = {
 
                     Swal.fire({ // https://sweetalert2.github.io/#configuration
                         title: verifyCodeMessages[transport].title,
-                        html: verifyCodeMessages[transport].pre + new_transport + verifyCodeMessages[transport].post,
+                        html: verifyCodeMessages[transport].pre + this.new_transport + verifyCodeMessages[transport].post,
                         input: "number",
                         icon: "question",
                         // inputLabel: "Code",
@@ -589,17 +593,16 @@ const TransportForm = {
             };
         },
         saveTransport: async function(transport) {
-            const new_transport = document.getElementById(transport + '-input').value.trim();
             const res = await fetchApi({
                 method: "PUT",
-                uri: this.formatApiUri('/transport/' + transport + '/' + new_transport),
+                uri: this.formatApiUri('/transport/' + transport + '/' + this.new_transport),
             });
             const data = res.data;
             if (data.code != "Ok") {
                 toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
             } else {
-                this.user.transports[transport] = new_transport;
-                document.getElementById(transport + '-input').value = '';
+                this.user.transports[transport] = this.new_transport;
+                this.new_transport = '';
                 toast({ message: this.messages.success.update, className: 'green contrasted' });
             }
         },
