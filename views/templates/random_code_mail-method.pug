@@ -6,7 +6,7 @@ script#random_code_mail-method(type='text/x-template').
      </div>
      <div class="col s12 m8">
       <div class="card" style="margin: auto;margin-bottom: 15px;">
-       <transport-form :user=user :messages=messages :infos=infos transport="mail" inputType="email" :testAndSaveTransport=testAndSaveTransport :saveTransport=saveTransport :deleteTransport=deleteTransport :isManager=isManager />
+       <transport-form :user :messages :infos :method transport="mail" inputType="email" :isManager :hasValidTransportForRandom_codeMethod :formatApiUri />
       </div>
      </div>
     </div>

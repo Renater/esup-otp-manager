@@ -527,32 +527,14 @@ const TransportForm = {
         'user': Object,
         'messages': Object,
         'infos': Object,
+        'method': String,
         'transport': String,
         'inputType': String,
-        'testAndSaveTransport': Function,
-        'saveTransport': Function,
-        'deleteTransport': Function,
         'isManager': Boolean,
-    },
-    template: '#transport_form'
-};
-
-const RandomCodeMethod = {
-    props: {
-        'user': Object,
-        'messages': Object,
-        'infos': Object,
-        'activate': Function,
-        'deactivate': Function,
         'hasValidTransportForRandom_codeMethod': Function,
         'formatApiUri': Function,
-        'isManager': Boolean,
-        'method': String,
     },
-    components: {
-        'transport-form': TransportForm,
-    },
-    watch: {
+     watch: {
         "user.transports": {
             handler() {
                 this.user.methods[this.method].askActivation = !this.hasValidTransportForRandom_codeMethod(this.method);
@@ -626,7 +608,7 @@ const RandomCodeMethod = {
             const message = this.messages.api.methods.random_code?.confirm_delete?.[transport]?.replace("%TRANSPORT%", oldTransport);
             if (window.confirm(message)) {
                 this.user.transports[transport] = null;
-    
+
                 return fetchApi({
                     method: "DELETE",
                     uri: this.formatApiUri('/transport/' + transport),
@@ -641,6 +623,24 @@ const RandomCodeMethod = {
                 });
             }
         },
+    },
+    template: '#transport_form'
+};
+
+const RandomCodeMethod = {
+    props: {
+        'user': Object,
+        'messages': Object,
+        'infos': Object,
+        'activate': Function,
+        'deactivate': Function,
+        'hasValidTransportForRandom_codeMethod': Function,
+        'formatApiUri': Function,
+        'isManager': Boolean,
+        'method': String,
+    },
+    components: {
+        'transport-form': TransportForm,
     },
     template: '#random_code-method'
 };
