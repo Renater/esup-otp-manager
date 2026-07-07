@@ -10,8 +10,8 @@ script#transport_form(type='text/x-template').
         </div>
         <form @submit.prevent="testAndSaveTransport(transport)" class="row" style="margin-bottom: 0;">
           <div class="input-field col s12 m7">
-            <input :type="inputType" v-model.trim="new_transport" :id="input_id" required :title="transport_regex_infos" />
-            <label :for="input_id">{{ messages.api.transports[transport] }}</label>
+            <input :type="inputType" v-model.trim="new_transport" :id="`${transport}-input`" required :pattern="infos.transport_regexes[transport] || null" :title="messages.api.methods.random_code.transport_regexes_infos[transport]" />
+            <label :for="`${transport}-input`">{{ messages.api.transports[transport] }}</label>
           </div>
           <button type="submit" :title="messages.api.methods.random_code.testAndSaveTransport[transport]" class="waves-effect waves-light btn col s12 m5">
             <span v-if="user.transports[transport]">{{ messages.api.action.modify }}<i class="material-icons right" aria-hidden="true">mode_edit</i></span>
