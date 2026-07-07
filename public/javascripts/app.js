@@ -539,6 +539,14 @@ const TransportForm = {
             new_transport: "",
         }
     },
+    computed: {
+        input_id() {
+            return `${this.method}-${this.transport}-input`;
+        },
+        input() {
+            return document.getElementById(this.input_id);
+        },
+    },
      watch: {
         "user.transports": {
             handler() {
@@ -546,6 +554,9 @@ const TransportForm = {
             },
             deep: true,
             immediate: true,
+        },
+        new_transport() {
+            this.input.setCustomValidity("");
         },
     },
     methods: {
@@ -557,7 +568,12 @@ const TransportForm = {
                 });
                 const data = res.data;
                 if (data.code != "Ok") {
-                    toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+                    if(data.message == "regex"){
+                        this.input.setCustomValidity(this.messages.api.methods.random_code.transport_regexes_infos?.[this.transport]);
+                        this.input.reportValidity();
+                    } else {
+                        toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+                    }
                 } else {
                     const expected = data.otp;
 

@@ -68,7 +68,10 @@ if (properties.esup.transport_regexes) {
 function checkTransportRegex(req, res, next) {
     const regex = properties.esup.transport_regExps[req.params.transport];
     if (regex && !regex.test(req.params.new_transport)) {
-        return redirectForbidden(req, res, 500);
+        return res.send ({
+            code: "KO",
+            message: "regex",
+        })
     } else {
         return next();
     }
