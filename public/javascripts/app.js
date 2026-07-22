@@ -934,7 +934,7 @@ const ManagerDashboard = {
         return {
             user: {
                 uid: String,
-                displayName: String,
+                name: String,
                 methods: Object,
                 transports: Object
             },
@@ -1011,7 +1011,7 @@ const ManagerDashboard = {
         setUser: function(uid, user) {
             this.user = {
                 uid: uid,
-                displayName: user.displayName,
+                name: user.displayName,
                 methods: user.methods,
                 transports: user.transports,
             }
