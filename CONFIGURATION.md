@@ -15,7 +15,7 @@ DisplayName for SAML), and may be eventually remapped if needed.
 Additional arbitrary attributes may be provided by the authentication server,
 in order to evaluate ACLs, such as authentication methods restrictions, for
 instance:
-```
+```json
 "users_methods": {
     "random_code": { "deny": { "edupersonaffiliation" : ["student","alum"] } },
 }
@@ -31,7 +31,7 @@ identifier only.
 #### CAS
 
 CAS authentication require the presence of a CAS object in the configuration file:
-```
+```json
 "authentication": "CAS",
 "CAS": {
     "version": "CAS3.0",
@@ -50,7 +50,7 @@ This object has the following keys:
 
 SAML authentication require the presence of a SAML object in the configuration file:
 
-```
+```json
 "authentication": "SAML",
 "SAML": {
     "sp": {
@@ -89,7 +89,7 @@ This object has the following keys:
 esup-otp-manager provides two different log types.
 
 Generic logs, for generic messages, are configured with the following key:
-```
+```json
 "logs": {
     "main": {
         "level": "info",
@@ -106,7 +106,7 @@ This object has the following keys:
 If `logs.main` key is not defined, no message will be logged.
 
 Traffic logs, for HTTP queries, are configured with the following key:
-```
+```json
 "logs": {
     "access": {
         "format": "dev",
