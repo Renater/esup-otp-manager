@@ -33,6 +33,7 @@ function routing() {
             uid: req.session.passport.user.uid,
             name: req.session.passport.user.name,
             transport_regexes: properties.esup.transport_regexes,
+            methods_not_deactivable_by_users: properties.esup.methods_not_deactivable_by_users,
         });
     });
 

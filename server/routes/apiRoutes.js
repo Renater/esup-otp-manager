@@ -77,6 +77,17 @@ function checkTransportRegex(req, res, next) {
     }
 }
 
+function checkMethod_not_deactivable_by_users(req, res, next) {
+    if(properties.esup.methods_not_deactivable_by_users?.includes(req.params.method)) {
+        return res.send ({
+            code: "KO",
+            message: "method_not_deactivable_by_users",
+        })
+    } else {
+        return next();
+    }
+}
+
 /**
  *  @typedef {{
  *      relUrl: string,
@@ -253,7 +264,7 @@ export function routing(router) {
         });
     });
 
-    router.put('/api/:method/deactivate', canAccessUserMethod, function(req, res) {
+    router.put('/api/:method/deactivate', canAccessUserMethod, checkMethod_not_deactivable_by_users, function(req, res) {
         request_otp_api(req, res, {
             method: 'PUT',
             relUrl: '/protected/users/'+req.session.passport.user.uid+'/methods/'+req.params.method+'/deactivate/',

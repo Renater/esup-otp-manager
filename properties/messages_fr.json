@@ -142,6 +142,7 @@
       "help_if_activating": "La méthode n’est pas encore activée. Pour finaliser l’activation, suivez les étapes ci-dessous.",
       "help_if_active": "La méthode est activée. Pour la désactiver, cliquez sur l’interrupteur ci-dessus.",
       "help_if_inactive": "La méthode est désactivée. Pour l’activer, cliquez sur l’interrupteur ci-dessus, puis suivez les instructions si nécessaire.",
+      "help_if_method_not_deactivable_by_users": "Vous ne pouvez pas désactiver cette méthode.",
       "note": "Dans vos préférences, nous vous conseillons fortement de paramétrer au moins 2 méthodes afin de pouvoir assurer la continuité d’utilisation des services numériques."
     },
     "index": "Interface de gestion de l’authentification renforcée (multifacteur)",

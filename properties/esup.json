@@ -27,6 +27,8 @@
         "sms":  "^((0[67](([.]|-| )?[0-9]){8})|((00|[+])(([.]|-| )?[0-9]){7,15}))$",
         "#mail": "(?i:^(?!.*(?:univ[.]fr|univ-paris[.]fr)$).*$)"
     },
+    "#how_to methods_not_deactivable_by_users": "Can be used for 'passcode_grid' or 'bypass'. Users will only be able to regenerate codes.",
+    "methods_not_deactivable_by_users": [],
     "#how_to default_language": "available languages: ['en', 'fr']",
     "default_language": "en",
     "logs": {

@@ -142,6 +142,7 @@
       "help_if_activating": "The method is not yet activated. To complete the activation, follow the steps below.",
       "help_if_active": "The method is enabled. To disable it, click the toggle switch above.",
       "help_if_inactive": "The method is disabled. To enable it, click the toggle switch above, then follow the instructions if prompted.",
+      "help_if_method_not_deactivable_by_users": "You cannot disable this method.",
       "note": "Set up at least 2 methods among:"
     },
     "index": "Multi-Factor Authentication Management Interface",

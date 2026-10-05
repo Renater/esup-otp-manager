@@ -11,11 +11,12 @@ script#user-dashboard(type='text/x-template').
         <div class='switch'>
           <label>
             {{messages.api.home.deactivated}}
-            <input type='checkbox' :id="method.name+'_switch'" @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)" :name="method.name" role="switch" :aria-label="method.label" :checked="user.methods[method.name].active && !user.methods[method.name].askActivation"/>
+            <input type='checkbox' :id="method.name+'_switch'" @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)" :name="method.name" role="switch" :aria-label="method.label" :checked="user.methods[method.name].active && !user.methods[method.name].askActivation" :disabled="infos.methods_not_deactivable_by_users?.includes(method.name) && user.methods[method.name].active"/>
             <span class='lever' :class="{ askActivation: user.methods[method.name].askActivation }"></span>
             {{ messages.api.home.activated }}
           </label>
           <p v-if="user.methods[method.name].askActivation" class="grey-text text-darken-1" style="margin-top: 0">{{ messages.api.home.help_if_activating }}</p>
+          <p v-else-if="infos.methods_not_deactivable_by_users?.includes(method.name)" class="grey-text text-darken-1" style="margin-top: 0">{{ messages.api.home.help_if_method_not_deactivable_by_users }}</p>
           <p v-else-if="user.methods[method.name].active"   class="grey-text text-darken-1" style="margin-top: 0">{{ messages.api.home.help_if_active     }}</p>
           <p v-else                                         class="grey-text text-darken-1" style="margin-top: 0">{{ messages.api.home.help_if_inactive   }}</p>
         </div>
