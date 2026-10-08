@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.0.3 (2026-10-08) ([release](https://github.com/EsupPortail/esup-otp-manager/releases/tag/v2.0.3))
+- **fix** blank page in Manager view [a7f639e](https://github.com/EsupPortail/esup-otp-manager/commit/a7f639e9f8853abc4e370e5c114a4d445cd77576)
+- setting to prevent users from deactivating passcode_grid and/or bypass [bcc2820](https://github.com/EsupPortail/esup-otp-manager/commit/bcc2820ad7e108fa3029269df9455f44a08f12c4)
+- update dependencies
+
+**Full Changelog**:  https://github.com/EsupPortail/esup-otp-manager/compare/v2.0.2...v2.0.3
+
 ## v2.0.2 (2026-10-02) ([release](https://github.com/EsupPortail/esup-otp-manager/releases/tag/v2.0.2))
 - update dependencies (**requires "npm install"**)
 - improve instructions for users
