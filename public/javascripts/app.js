@@ -808,17 +808,6 @@ const UserDashboard = {
                 });
             }
         },
-        deactivateAllMethods: function() {
-            if (window.confirm(this.messages.manager.confirm_deactivateAllMethods)) {
-                return Promise.all(
-                    Object.keys(this.methods)
-                        .filter(method => this.user.methods[method].active)
-                        .map(method => this.deactivate(method, true))
-                ).then(() =>
-                    toast({ message: this.messages.manager.allMethodsSuccessfullyDeactivated, className: 'green contrasted' })
-                );
-            }
-        },
         confirmReset: function(method) {
             return window.confirm(this.messages.api.methods[method].confirm_reset || this.messages.api.action.confirm_reset)
         },
@@ -928,6 +917,22 @@ const UserView = {
         ...UserDashboard.methods,
         formatApiUri: function(uri) {
             return '/api/admin/' + this.user.uid + uri;
+        },
+        deactivateAllMethods: async function() {
+            if (window.confirm(this.messages.manager.confirm_deactivateAllMethods)) {
+                for (const method of this.user_active_methods) {
+                    await this.deactivate(method, true);
+                }
+                toast({ message: this.messages.manager.allMethodsSuccessfullyDeactivated, className: 'green contrasted' })
+            }
+        },
+    },
+    computed: {
+        user_active_methods() {
+            return Object.values(this.methods)
+                .filter(method => method.activate)
+                .map(method => method.name)
+                .filter(method => this.user.methods[method].active);
         },
     },
 };
