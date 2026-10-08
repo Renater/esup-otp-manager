@@ -10,6 +10,7 @@
     "baseUrl": "",
     "port": "",
     "api_url": "http://localhost:3000",
+    "sockets_api_url": "https://localhost:3000",
     "api_password":"changeit",
     "session_secret_key": "changeit",
     "admins": ["john"],
