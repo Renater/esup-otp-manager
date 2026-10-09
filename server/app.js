@@ -23,7 +23,6 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import passport from 'passport';
-import logger from '../services/logger.js';
 
 const app = express();
 import * as sockets from './sockets.js';
